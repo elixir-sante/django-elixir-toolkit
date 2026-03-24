@@ -1,0 +1,32 @@
+<div class="control {% if icon %}has-icons-left{% endif %}">
+    <div class="select {{ css_classes }}" style="width:100%">
+        {% if icon %}
+        <span class="icon is-small is-left">
+            <i class="fas {{ icon }}"></i>
+        </span>
+        {% endif %}
+
+        <select name="{{ name }}" id="{{ element_id }}" class="selectize-control">
+            <option value="" disabled {% if not selected %}selected{% endif %} hidden>{{ placeholder }}</option>
+            {% for value, label in options %}
+                <option value="{{ value }}" {% if value|stringformat:"s" == selected %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    var $select = $('#{{ element_id }}').selectize({
+        persist: false,
+        create: false,
+        maxItems: 1,
+        plugins: [ 'clear_button'],
+        dropdownParent: 'body'
+    });
+    // On force le style Bulma sur l'input Selectize
+    $($select[0].selectize.$control).addClass('input');
+});
+</script>
