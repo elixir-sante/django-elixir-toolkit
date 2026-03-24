@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<h1>Django Elixir toolkit</h1>
+
+<h2>Simple components</h2>
+
+<a href="#" class="button is-primary">Bouton primary</a>
+<a href="#" class="button">Bouton</a>
+
+
+<h2>Form</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Envoyer">
+</form>
+
+{% endblock %}
