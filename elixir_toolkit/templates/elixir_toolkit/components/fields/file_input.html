@@ -1,0 +1,94 @@
+{% load crispy_forms_field %}
+
+<div class="field file-uploader">
+    <label class="label">{{ field.label }}</label>
+    <div class="control">
+        <div class="file has-name is-fullwidth is-primary">
+            <label class="file-label">
+                {% crispy_field field 'class' 'file-input' %}
+                <span class="file-cta">
+                    <span class="file-icon"><i class="fas fa-upload"></i></span>
+                    <span class="file-label">Choisir...</span>
+                </span>
+                <span class="file-name">Aucun fichier</span>
+            </label>
+        </div>
+    </div>
+    <div id="file-list" class="mt-2 tags"></div>
+    <p class="help file-size has-text-grey"></p>
+    {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
+</div>
+
+<script>
+function initElixirUploader() {
+    document.querySelectorAll('.file-uploader').forEach(container => {
+        const fileInput = container.querySelector('.file-input');
+        const fileListDisplay = container.querySelector('#file-list');
+        const fileNameLabel = container.querySelector('.file-name');
+        const fileSizeContainer = container.querySelector('.file-size');
+
+        if (!fileInput || !fileListDisplay) return;
+
+        let allFiles = new DataTransfer();
+
+        function updateFileList() {
+            fileListDisplay.innerHTML = '';
+            let totalSize = 0;
+
+            if (!allFiles.files.length) {
+                if (fileNameLabel) fileNameLabel.textContent = 'Aucun fichier';
+                if (fileSizeContainer) fileSizeContainer.textContent = '';
+                return;
+            }
+
+            Array.from(allFiles.files).forEach((file, index) => {
+                totalSize += file.size;
+                const fileControl = document.createElement('div');
+                fileControl.className = 'control';
+                fileControl.innerHTML = `
+                    <div class="tags has-addons">
+                        <a class="tag is-delete is-medium" data-index="${index}"></a>
+                        <span class="tag is-link is-medium">${file.name.substring(0, 25)}</span>
+                    </div>
+                `;
+
+                fileControl.querySelector('.is-delete').onclick = (e) => {
+                    e.preventDefault();
+                    removeFile(index);
+                };
+                fileListDisplay.appendChild(fileControl);
+            });
+
+            if (fileNameLabel) fileNameLabel.textContent = `${allFiles.files.length} fichier(s)`;
+            if (fileSizeContainer) {
+                fileSizeContainer.textContent = `Taille : ${(totalSize / (1024 * 1024)).toFixed(2)} Mo`;
+            }
+        }
+
+        function removeFile(index) {
+            const dt = new DataTransfer();
+            Array.from(allFiles.files).forEach((file, i) => {
+                if (i !== index) dt.items.add(file);
+            });
+            allFiles = dt;
+            fileInput.files = allFiles.files; 
+            updateFileList();
+        }
+
+        fileInput.addEventListener('change', function() {
+            if (this.multiple) {
+                Array.from(this.files).forEach(file => allFiles.items.add(file));
+            } else {
+                allFiles = new DataTransfer();
+                if (this.files.length) allFiles.items.add(this.files[0]);
+            }
+            
+            this.files = allFiles.files;
+            updateFileList();
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initElixirUploader);
+document.body.addEventListener('htmx:afterSwap', initElixirUploader);
+</script>

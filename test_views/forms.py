@@ -8,6 +8,31 @@ COLOR_CHOICES = (
     ('blue', 'Blue')
 )
 
+
+class MultipleFileInput(forms.FileInput):
+    def __init__(self, attrs=None):
+        super().__init__(attrs)
+        self.attrs.update({'multiple': True})
+
+    def value_from_datadict(self, data, files, name):
+        if files and hasattr(files, 'getlist'):
+            return files.getlist(name)
+        return super().value_from_datadict(data, files, name)
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+    
+        
 class FormExample(forms.Form):
     text            = forms.CharField(label="Nom complet")
     email           = forms.EmailField(label="Adresse Email")
@@ -28,7 +53,10 @@ class FormExample(forms.Form):
                         choices=COLOR_CHOICES,
                         widget=forms.RadioSelect()
                     )
-    file            = forms.FileField(label="Document justificatif", required=True)
+    file = MultipleFileField(
+        label="Documents justificatifs",
+        required=True
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -70,7 +98,7 @@ class FormExample(forms.Form):
                 Div(
                     Div('checkboxes', css_class='column is-4'),
                     Div('radios', css_class='column is-4'),
-                    Div('file', css_class='column is-4'),
+                    Div(Field('file', template="elixir_toolkit/components/fields/file_input.html"), css_class='column is-4'),
                     css_class='columns'
                 ),
                 'checkbox',
