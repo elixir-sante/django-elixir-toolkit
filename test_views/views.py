@@ -15,7 +15,11 @@ class FormTestView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+        context['mes_filtres_couleurs'] = [
+            ('red', 'Rouge'),
+            ('green', 'Vert'),
+            ('blue', 'Bleu'),
+        ]
         context['mes_options_paiement'] = [
             ('SCHE', 'Paiement échéance'),
             ('FREE', 'Montant libre'),

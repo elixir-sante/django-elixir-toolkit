@@ -4,6 +4,11 @@ body{
 .button.is-primary {
     background-color: #ff0000 !important; 
 }
+.button.is-link {
+    background-color: var(--secondary-color, #485fc7); /* #485fc7 est le bleu Link de Bulma */
+    border-color: transparent;
+    color: #fff;
+}
 /* 1. On cache la flèche native de Bulma (le pseudo-élément :after de .select) */
 .select:not(.is-multiple):not(.is-loading)::after {
     display: none !important;
