@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 django = ">=6"
+django-crispy-forms = "*"
+crispy-bulma = "*"
 
 [dev-packages]
 coverage = "*"

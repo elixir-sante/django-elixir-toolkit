@@ -1,8 +1,6 @@
-body{
-    background-color: white  !important;
-}
+
 .button.is-primary {
-    background-color: #ff0000 !important; 
+    background-color: #cf4747 !important; 
 }
 /* 1. On cache la flèche native de Bulma (le pseudo-élément :after de .select) */
 .select:not(.is-multiple):not(.is-loading)::after {
