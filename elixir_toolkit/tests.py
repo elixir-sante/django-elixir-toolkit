@@ -75,11 +75,7 @@ class ToolkitValidationTest(TestCase):
         self.assertIn('Alpha', rendered)
         
 class ToolkitSelectizeTest(TestCase):
-    def render_template(self, string, context=None):
-        context = Context(context or {})
-        return Template(string).render(context)
-
-    def test_ui_select_tag_parsing(self):
+      def test_ui_select_tag_parsing(self):
         """Vérifie que le tag ui_select transforme bien une string d'options en HTML"""
         template = """
             {% load elixir_toolkit_tags %}
@@ -118,3 +114,37 @@ class ToolkitSelectizeTest(TestCase):
         
         self.assertIn('has-icons-left', rendered)
         self.assertIn('fa-user', rendered)
+        
+
+class ToolkitFilterBarTest(TestCase):
+    def render_template(self, string, context=None):
+        context = Context(context or {})
+        return Template(string).render(context)
+
+    def test_filter_bar_basic_render(self):
+        filters = [('active', 'Actifs'), ('closed', 'Fermés')]
+        template = "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=filters %}"
+        rendered = self.render_template(template, {'filters': filters})
+        
+        self.assertIn('Tout', rendered)
+        self.assertIn('data-filter="active"', rendered)
+        self.assertIn('Actifs', rendered)
+        self.assertIn('data-filter="closed"', rendered)
+        self.assertIn('Fermés', rendered)
+
+    def test_filter_bar_identifier(self):
+        filters = [('1', 'Un')]
+        template = "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=filters identifier='projects' %}"
+        rendered = self.render_template(template, {'filters': filters})
+        
+        # Vérifie l'ID du div
+        self.assertIn('id="filter-bar-projects"', rendered)
+        self.assertIn("getElementById('filter-bar-projects')", rendered)
+        self.assertIn("identifier: 'projects'", rendered)
+
+    def test_filter_bar_default_identifier(self):
+        filters = []
+        template = "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=filters %}"
+        rendered = self.render_template(template, {'filters': filters})
+        
+        self.assertIn('id="filter-bar-default"', rendered)

@@ -14,11 +14,17 @@
 {% ui_button_primary text="bouton primary" css_classes="is-large is-loading is-rounded" id="submit-btn" %}
 {% ui_button_primary text="Suivant" icon="fas fa-arrow-left" %}
 {% ui_button_primary text="Continuer" icon="fas fa-arrow-right" icon_right=True %}
+{% ui_button_secondary text="bouton secondary" icon="fas fa-arrow-right" icon_right=True %}
 
 
 {% ui_select  name="filtre_status"  options="[('SCHE', 'Paiement échéance'), ('FREE', 'Montant libre')]" selected="SCHE" icon="fa-filter" placeholder="Filtrer par statut..." %}
 
 {% ui_select name="payment_mode" options=mes_options_paiement selected=mode_par_defaut icon="fa-credit-card"  placeholder="Choisir le mode..." %}
+
+<br>
+<p> Filtres </p>
+{% ui_filter_bar filters=mes_filtres_couleurs identifier="colors" %}
+<br>
 <h2>Form</h2>
 
 <form method="post">

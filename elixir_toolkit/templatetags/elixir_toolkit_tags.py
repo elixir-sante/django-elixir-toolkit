@@ -32,6 +32,13 @@ def ui_button_primary(text, css_classes="", **kwargs):
     return ui_button(text, css_classes=new_classes, **kwargs)
 
 
+@register.inclusion_tag('elixir_toolkit/components/button.html')
+def ui_button_secondary(text, css_classes="", **kwargs):
+    """Bouton secondaire - Couleur 'Link' (Bleu) en dur"""
+    new_classes = f"is-link {css_classes}".strip()
+    return ui_button(text, css_classes=new_classes, **kwargs)
+
+
 @register.inclusion_tag('elixir_toolkit/components/select.html')
 def ui_select(name, options, element_id=None, selected=None, placeholder="Choisissez...", icon=None, css_classes=""):
     if isinstance(options, str):
@@ -51,4 +58,15 @@ def ui_select(name, options, element_id=None, selected=None, placeholder="Choisi
         'placeholder': placeholder,
         'icon': icon,
         'css_classes': css_classes,
+    }
+    
+@register.inclusion_tag('elixir_toolkit/components/filter_bar.html')
+def ui_filter_bar(filters, identifier="default"):
+    """
+    filters: la liste envoyée par la vue
+    identifier: pour différencier si tu as plusieurs barres sur la même page
+    """
+    return {
+        'filters': filters,
+        'identifier': identifier,
     }
