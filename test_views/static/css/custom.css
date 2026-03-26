@@ -1,0 +1,71 @@
+body{
+    background-color: white  !important;
+}
+.button.is-primary {
+    background-color: #ff0000 !important; 
+}
+.button.is-link {
+    background-color: var(--secondary-color, #485fc7); /* #485fc7 est le bleu Link de Bulma */
+    border-color: transparent;
+    color: #fff;
+}
+/* 1. On cache la flèche native de Bulma (le pseudo-élément :after de .select) */
+.select:not(.is-multiple):not(.is-loading)::after {
+    display: none !important;
+}
+
+/* 2. On retire le padding à droite qui était réservé à la flèche Bulma */
+.select select {
+    padding-right: 0.625em !important;
+}
+
+/* 3. On s'assure que Selectize occupe bien toute la largeur sans bordures doubles */
+.selectize-input.input {
+    border: none !important; /* On utilise la bordure du container .select de Bulma */
+    box-shadow: none !important;
+}
+
+/* 4. Si tu veux quand même une seule flèche propre (celle de Selectize) mais grise */
+.selectize-control.single .selectize-input:after {
+    border-color: #888 transparent transparent transparent !important;
+    top: 55% !important;
+}
+
+/* Couleur de l'élément sélectionné dans la liste (le "vert") */
+.selectize-dropdown .active {
+    background-color: #dc3232 !important; /* Le bleu standard de Bulma */
+    color: white !important;
+}
+
+/* Fond de la liste déroulante (pour éviter le gros bloc blanc en mode sombre) */
+.selectize-dropdown {
+    background-color: #fff; /* À changer si tu es en mode sombre, ex: #363636 */
+    border-color: #dbdbdb;
+}
+
+/* L'élément sélectionné dans le champ (quand le focus est perdu) */
+.selectize-input.full {
+    background-color: transparent !important;
+}
+
+/* Style de l'input quand on tape dedans */
+.selectize-input.focus {
+    border-color: #3273dc !important;
+    border-radius: 5px;
+}
+
+.selectize-dropdown .selectize-dropdown-content .active {
+    background-color: #3273dc !important; /* Bleu Bulma */
+    color: #ffffff !important;
+}
+
+/* On gère aussi le cas où l'élément est "sélectionné" mais pas "actif" (survolé) */
+.selectize-dropdown .selected {
+    background-color: #f5f5f5;
+    color: #363636;
+}
+
+/* Petite correction pour les icônes dans la liste si elles deviennent invisibles */
+.selectize-dropdown .active i {
+    color: #ffffff !important;
+}

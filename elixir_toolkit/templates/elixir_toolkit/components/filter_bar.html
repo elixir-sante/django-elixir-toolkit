@@ -1,0 +1,38 @@
+<div class="buttons" id="filter-bar-{{ identifier }}">
+    <button class="button is-rounded is-primary filter-btn" data-filter="">
+        Tout
+    </button>
+
+    {% for val, label in filters %}
+    <button class="button is-rounded is-primary-light has-text-primary filter-btn" 
+            data-filter="{{ val }}">
+        {{ label }}
+    </button>
+    {% endfor %}
+</div>
+
+<script>
+    // On utilise un sélecteur spécifique à l'identifiant
+    const container = document.getElementById('filter-bar-{{ identifier }}');
+    
+    container.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // 1. Update visuel (Bouton actif)
+            container.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.replace('is-primary', 'is-primary-light');
+                b.classList.add('has-text-primary');
+            });
+            this.classList.replace('is-primary-light', 'is-primary');
+            this.classList.remove('has-text-primary');
+
+            // 2. Emission de l'info 
+            const filterEvent = new CustomEvent('filterChanged', {
+                detail: { 
+                    value: this.dataset.filter,
+                    identifier: '{{ identifier }}'
+                }
+            });
+            document.dispatchEvent(filterEvent);
+        });
+    });
+</script>
