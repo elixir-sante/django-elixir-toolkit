@@ -75,7 +75,7 @@ class ToolkitValidationTest(TestCase):
         self.assertIn('Alpha', rendered)
         
 class ToolkitSelectizeTest(TestCase):
-      def test_ui_select_tag_parsing(self):
+    def test_ui_select_tag_parsing(self):
         """Vérifie que le tag ui_select transforme bien une string d'options en HTML"""
         template = """
             {% load elixir_toolkit_tags %}
