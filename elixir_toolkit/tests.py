@@ -38,3 +38,37 @@ class ToolkitButtonsTest(TestCase):
         
         self.assertIn('<i class="fas fa-envelope"></i>', rendered)
         self.assertIn('<span class="icon">', rendered)
+        
+
+class ToolkitFilterBarTest(TestCase):
+    def render_template(self, string, context=None):
+        context = Context(context or {})
+        return Template(string).render(context)
+
+    def test_filter_bar_basic_render(self):
+        filters = [('active', 'Actifs'), ('closed', 'Fermés')]
+        template = "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=filters %}"
+        rendered = self.render_template(template, {'filters': filters})
+        
+        self.assertIn('Tout', rendered)
+        self.assertIn('data-filter="active"', rendered)
+        self.assertIn('Actifs', rendered)
+        self.assertIn('data-filter="closed"', rendered)
+        self.assertIn('Fermés', rendered)
+
+    def test_filter_bar_identifier(self):
+        filters = [('1', 'Un')]
+        template = "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=filters identifier='projects' %}"
+        rendered = self.render_template(template, {'filters': filters})
+        
+        # Vérifie l'ID du div
+        self.assertIn('id="filter-bar-projects"', rendered)
+        self.assertIn("getElementById('filter-bar-projects')", rendered)
+        self.assertIn("identifier: 'projects'", rendered)
+
+    def test_filter_bar_default_identifier(self):
+        filters = []
+        template = "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=filters %}"
+        rendered = self.render_template(template, {'filters': filters})
+        
+        self.assertIn('id="filter-bar-default"', rendered)
