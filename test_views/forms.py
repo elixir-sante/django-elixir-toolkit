@@ -3,36 +3,24 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 
 COLOR_CHOICES = (
-    ('red', 'Red'),
-    ('green', 'Green'),
-    ('blue', 'Blue')
+    ('red', 'Red'), ('green', 'Green'), ('blue', 'Blue')
 )
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
 
-class MultipleFileInput(forms.FileInput):
-    def __init__(self, attrs=None):
-        super().__init__(attrs)
-        self.attrs.update({'multiple': True})
-
-    def value_from_datadict(self, data, files, name):
-        if files and hasattr(files, 'getlist'):
-            return files.getlist(name)
-        return super().value_from_datadict(data, files, name)
 
 class MultipleFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("widget", MultipleFileInput())
+        kwargs.setdefault('widget', MultipleFileInput())
         super().__init__(*args, **kwargs)
-
     def clean(self, data, initial=None):
         single_file_clean = super().clean
         if isinstance(data, (list, tuple)):
-            result = [single_file_clean(d, initial) for d in data]
-        else:
-            result = single_file_clean(data, initial)
-        return result
-    
-        
+            return [single_file_clean(d, initial) for d in data]
+        return [single_file_clean(data, initial)]
+
+
 class FormExample(forms.Form):
     text            = forms.CharField(label="Nom complet")
     email           = forms.EmailField(label="Adresse Email")
@@ -53,64 +41,59 @@ class FormExample(forms.Form):
                         choices=COLOR_CHOICES,
                         widget=forms.RadioSelect()
                     )
-    file = MultipleFileField(
-        label="Documents justificatifs",
-        required=True
-    )
+    file = MultipleFileField(label="Documents justificatifs", required=True)
+    file2 = forms.FileField(label="Documents test", required=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        # IMPORTANT: S'assurer que le template pack est bien défini ici si besoin
+        self.helper.template_pack = 'bulma' 
         
         self.helper.layout = Layout(
             Fieldset(
                 '👤 Informations personnelles',
                 Div(
-                    Div(Field('text', placeholder="Ex: Jean Dupont", icon_left="fas fa-user"), css_class='column is-6'),
-                    Div(Field('email', placeholder="jean@email.com", icon_left="fas fa-envelope"), css_class='column is-6'),
+                    Div(Field('text', placeholder="Ex: Jean Dupont"), css_class='column is-6'),
+                    Div(Field('email', placeholder="jean@email.com"), css_class='column is-6'),
                     css_class='columns' 
                 ),
                 Div(
-                    Div(Field('password', icon_left="fas fa-lock"), css_class='column is-6'),
-                    Div(Field('number', icon_left="fas fa-hashtag"), css_class='column is-6'),
+                    Div(Field('password'), css_class='column is-6'),
+                    Div(Field('number'), css_class='column is-6'),
                     css_class='columns'
                 )
             ),
-
             HTML('<hr class="my-5">'),
-
             Fieldset(
                 '🎨 Préférences visuelles',
                 Div(
                     Div('select', css_class='column is-4'),
                     Div('multi_select', css_class='column is-4'),
-                    Div(Field('url', placeholder="https://...", icon_left="fas fa-link"), css_class='column is-4'),
+                    Div(Field('url'), css_class='column is-4'),
                     css_class='columns'
                 ),
                 'textarea',
             ),
-
             HTML('<hr class="my-5">'),
-
             Fieldset(
                 '🔘 Choix et Fichiers',
                 Div(
                     Div('checkboxes', css_class='column is-4'),
                     Div('radios', css_class='column is-4'),
+                    # On repasse en mode explicite pour éviter le bug de détection
                     Div(Field('file', template="elixir_toolkit/components/fields/file_input.html"), css_class='column is-4'),
                     css_class='columns'
                 ),
+                Div(Div(Field('file2', template="elixir_toolkit/components/fields/file_input.html"), css_class='column is-4'),),
                 'checkbox',
             ),
-
             HTML("""
-                <div class="field mt-5">
-                    <div class="control">
-                        <button type="submit" class="button is-primary is-fullwidth">
-                            <span class="icon"><i class="fas fa-paper-plane"></i></span>
-                            <span>Envoyer le formulaire</span>
-                        </button>
-                    </div>
-                </div>
+                <div class="field mt-5"><div class="control">
+                    <button type="submit" class="button is-primary is-fullwidth">
+                        <span class="icon"><i class="fas fa-paper-plane"></i></span>
+                        <span>Envoyer le formulaire</span>
+                    </button>
+                </div></div>
             """)
         )
