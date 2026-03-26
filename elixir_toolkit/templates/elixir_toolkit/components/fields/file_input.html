@@ -3,7 +3,7 @@
 <div class="field file-uploader">
     <label class="label">{{ field.label }}</label>
     <div class="control">
-        <div class="file has-name is-fullwidth is-primary">
+        <div class="file has-name is-fullwidth {% if field.errors %}is-danger{% else %}is-primary{% endif %}">
             <label class="file-label">
                 {% crispy_field field 'class' 'file-input' %}
                 <span class="file-cta">
@@ -16,6 +16,11 @@
     </div>
     <div id="file-list" class="mt-2 tags"></div>
     <p class="help file-size has-text-grey"></p>
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <p class="help is-danger"><strong>{{ error }}</strong></p>
+        {% endfor %}
+    {% endif %}
     {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
 </div>
 
