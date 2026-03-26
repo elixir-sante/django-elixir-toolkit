@@ -1,5 +1,5 @@
 <div class="control {% if icon %}has-icons-left{% endif %}">
-    <div class="select {{ css_classes }}" style="width:100%">
+    <div class="select {{ css_classes }} {% if field.errors %}is-danger{% endif %}" style="width:100%">
         {% if icon %}
         <span class="icon is-small is-left">
             <i class="fas {{ icon }}"></i>
@@ -14,6 +14,12 @@
                 </option>
             {% endfor %}
         </select>
+        {% if field.errors %}
+            {% for error in field.errors %}<p class="help is-danger">{{ error }}</p>{% endfor %}
+        {% endif %}
+        {% if field.help_text %}
+            <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
     </div>
 </div>
 

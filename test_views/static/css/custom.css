@@ -1,8 +1,6 @@
-body{
-    background-color: white  !important;
-}
+
 .button.is-primary {
-    background-color: #ff0000 !important; 
+    background-color: #cf4747 !important; 
 }
 .button.is-link {
     background-color: var(--secondary-color, #485fc7); /* #485fc7 est le bleu Link de Bulma */
