@@ -2,24 +2,12 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 
+from elixir_toolkit.forms import MultipleFileField, FileUpload
+
+
 COLOR_CHOICES = (
     ('red', 'Red'), ('green', 'Green'), ('blue', 'Blue')
 )
-
-class MultipleFileInput(forms.ClearableFileInput):
-    allow_multiple_selected = True
-
-
-class MultipleFileField(forms.FileField):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('widget', MultipleFileInput())
-        super().__init__(*args, **kwargs)
-    def clean(self, data, initial=None):
-        single_file_clean = super().clean
-        if isinstance(data, (list, tuple)):
-            return [single_file_clean(d, initial) for d in data]
-        return [single_file_clean(data, initial)]
-
 
 class FormExample(forms.Form):
     text            = forms.CharField(label="Nom complet")
@@ -82,10 +70,10 @@ class FormExample(forms.Form):
                     Div('checkboxes', css_class='column is-4'),
                     Div('radios', css_class='column is-4'),
                     # On repasse en mode explicite pour éviter le bug de détection
-                    Div(Field('file', template="elixir_toolkit/components/fields/file_input.html"), css_class='column is-4'),
+                    Div(FileUpload('file'), css_class='column is-4'),
                     css_class='columns'
                 ),
-                Div(Div(Field('file2', template="elixir_toolkit/components/fields/file_input.html"), css_class='column is-4'),),
+                Div(Div(FileUpload('file2'), css_class='column is-4'),),
                 'checkbox',
             ),
             HTML("""
