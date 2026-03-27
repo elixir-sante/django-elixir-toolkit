@@ -6,33 +6,93 @@
         </span>
         {% endif %}
 
-        <select name="{{ name }}" id="{{ element_id }}" class="selectize-control">
-            <option value="" disabled {% if not selected %}selected{% endif %} hidden>{{ placeholder }}</option>
+        <select 
+            name="{{ name }}" 
+            id="{{ element_id }}" 
+            aria-label="{{ name }}"
+            class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}" 
+            {% if disabled %}disabled{% endif %}
+            {% if required %}required=""{% endif %}
+        >
+            {% if placeholder %}
+                <option class="placeholder is-size-4" value="" disabled {% if not selected %}selected{% endif %} hidden>
+                    {{ placeholder }}
+                </option>
+            {% else %}
+                <option class="placeholder" value="" disabled {% if not selected %}selected{% endif %} hidden>
+                    Séléctionner un élement...
+                </option>
+            {% endif %}
+
             {% for value, label in options %}
-                <option value="{{ value }}" {% if value|stringformat:"s" == selected %}selected{% endif %}>
+                <option class="is-size-6" value="{{ value }}" {% if value|stringformat:"s" == selected %}selected{% endif %}>
                     {{ label }}
                 </option>
             {% endfor %}
         </select>
     </div>
+    
     {% if field.errors %}
-            {% for error in field.errors %}<p class="help is-danger">{{ error }}</p>{% endfor %}
-        {% endif %}
-        {% if field.help_text %}
-            <p class="help">{{ field.help_text|safe }}</p>
-        {% endif %}
+        {% for error in field.errors %}<p class="help is-danger">{{ error }}</p>{% endfor %}
+    {% endif %}
+    {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+    {% endif %}
 </div>
 
 <script>
 $(document).ready(function() {
-    var $select = $('#{{ element_id }}').selectize({
+    // Registre global pour la fermeture unique
+    window.selectizeInstances = window.selectizeInstances || [];
+
+    var closeOthers = function(current) {
+        window.selectizeInstances.forEach(function(instance) {
+            if (instance !== current && instance.isOpen) {
+                instance.close();
+            }
+        });
+    };
+
+    var config = {
+        delimiter: ',',
         persist: false,
         create: false,
         maxItems: 1,
-        plugins: [ 'clear_button'],
-        dropdownParent: 'body'
-    });
-    // On force le style Bulma sur l'input Selectize
-    $($select[0].selectize.$control).addClass('input');
+        openOnFocus: false,
+        plugins: ['clear_button'],
+        dropdownParent: 'body',
+        onInitialize: function() {
+            window.selectizeInstances.push(this);
+            if ($('#{{ element_id }}').is(':disabled')) {
+                this.disable();
+            }
+        },
+        onDropdownOpen: function() {
+            closeOthers(this);
+        }
+    };
+
+    // Rendu spécifique pour le champ d'icônes
+    if ("{{ name }}" === "icon") {
+        config.render = {
+            option: function(data, escape) {
+                return '<div class="is-size-6"><i class="fas p-2 fa-' + escape(data.value) + ' mr-2"></i>' + escape(data.text) + '</div>';
+            },
+            item: function(data, escape) {
+                return '<div class="is-size-6"><i class="fas fa-' + escape(data.value) + ' mr-1"></i>' + escape(data.text) + '</div>';
+            }
+        };
+    }
+
+    var $select = $('#{{ element_id }}').selectize(config);
+    var instance = $select[0].selectize;
+
+    // Harmonisation visuelle Bulma
+    var $control = $(instance.$control);
+    $control.addClass('input');
+    $('.selectize-dropdown').removeClass('input'); // Sécurité
+    
+    // Force la largeur de l'input interne pour le focus
+    $control.find('input').attr("style", "width: 100% !important;");
 });
 </script>

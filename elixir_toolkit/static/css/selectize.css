@@ -1,0 +1,113 @@
+@import "https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.min.css";
+
+/* --- Structure de base --- */
+.control .select .selectize-control {
+    padding: 0;
+    width: 100%;
+    height: auto;
+    min-height: 2.5rem;
+    max-width: 100%;
+}
+
+/* --- Input Selectize (Style Bulma) --- */
+.control .select .selectize-control .selectize-input {
+    box-shadow: none;
+    border: none;
+    font-size: 16px !important; /* Force 16px pour éviter le zoom iOS */
+    padding: var(--bulma-control-padding-vertical) var(--bulma-control-padding-horizontal);
+    background-color: #fff !important;
+    color: #363636 !important; /* Texte foncé */
+    display: flex !important;
+    align-items: center !important;
+    min-height: 2.5rem !important;
+    border-radius: var(--bulma-input-radius, 4px);
+}
+
+/* --- Gestion des icônes Bulma à gauche --- */
+.control.has-icons-left .select .selectize-control .selectize-input {
+    padding-left: 2.5rem !important;
+}
+
+.control.has-icons-left .icon {
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* --- Dropdown (Le menu qui s'ouvre) --- */
+.selectize-dropdown {
+    font-size: 16px !important;
+    z-index: 1000 !important;
+    background-color: #fff !important;
+    border: 1px solid #dbdbdb !important;
+    box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1) !important;
+}
+
+.selectize-dropdown .option {
+    padding: 0.5rem 0.75rem !important;
+    color: #363636 !important; /* Force le texte en foncé */
+    background-color: #fff !important;
+}
+
+/* --- États Hover / Active / Selected --- */
+.selectize-dropdown .option.active {
+    background-color: #f5f5f5 !important;
+    color: #363636 !important;
+}
+
+.selectize-dropdown .option.selected {
+    background-color: var(--primary-color, #8b8d8dad) !important;
+    color: var(--secondary-color, #e06464) !important;
+}
+
+/* --- Correctifs Divers --- */
+.control .select.is-danger .selectize-control.input-error {
+    border-color: hsl(var(--bulma-danger-h), var(--bulma-danger-s), var(--bulma-danger-l)) !important;
+}
+
+.control .select .selectize-control .selectize-input input::placeholder {
+    color: #7a7a7a !important;
+    font-style: italic;
+}
+
+/* Masquer la flèche par défaut de Selectize (Bulma gère le look) */
+.control .select .selectize-control .selectize-input:after {
+    display: none !important;
+}
+
+/* --- Multi-select --- */
+.selectize-control.multi .selectize-input > div {
+    padding: 2px 8px;
+    margin: 3px;
+    background: #f5f5f5;
+    color: #363636;
+    border-radius: 2px;
+}
+
+/* --- Bouton de suppression (Clear) --- */
+.selectize-control.plugin-clear_button .clear {
+    right: 10px !important;
+    font-size: 18px !important;
+    color: #b5b5b5 !important;
+}
+
+/* --- Responsive --- */
+@media screen and (max-width: 768px) {
+    .mobile-selectize-fullwidth {
+        flex-direction: column !important;
+        display: flex !important;
+        gap: 0.5rem;
+    }
+    
+    .mobile-selectize-fullwidth .control,
+    .mobile-selectize-fullwidth .selectize-control {
+        width: 100% !important;
+    }
+}
+
+.selectize-item-padded {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0.25rem 0.25rem 0.25rem 0 !important;
+}
