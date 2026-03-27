@@ -86,22 +86,23 @@ def ui_filter_bar(filters, identifier="default"):
 def ui_list(items, title_field="title", desc_field="description", extra_field=None, 
             icon_field=None, tag_label_field=None, tag_icon_field=None, 
             link_url_name=None, **kwargs):
-    """
-    Composant de liste générique avec support de badge/tag.
-    """
     processed_items = []
     for item in items:
-        # Helper pour récupérer une valeur d'un dict ou d'un objet
-        get_val = lambda field: getattr(item, field, item.get(field)) if isinstance(item, dict) else getattr(item, field, None)
+        # On définit une fonction robuste pour récupérer la valeur
+        def get_val(field_name):
+            if not field_name: # Si le champ est None, on s'arrête là
+                return None
+            if isinstance(item, dict):
+                return item.get(field_name)
+            return getattr(item, field_name, None)
         
         processed_items.append({
             'title': get_val(title_field) or "",
             'description': get_val(desc_field) or "",
             'extra': get_val(extra_field),
             'icon': get_val(icon_field) or "receipt",
-            # Données du Tag (badge)
-            'tag_label': get_val(tag_label_field) if tag_label_field else None,
-            'tag_icon': get_val(tag_icon_field) if tag_icon_field else "user",
+            'tag_label': get_val(tag_label_field),
+            'tag_icon': get_val(tag_icon_field) or "user",
             'obj': item 
         })
 
@@ -109,4 +110,41 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
         'items': processed_items,
         'link_url_name': link_url_name,
         'css_classes': kwargs.get('css_classes', '')
+    }
+    
+@register.inclusion_tag('elixir_toolkit/components/table.html')
+def ui_table(items, columns, css_classes=""):
+    """
+    Tableau générique.
+    columns: list de dicts [
+        {'header': 'Titre', 'field': 'key', 'type': 'text/price/date/badge', 'icon_field': 'icon_key'}
+    ]
+    """
+    processed_rows = []
+    
+    for item in items:
+        row_cells = []
+        for col in columns:
+            field = col.get('field')
+            
+            # Helper de récupération sécurisée
+            def get_val(f):
+                if not f: return None
+                return item.get(f) if isinstance(item, dict) else getattr(item, f, None)
+
+            row_cells.append({
+                'value': get_val(field),
+                'header': col.get('header'), # Utile pour le responsive mobile
+                'type': col.get('type', 'text'),
+                'icon': get_val(col.get('icon_field')),
+                'class': col.get('class', ''),
+                'sub_value': get_val(col.get('sub_field')),
+                'suffix': col.get('suffix', ''), # Ex: '€', ' points', etc.
+            })
+        processed_rows.append(row_cells)
+
+    return {
+        'headers': [col.get('header') for col in columns],
+        'rows': processed_rows,
+        'css_classes': css_classes
     }

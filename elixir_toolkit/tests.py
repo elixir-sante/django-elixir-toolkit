@@ -169,3 +169,76 @@ class ToolkitFilterBarTest(ToolkitBaseTest):
         
         self.assertIn('Tout', rendered)
         self.assertNotIn('data-group="0"', rendered)
+        
+
+class ToolkitListTest(ToolkitBaseTest):
+    def test_ui_list_basic_rendering(self):
+        """Vérifie que la liste affiche le titre, la description et l'extra"""
+        items = [{
+            'id': 10,
+            'name': 'Consultation',
+            'info': '12/03/2024',
+            'price': '25€'
+        }]
+        # On précise bien les noms de champs correspondants au dictionnaire
+        template = "{% load elixir_toolkit_tags %}{% ui_list items=items title_field='name' desc_field='info' extra_field='price' %}"
+        rendered = self.render_template(template, {'items': items})
+        
+        self.assertIn('Consultation', rendered)
+        self.assertIn('12/03/2024', rendered)
+        self.assertIn('25€', rendered)
+        self.assertIn('fa-angle-right', rendered)
+
+    def test_ui_list_tag_and_icon(self):
+        """Vérifie le rendu du badge (tag) et de l'icône principale"""
+        items = [{
+            'name': 'Test',
+            'patient': 'Jean Dupont',
+            'type': 'pills'
+        }]
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_list items=items title_field='name' tag_label_field='patient' icon_field='type' %}
+        """
+        rendered = self.render_template(template, {'items': items})
+        
+        self.assertIn('Jean Dupont', rendered)
+        self.assertIn('fa-pills', rendered)
+        self.assertIn('tag is-primary', rendered)
+
+    def test_ui_list_clickable_logic(self):
+        """Vérifie la présence du container cliquable et du lien par défaut"""
+        items = [{'id': 1, 'name': 'Lien Test'}]
+        template = "{% load elixir_toolkit_tags %}{% ui_list items=items title_field='name' %}"
+        rendered = self.render_template(template, {'items': items})
+        
+        # Vérifie que href="#" est généré quand link_url_name est absent
+        self.assertIn('href="#"', rendered)
+        self.assertIn('is-clickable-container', rendered)
+        self.assertIn('item-main-link', rendered)
+
+    def test_ui_list_empty_state(self):
+        """Vérifie le message si la liste est vide"""
+        template = "{% load elixir_toolkit_tags %}{% ui_list items=items %}"
+        rendered = self.render_template(template, {'items': []})
+        
+        self.assertIn('Aucun élément à afficher', rendered)
+        
+
+class ToolkitTableTest(ToolkitBaseTest):
+    def test_ui_table_multi_purpose(self):
+        """Vérifie que le tableau gère les badges, les prix et les suffixes"""
+        items = [{'name': 'Test', 'status': 'OK', 'score': 95}]
+        cols = [
+            {'header': 'Nom', 'field': 'name'},
+            {'header': 'Etat', 'field': 'status', 'type': 'badge'},
+            {'header': 'Points', 'field': 'score', 'suffix': ' pts'}
+        ]
+        template = "{% load elixir_toolkit_tags %}{% ui_table items=items columns=cols %}"
+        rendered = self.render_template(template, {'items': items, 'cols': cols})
+        
+        # Vérifie le badge
+        self.assertIn('tag is-light', rendered)
+        self.assertIn('OK', rendered)
+        # Vérifie le suffixe
+        self.assertIn('95 pts', rendered)
