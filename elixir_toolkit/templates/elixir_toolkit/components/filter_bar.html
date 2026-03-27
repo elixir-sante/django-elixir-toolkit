@@ -1,38 +1,83 @@
-<div class="buttons" id="filter-bar-{{ identifier }}">
-    <button class="button is-rounded is-primary filter-btn" data-filter="">
-        Tout
-    </button>
+<div class="filter-system" id="filter-system-{{ identifier }}">
+    <div class="buttons filter-group">
 
-    {% for val, label in filters %}
-    <button class="button is-rounded is-primary-light has-text-primary filter-btn" 
-            data-filter="{{ val }}">
-        {{ label }}
-    </button>
-    {% endfor %}
+        <!-- Bouton reset global -->
+        <button 
+            class="button is-rounded is-primary filter-btn" 
+            data-filter="" 
+            data-group="all">
+            Tout
+        </button>
+
+        {% if is_multi %}
+            {% for sub_filters in filters %}
+                {% for val, label in sub_filters %}
+                    <button 
+                        class="button is-rounded is-primary-light has-text-primary filter-btn"
+                        data-filter="{{ val }}"
+                        data-group="{{ forloop.parentloop.counter0 }}">
+                        {{ label }}
+                    </button>
+                {% endfor %}
+            {% endfor %}
+        {% else %}
+            {% for val, label in filters %}
+                <button 
+                    class="button is-rounded is-primary-light has-text-primary filter-btn"
+                    data-filter="{{ val }}"
+                    data-group="0">
+                    {{ label }}
+                </button>
+            {% endfor %}
+        {% endif %}
+
+    </div>
 </div>
 
 <script>
-    // On utilise un sélecteur spécifique à l'identifiant
-    const container = document.getElementById('filter-bar-{{ identifier }}');
-    
-    container.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            // 1. Update visuel (Bouton actif)
-            container.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.replace('is-primary', 'is-primary-light');
-                b.classList.add('has-text-primary');
-            });
-            this.classList.replace('is-primary-light', 'is-primary');
-            this.classList.remove('has-text-primary');
+(function() {
+    const mainContainer = document.getElementById('filter-system-{{ identifier }}');
+    const state = {};
 
-            // 2. Emission de l'info 
-            const filterEvent = new CustomEvent('filterChanged', {
-                detail: { 
-                    value: this.dataset.filter,
-                    identifier: '{{ identifier }}'
+    mainContainer.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const value = this.dataset.filter;
+            const group = this.dataset.group;
+
+            if (group === "all") {
+                Object.keys(state).forEach(k => state[k] = []);
+
+                mainContainer.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.replace('is-primary', 'is-primary-light');
+                    b.classList.add('has-text-primary');
+                });
+
+                this.classList.replace('is-primary-light', 'is-primary');
+                this.classList.remove('has-text-primary');
+            } else {
+                if (!state[group]) state[group] = [];
+
+                if (state[group].includes(value)) {
+                    state[group] = state[group].filter(v => v !== value);
+
+                    this.classList.replace('is-primary', 'is-primary-light');
+                    this.classList.add('has-text-primary');
+                } else {
+                    state[group].push(value);
+
+                    this.classList.replace('is-primary-light', 'is-primary');
+                    this.classList.remove('has-text-primary');
                 }
-            });
-            document.dispatchEvent(filterEvent);
+
+                const allBtn = mainContainer.querySelector('[data-group="all"]');
+                allBtn.classList.replace('is-primary', 'is-primary-light');
+                allBtn.classList.add('has-text-primary');
+            }
+
+            document.dispatchEvent(new CustomEvent('filterChanged', {
+                detail: { state: state, identifier: '{{ identifier }}' }
+            }));
         });
     });
+})();
 </script>

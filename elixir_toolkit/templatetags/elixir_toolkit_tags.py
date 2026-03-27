@@ -62,11 +62,21 @@ def ui_select(name, options, element_id=None, selected=None, placeholder="Choisi
     
 @register.inclusion_tag('elixir_toolkit/components/filter_bar.html')
 def ui_filter_bar(filters, identifier="default"):
-    """
-    filters: la liste envoyée par la vue
-    identifier: pour différencier si tu as plusieurs barres sur la même page
-    """
+    is_multi = False
+
+    if filters and len(filters) > 0:
+        first = filters[0]
+
+        # Si déjà liste de listes
+        if isinstance(first, (list, tuple)) and len(first) > 0 and isinstance(first[0], (list, tuple)):
+            is_multi = True
+        else:
+            # 🔥 NORMALISATION : transformer en liste de listes
+            filters = [filters]
+            is_multi = True
+
     return {
         'filters': filters,
         'identifier': identifier,
+        'is_multi': is_multi
     }

@@ -23,8 +23,22 @@
 
 <br>
 <p> Filtres </p>
-{% ui_filter_bar filters=mes_filtres_couleurs identifier="colors" %}
+{% ui_filter_bar filters=mes_filtres identifier="colors" %}
 <br>
+<div class="columns is-multiline mt-5" id="container-objets">
+        {% for obj in objets_test %}
+            {# data-val-0 = couleur, data-val-1 = chiffre #}
+            <div class="column is-3 item-a-filtrer" 
+                 data-val-0="{{ obj.color }}" 
+                 data-val-1="{{ obj.num }}">
+                <div class="notification is-light has-text-centered">
+                    <strong>{{ obj.name }}</strong>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+<br>
+
 <h2>Form</h2>
 
 <form method="post">
@@ -32,5 +46,30 @@
     {% crispy form %}
     <input type="submit" value="Envoyer">
 </form>
+<script>
+   document.addEventListener('filterChanged', function(e) {
+    if (e.detail.identifier === 'colors') {
+        const state = e.detail.state;
 
+        document.querySelectorAll('.item-a-filtrer').forEach(item => {
+            let isMatch = true;
+
+            Object.keys(state).forEach(groupIdx => {
+                const selectedValues = state[groupIdx];
+
+                if (selectedValues.length > 0) {
+                    const itemValue = item.getAttribute(`data-val-${groupIdx}`);
+
+                    // 🔥 OU dans le groupe
+                    if (!selectedValues.includes(itemValue)) {
+                        isMatch = false;
+                    }
+                }
+            });
+
+            item.style.display = isMatch ? "block" : "none";
+        });
+    }
+});
+</script>
 {% endblock %}
