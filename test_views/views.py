@@ -28,5 +28,34 @@ class FormTestView(FormView):
             {'color': 'blue', 'num': '1', 'name': 'Bleu 1'},
             {'color': 'green', 'num': '3', 'name': 'Vert 3'},
         ]
+        context['remboursements_test'] = [
+            {
+                'id': 1,
+                'libelle': 'Consultation Médecin Généraliste',
+                'date_info': 'Remboursé le 12/03/2024',
+                'montant': '25,00 €',
+                'patient': 'Jean Dupont',
+                'user_icon': 'user',
+                'type_icon': 'hand-holding-medical'
+            },
+            {
+                'id': 2,
+                'libelle': 'Pharmacie - Achat médicaments',
+                'date_info': 'Remboursé le 10/03/2024',
+                'montant': '12,40 €',
+                'patient': 'Marie Dupont',
+                'user_icon': 'user-female', # si tu gères des icônes différentes
+                'type_icon': 'pills'
+            },
+            {
+                'id': 3,
+                'libelle': 'Analyse de sang',
+                'date_info': 'Acte du 05/03/2024',
+                'montant': '45,00 €',
+                'patient': 'Jean Dupont',
+                'user_icon': 'user',
+                'type_icon': 'flask'
+            }
+        ]
         
         return context

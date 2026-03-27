@@ -80,3 +80,33 @@ def ui_filter_bar(filters, identifier="default"):
         'identifier': identifier,
         'is_multi': is_multi
     }
+    
+
+@register.inclusion_tag('elixir_toolkit/components/list.html')
+def ui_list(items, title_field="title", desc_field="description", extra_field=None, 
+            icon_field=None, tag_label_field=None, tag_icon_field=None, 
+            link_url_name=None, **kwargs):
+    """
+    Composant de liste générique avec support de badge/tag.
+    """
+    processed_items = []
+    for item in items:
+        # Helper pour récupérer une valeur d'un dict ou d'un objet
+        get_val = lambda field: getattr(item, field, item.get(field)) if isinstance(item, dict) else getattr(item, field, None)
+        
+        processed_items.append({
+            'title': get_val(title_field) or "",
+            'description': get_val(desc_field) or "",
+            'extra': get_val(extra_field),
+            'icon': get_val(icon_field) or "receipt",
+            # Données du Tag (badge)
+            'tag_label': get_val(tag_label_field) if tag_label_field else None,
+            'tag_icon': get_val(tag_icon_field) if tag_icon_field else "user",
+            'obj': item 
+        })
+
+    return {
+        'items': processed_items,
+        'link_url_name': link_url_name,
+        'css_classes': kwargs.get('css_classes', '')
+    }

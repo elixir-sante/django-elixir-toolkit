@@ -1,4 +1,8 @@
 
+body{
+    background-color: white;
+}
+
 .button.is-primary {
     background-color: #cf4747 !important; 
 }
