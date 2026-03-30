@@ -74,4 +74,4 @@ Pour l'appel des custom_tags : {% ui_button text="Voir la doc" href="https://bul
 
 Regarder les customs_tags pour voir les paramètres à passer  comme le text. 
 
-Voir les exemples dans l'app test_app pour accéders aux différents exemples d'utilisation des composants/crispy.
+Voir les exemples dans l'app test_app pour accéders aux différents exemples d'utilisation des composants/crispy (views/forms/templates)
