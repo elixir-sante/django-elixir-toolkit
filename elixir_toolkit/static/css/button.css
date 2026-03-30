@@ -1,0 +1,9 @@
+.button.is-primary {
+    background-color: #cf4747 !important; 
+}
+
+.button.is-link {
+    background-color: var(--secondary-color, #485fc7);
+    border-color: transparent;
+    color: #fff;
+}
