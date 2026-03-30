@@ -38,12 +38,12 @@ Le toolkit peut être installé directement depuis GitHub.
 
 * **Production (Choix de la version) :**
 ```bash
-  pip install git+[https://github.com/ton-pseudo/django-elixir-toolkit.git@vX.X.X]
+  pip install git+https://github.com/elixir-sante/django-elixir-toolkit.git@vX.X.X
 ```
 
 * **Développement (Dernières nouveautés) :**
 ```bash
-pip install git+[https://github.com/ton-pseudo/django-elixir-toolkit.git@dev]
+pip install git+https://github.com/elixir-sante/django-elixir-toolkit.git@dev
 ```
 
 * **2. Configuration Django**
