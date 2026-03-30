@@ -26,7 +26,7 @@
                                         {% if cell.type == 'price' %}
                                             {{ cell.value|floatformat:2 }}€
                                         {% elif cell.type == 'badge' %}
-                                            <span class="tag is-light is-rounded">{{ cell.value }}</span>
+                                            <span class="tag is-primary is-light is-rounded">{{ cell.value }}</span>
                                         {% else %}
                                             {{ cell.value|default:"" }}{{ cell.suffix }}
                                         {% endif %}

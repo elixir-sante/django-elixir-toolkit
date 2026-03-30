@@ -88,9 +88,8 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
             link_url_name=None, **kwargs):
     processed_items = []
     for item in items:
-        # On définit une fonction robuste pour récupérer la valeur
         def get_val(field_name):
-            if not field_name: # Si le champ est None, on s'arrête là
+            if not field_name:
                 return None
             if isinstance(item, dict):
                 return item.get(field_name)
