@@ -4,12 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.1.0"
+version = "0.1.1"
 description = "UI Components Toolkit for Django based on Bulma"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "django>=6.0.3",
+    "django-crispy-forms>=2.0",
+    "crispy-bulma>=0.10"
 ]
 
 [tool.setuptools.packages.find]
