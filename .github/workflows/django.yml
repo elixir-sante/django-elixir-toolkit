@@ -1,0 +1,44 @@
+name: Django Elixir Toolkit Tests
+
+on:
+  push:
+    branches: [ main, dev ]
+    tags: [ 'v*' ] # Se déclenche aussi sur les tags de version (ex: v0.1.1)
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # On teste sur les versions Python supportées par Django 6.0
+        python-version: ["3.12", "3.13"] 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # On installe le toolkit en mode éditable avec ses dépendances
+          pip install -e .
+          # On installe spécifiquement les dépendances de test si besoin
+          # pip install pytest-django 
+
+      - name: Run Django Tests
+        run: |
+          # Si tu as un projet de test interne (ex: test_project)
+          # cd test_project && python manage.py test elixir_toolkit
+          
+          # Sinon, on lance les tests via Django sans projet complet
+          django-admin test elixir_toolkit --settings=elixir_toolkit.test_settings
+        env:
+          PYTHONPATH: .
