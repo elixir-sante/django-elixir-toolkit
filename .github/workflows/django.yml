@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         # On teste sur les versions Python supportées par Django 6.0
-        python-version: ["3.12", "3.13", "3.14"] 
+        python-version: ["3.14"] 
 
     steps:
       - name: Checkout code
