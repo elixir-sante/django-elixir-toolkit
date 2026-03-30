@@ -1,3 +1,7 @@
+{% load elixir_toolkit_tags %}
+
+{% toolkit_css %}
+
 <div class="list has-visible-pointer-controls {{ css_classes }}">
     {% for item in items %}
         {# Le parent devient un DIV avec une URL en data-attribute #}
