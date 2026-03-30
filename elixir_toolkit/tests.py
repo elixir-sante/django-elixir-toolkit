@@ -238,7 +238,7 @@ class ToolkitTableTest(ToolkitBaseTest):
         rendered = self.render_template(template, {'items': items, 'cols': cols})
         
         # Vérifie le badge
-        self.assertIn('tag is-light', rendered)
+        self.assertIn('tag is-primary is-light', rendered)
         self.assertIn('OK', rendered)
         # Vérifie le suffixe
         self.assertIn('95 pts', rendered)
