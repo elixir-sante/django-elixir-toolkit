@@ -49,7 +49,7 @@ pip install git+https://github.com/elixir-sante/django-elixir-toolkit.git@dev
 * **2. Configuration Django**
 Ajoute les applications nécessaires dans ton settings.py :
 
-Python
+```Python
 INSTALLED_APPS = [
     ...
     'crispy_forms',
@@ -58,9 +58,10 @@ INSTALLED_APPS = [
     ...
 ]
 
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bulma"
 CRISPY_TEMPLATE_PACK = "bulma"
-
+```
 * **Structure du Projet**
 elixir_toolkit/forms.py : Logique des champs file upload.
 
