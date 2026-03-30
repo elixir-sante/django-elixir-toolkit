@@ -1,9 +1,9 @@
-name: Django Elixir Toolkit Tests
+name: Django Elixir Toolkit CI/CD
 
 on:
   push:
     branches: [ main, dev ]
-    tags: [ 'v*' ] # Se déclenche aussi sur les tags de version (ex: v0.1.1)
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, dev ]
 
@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # On teste sur les versions Python supportées par Django 6.0
-        python-version: ["3.14"] 
+        python-version: ["3.14"]
 
     steps:
       - name: Checkout code
@@ -28,14 +27,41 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # On installe le toolkit en mode éditable avec ses dépendances
           pip install -e .
-          # On installe spécifiquement les dépendances de test si besoin
-          # pip install pytest-django 
 
       - name: Run Django Tests
         run: |
-          # On utilise les settings de ton application de test interne
           python manage.py test elixir_toolkit --settings=test_app.settings
         env:
           PYTHONPATH: .
+
+  publish-release:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest 
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build package
+        run: |
+          pip install build
+          python -m build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
