@@ -46,7 +46,7 @@ Le toolkit peut être installé directement depuis GitHub.
 pip install git+https://github.com/elixir-sante/django-elixir-toolkit.git@dev
 ```
 
-* **2. Configuration Django**
+### 2. Configuration Django
 Ajoute les applications nécessaires dans ton settings.py :
 
 ```Python
@@ -75,6 +75,7 @@ test_app/ : Projet de test interne servant d'exemple d'implémentation et de san
 
 
 Pour l'appel des custom_tags : {% ui_button text="Voir la doc" href="https://bulma.io" target="_blank" icon="fas fa-book" %}
+
 Regarder les customs_tags pour voir les paramètres à passer  comme le text. 
 
 Voir les exemples dans l'app test_app pour accéders aux différents exemples d'utilisation des composants/crispy.
