@@ -63,15 +63,11 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bulma"
 CRISPY_TEMPLATE_PACK = "bulma"
 ```
 * **Structure du Projet**
-elixir_toolkit/forms.py : Logique des champs file upload.
-
-elixir_toolkit/templatetags/elixir_toolkit_tag.py : les custom_tag a appeller dans les templates pour utiliser les composants
-
-elixir_toolkit/templates/ : Fichiers HTML des composants (organisés par dossiers fields, components).
-
-elixir_toolkit/static/ : Fichiers CSS (button.css, selectize.css).
-
-test_app/ : Projet de test interne servant d'exemple d'implémentation et de sandbox
+* elixir_toolkit/forms.py : Logique des champs file upload.
+* elixir_toolkit/templatetags/elixir_toolkit_tag.py : les custom_tag a appeller dans les templates pour utiliser les composants
+* elixir_toolkit/templates/ : Fichiers HTML des composants (organisés par dossiers fields, components).
+* elixir_toolkit/static/ : Fichiers CSS (button.css, selectize.css).
+* test_app/ : Projet de test interne servant d'exemple d'implémentation et de sandbox
 
 
 Pour l'appel des custom_tags : {% ui_button text="Voir la doc" href="https://bulma.io" target="_blank" icon="fas fa-book" %}
