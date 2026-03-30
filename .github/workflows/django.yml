@@ -35,10 +35,7 @@ jobs:
 
       - name: Run Django Tests
         run: |
-          # Si tu as un projet de test interne (ex: test_project)
-          # cd test_project && python manage.py test elixir_toolkit
-          
-          # Sinon, on lance les tests via Django sans projet complet
-          django-admin test elixir_toolkit --settings=elixir_toolkit.test_settings
+          # On utilise les settings de ton application de test interne
+          python manage.py test elixir_toolkit --settings=test_app.settings
         env:
           PYTHONPATH: .
