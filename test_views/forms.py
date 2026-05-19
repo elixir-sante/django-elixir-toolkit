@@ -1,29 +1,87 @@
 from django import forms
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
+
+from elixir_toolkit.forms import MultipleFileField, FileUpload
 
 
 COLOR_CHOICES = (
-    ('red', 'Red'),
-    ('green', 'Green'),
-    ('blue', 'Blue')
+    ('red', 'Red'), ('green', 'Green'), ('blue', 'Blue')
 )
 
-
 class FormExample(forms.Form):
-    text            = forms.CharField()
-    email           = forms.EmailField()
-    number          = forms.CharField(widget=forms.NumberInput())
-    url             = forms.CharField(widget=forms.URLInput())
-    password        = forms.CharField(widget=forms.PasswordInput())
-    select          = forms.ChoiceField(choices=COLOR_CHOICES)
-    multi_select    = forms.MultipleChoiceField(choices=COLOR_CHOICES)
-    textarea        = forms.CharField(widget=forms.Textarea())
-    checkbox        = forms.BooleanField()
+    text            = forms.CharField(label="Nom complet")
+    email           = forms.EmailField(label="Adresse Email")
+    number          = forms.CharField(label="Âge", widget=forms.NumberInput())
+    url             = forms.CharField(label="Site Web", widget=forms.URLInput())
+    password        = forms.CharField(label="Mot de passe", widget=forms.PasswordInput())
+    select          = forms.ChoiceField(label="Couleur unique", choices=COLOR_CHOICES)
+    multi_select    = forms.MultipleChoiceField(label="Couleurs multiples", choices=COLOR_CHOICES)
+    textarea        = forms.CharField(label="Message", widget=forms.Textarea())
+    checkbox        = forms.BooleanField(label="J'accepte les conditions", required=True)
     checkboxes      = forms.MultipleChoiceField(
+                        label="Options à cocher",
                         choices=COLOR_CHOICES,
                         widget=forms.CheckboxSelectMultiple()
                     )
     radios          = forms.ChoiceField(
+                        label="Choix exclusif",
                         choices=COLOR_CHOICES,
                         widget=forms.RadioSelect()
                     )
-    file            = forms.FileField(required=True)
+    file = MultipleFileField(label="Documents justificatifs", required=True)
+    file2 = forms.FileField(label="Documents test", required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        # IMPORTANT: S'assurer que le template pack est bien défini ici si besoin
+        self.helper.template_pack = 'bulma' 
+        
+        self.helper.layout = Layout(
+            Fieldset(
+                '👤 Informations personnelles',
+                Div(
+                    Div(Field('text', placeholder="Ex: Jean Dupont"), css_class='column is-6'),
+                    Div(Field('email', placeholder="jean@email.com"), css_class='column is-6'),
+                    css_class='columns' 
+                ),
+                Div(
+                    Div(Field('password'), css_class='column is-6'),
+                    Div(Field('number'), css_class='column is-6'),
+                    css_class='columns'
+                )
+            ),
+            HTML('<hr class="my-5">'),
+            Fieldset(
+                '🎨 Préférences visuelles',
+                Div(
+                    Div('select', css_class='column is-4'),
+                    Div('multi_select', css_class='column is-4'),
+                    Div(Field('url'), css_class='column is-4'),
+                    css_class='columns'
+                ),
+                'textarea',
+            ),
+            HTML('<hr class="my-5">'),
+            Fieldset(
+                '🔘 Choix et Fichiers',
+                Div(
+                    Div('checkboxes', css_class='column is-4'),
+                    Div('radios', css_class='column is-4'),
+                    # On repasse en mode explicite pour éviter le bug de détection
+                    Div(FileUpload('file'), css_class='column is-4'),
+                    css_class='columns'
+                ),
+                Div(Div(FileUpload('file2'), css_class='column is-4'),),
+                'checkbox',
+            ),
+            HTML("""
+                <div class="field mt-5"><div class="control">
+                    <button type="submit" class="button is-primary is-fullwidth">
+                        <span class="icon"><i class="fas fa-paper-plane"></i></span>
+                        <span>Envoyer le formulaire</span>
+                    </button>
+                </div></div>
+            """)
+        )

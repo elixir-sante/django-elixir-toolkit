@@ -1,0 +1,137 @@
+.control .select .selectize-control {
+    padding: 0;
+    width: 100%;
+    height: auto;
+    min-height: 2.5rem;
+    max-width: 100%;
+}
+
+/* On cache la flèche native de Bulma car Selectize génère la sienne */
+.select:not(.is-multiple):not(.is-loading)::after {
+    display: none !important;
+}
+
+.select select {
+    padding-right: 0.625em !important;
+}
+
+/* --- 3. Style de l'Input (Champ de saisie) --- */
+.control .select .selectize-control .selectize-input {
+    box-shadow: none !important;
+    border: none !important; /* On laisse le container gérer ou on définit ici */
+    font-size: 16px !important; /* Évite le zoom auto sur iOS */
+    padding: var(--bulma-control-padding-vertical, 0.5em) var(--bulma-control-padding-horizontal, 0.75em);
+    background-color: #fff !important;
+    color: #363636 !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 2.5rem !important;
+    border-radius: var(--bulma-input-radius, 4px);
+}
+
+.selectize-input.full {
+    background-color: transparent !important;
+}
+
+.selectize-input.focus {
+    border-color: #3273dc !important; /* Bleu Bulma Focus */
+    border-radius: 5px;
+}
+
+.control .select .selectize-control .selectize-input input::placeholder {
+    color: #7a7a7a !important;
+    font-style: italic;
+}
+
+/* Gestion des icônes Bulma à gauche */
+.control.has-icons-left .select .selectize-control .selectize-input {
+    padding-left: 2.5rem !important;
+}
+
+.control.has-icons-left .icon {
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* --- 4. Menu Déroulant (Dropdown) --- */
+.selectize-dropdown {
+    font-size: 16px !important;
+    z-index: 1000 !important;
+    background-color: #fff !important;
+    border: 1px solid #dbdbdb !important;
+    box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1) !important;
+}
+
+.selectize-dropdown .option {
+    padding: 0.5rem 0.75rem !important;
+    color: #363636 !important;
+}
+
+/* État : Actif / Survol (Hover) */
+.selectize-dropdown .option.active, 
+.selectize-dropdown .selectize-dropdown-content .active {
+    background-color: var(--secondary-color, #485fc7) !important; /* Ton rouge personnalisé */
+    color: #ffffff !important;
+}
+
+/* État : Sélectionné (mais pas forcément survolé) */
+.selectize-dropdown .option.selected,
+.selectize-dropdown .selected {
+    background-color: #f5f5f5 !important;
+    color: #363636 !important;
+}
+
+.selectize-dropdown .active i {
+    color: #ffffff !important;
+}
+
+/* --- 5. Éléments Spécifiques (Multi, Clear, Erreurs) --- */
+
+/* Multi-select (Tags) */
+.selectize-control.multi .selectize-input > div {
+    padding: 2px 8px;
+    margin: 3px;
+    background: #f5f5f5;
+    color: #363636;
+    border-radius: 2px;
+}
+
+/* Bouton de suppression (Plugin Clear) */
+.selectize-control.plugin-clear_button .clear {
+    right: 10px !important;
+    font-size: 18px !important;
+    color: #b5b5b5 !important;
+}
+
+/* Erreur de validation */
+.control .select.is-danger .selectize-control.input-error {
+    border-color: hsl(var(--bulma-danger-h), var(--bulma-danger-s), var(--bulma-danger-l)) !important;
+}
+
+/* Flèche Selectize (optionnelle, grise) */
+.selectize-control.single .selectize-input:after {
+    border-color: #888 transparent transparent transparent !important;
+    top: 55% !important;
+}
+
+/* --- 6. Layouts Spéciaux & Responsive --- */
+.selectize-item-padded {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0.25rem 0.25rem 0.25rem 0 !important;
+}
+
+@media screen and (max-width: 768px) {
+    .mobile-selectize-fullwidth {
+        flex-direction: column !important;
+        display: flex !important;
+        gap: 0.5rem;
+    }
+    
+    .mobile-selectize-fullwidth .control,
+    .mobile-selectize-fullwidth .selectize-control {
+        width: 100% !important;
+    }
+}

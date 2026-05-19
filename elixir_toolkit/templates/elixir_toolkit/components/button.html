@@ -1,0 +1,30 @@
+{% load elixir_toolkit_tags %}
+
+{% toolkit_css %}
+{% if href %}
+<a href="{{ href }}" class="button {{ css_classes }}" {{ attrs|safe }}>
+{% else %}
+<button type="{{ type|default:'button' }}" class="button {{ css_classes }}" {{ attrs|safe }}>
+{% endif %}
+
+    {# Case cochée : Icône à gauche #}
+    {% if icon and not icon_right %}
+    <span class="icon">
+        <i class="{{ icon }}"></i>
+    </span>
+    {% endif %}
+
+    <span>{{ text }}</span>
+
+    {# Case cochée : Icône à droite #}
+    {% if icon and icon_right %}
+    <span class="icon">
+        <i class="{{ icon }}"></i>
+    </span>
+    {% endif %}
+
+{% if href %}
+</a>
+{% else %}
+</button>
+{% endif %}

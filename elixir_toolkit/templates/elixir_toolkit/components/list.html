@@ -1,0 +1,87 @@
+{% load elixir_toolkit_tags %}
+
+{% toolkit_css %}
+
+<div class="list has-visible-pointer-controls {{ css_classes }}">
+    {% for item in items %}
+        {# Le parent devient un DIV avec une URL en data-attribute #}
+        <div class="list-item is-flex is-align-items-center is-clickable-container" 
+             {% if link_url_name %}data-url="{% url link_url_name item.obj.pk %}"{% endif %}
+             style="cursor: pointer;">
+            
+            <div class="list-item-image mr-3">
+                <span class="icon is-medium has-text-primary">
+                    <i class="fa-solid fa-{{ item.icon }}"></i>
+                </span>
+            </div>
+
+            <div class="list-item-content" style="flex-grow: 1;">
+                <div class="columns is-vcentered is-mobile is-variable is-2">
+                    <div class="column">
+                        {% if item.description %}
+                        <p class="is-size-7 has-text-weight-light has-text-grey mb-1">
+                            {{ item.description }}
+                        </p>
+                        {% endif %}
+
+                        {# Le lien sémantique est ici sur le titre #}
+                        <p class="has-text-weight-semibold has-text-dark is-size-6-mobile">
+                            {% if link_url_name %}
+                                <a href="{% url link_url_name item.obj.pk %}" class="has-text-dark item-main-link">
+                                    {{ item.title }}
+                                </a>
+                            {% else %}
+                                <a href="#" class="has-text-dark item-main-link">
+                                    {{ item.title }}
+                                </a>
+                            {% endif %}
+                        </p>
+
+                        {% if item.tag_label %}
+                        <div class="mt-1">
+                            <span class="tag is-primary is-rounded is-light has-text-weight-semibold is-small">
+                                <i class="fa-regular fa-{{ item.tag_icon }} mr-2"></i>
+                                {{ item.tag_label }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if item.extra %}
+                    <div class="column is-narrow has-text-right">
+                        <span class="has-text-weight-bold has-text-dark is-size-5-tablet">
+                            {{ item.extra }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="list-item-controls ml-3">
+                <span class="icon has-text-grey-light">
+                    <i class="fa-solid fa-angle-right"></i>
+                </span>
+            </div>
+        </div>
+    {% empty %}
+        <div class="notification is-light">Aucun élément à afficher.</div>
+    {% endfor %}
+</div>
+
+<script>
+(function() {
+    // On cherche tous les containers cliquables
+    const containers = document.querySelectorAll('.is-clickable-container');
+    
+    containers.forEach(container => {
+        container.addEventListener('click', function(e) {
+            const url = this.dataset.url;
+            if (e.target.tagName === 'A' || e.target.closest('button')) return;
+            
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
+})();
+</script>

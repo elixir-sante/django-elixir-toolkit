@@ -1,0 +1,52 @@
+{% load elixir_toolkit_tags %}
+
+{% toolkit_css %}
+<div class="table-container">
+    <table class="table is-fullwidth is-hoverable {{ css_classes }}">
+        <thead>
+            <tr>
+                {% for header in headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    {% for cell in row %}
+                        <td class="{{ cell.class }}" data-label="{{ cell.header }}">
+                            <div class="is-flex is-align-items-center">
+                                {# Gestion de l'icône optionnelle #}
+                                {% if cell.icon %}
+                                    <span class="icon has-text-primary mr-2">
+                                        <i class="fa-solid fa-{{ cell.icon }}"></i>
+                                    </span>
+                                {% endif %}
+                                
+                                <div>
+                                    {# Rendu selon le type #}
+                                    <span class="is-block">
+                                        {% if cell.type == 'price' %}
+                                            {{ cell.value|floatformat:2 }}€
+                                        {% elif cell.type == 'badge' %}
+                                            <span class="tag is-primary is-light is-rounded">{{ cell.value }}</span>
+                                        {% else %}
+                                            {{ cell.value|default:"" }}{{ cell.suffix }}
+                                        {% endif %}
+                                    </span>
+                                    
+                                    {# Sous-ligne (ex: date, catégorie) #}
+                                    {% if cell.sub_value %}
+                                        <div class="is-size-7 has-text-grey">
+                                            {{ cell.sub_value }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

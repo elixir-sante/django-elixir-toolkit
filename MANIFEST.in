@@ -1,0 +1,2 @@
+recursive-include elixir_toolkit/templates *
+recursive-include elixir_toolkit/static *
