@@ -12,6 +12,7 @@ class AsyncFormView(FormView):
         return self.render_to_response(self.get_context_data())
     
     async def post(self, request, *args, **kwargs):
+        self.context = self.get_context_data()
         form = self.get_form()
         if form.is_valid():
             return await self.form_valid(form)
