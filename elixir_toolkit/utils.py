@@ -1,7 +1,7 @@
 from asgiref.sync import sync_to_async
 
 @sync_to_async
-def session_aget(request, key, default=None):   # utils.py to put in toolkit, dans le commit : ajouter self.context = self.self.get_context_data() dans view dans toolkit aussi
+def session_aget(request, key, default=None):
     return request.session.get(key, default)
 
 def session_get(request, key, default=None):
