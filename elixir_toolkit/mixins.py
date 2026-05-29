@@ -35,3 +35,36 @@ class SyncMixinDispatch:
             )
         self.pre_dispatch(request, *args, **kwargs) # type: ignore
         return super().dispatch(request, *args, **kwargs) # type: ignore
+
+
+class AsyncCheckSessionKey:
+    """
+    Checks if the required session key is present in the session,
+    before GET and POST requests.
+    If not, redirect to the URL returned by get_redirect_url().
+    This one is for async views.
+    """
+    required_session_key = None
+
+    def get_redirect_url(self) -> str:
+        raise ImproperlyConfigured('This should be overriden by your class')
+
+    async def _check_keys_presence_or_redirect(self, keys):
+        if type(keys) is str:
+            keys = [keys]
+        for key in keys:
+            if not await session_aget(self.request, key):
+                logger.error(f'Missing {key} in session, redirecting user')
+                redirect_now(self.get_redirect_url())
+
+    async def post(self, request, *args, **kwargs):
+        if not self.required_session_key:
+            raise ImproperlyConfigured('If this mixin is used, you should add \'required_session_key\' (str or list)')
+        await self._check_keys_presence_or_redirect(self.required_session_key)
+        return await super().post(request, *args, **kwargs)
+
+    async def get(self, request, *args, **kwargs):
+        if not self.required_session_key:
+            raise ImproperlyConfigured('If this mixin is used, you should add \'required_session_key\' (str or list)')
+        await self._check_keys_presence_or_redirect(self.required_session_key)
+        return await super().get(request, *args, **kwargs)
