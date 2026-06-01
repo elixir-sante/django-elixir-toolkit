@@ -2,7 +2,7 @@ import logging
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ImproperlyConfigured
 from elixir_toolkit.utils import session_aget
-from elixir_toolkit.utils import redirect_now
+from elixir_toolkit.middleware import redirect_now
 
 logger = logging.getLogger(__name__)
 class MixinDispatch:
