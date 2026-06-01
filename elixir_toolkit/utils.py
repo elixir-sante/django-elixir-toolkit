@@ -38,7 +38,3 @@ def session_pop(request, *keys):
     for k in keys:
         request.session.pop(k, None)
     request.session.modified = True
-
-
-def redirect_now(url):
-    raise Redirect(url)
