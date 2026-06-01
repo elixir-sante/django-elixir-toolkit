@@ -1,6 +1,6 @@
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ImproperlyConfigured
-
+from elixir_toolkit.utils import session_aget
 
 class MixinDispatch:
     """
