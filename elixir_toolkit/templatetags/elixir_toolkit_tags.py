@@ -23,6 +23,7 @@ def ui_button(text, css_classes="", icon=None, icon_right=False, href=None, **kw
         'icon': icon,
         'icon_right': icon_right,
         'href': href,
+        'type': kwargs.get('type', 'button'),
         'attrs': flatatt(html_attrs),
     }
 
