@@ -1,7 +1,10 @@
+import logging
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ImproperlyConfigured
 from elixir_toolkit.utils import session_aget
+from elixir_toolkit.utils import redirect_now
 
+logger = logging.getLogger(__name__)
 class MixinDispatch:
     """
     Mixin to ensure that the pre_dispatch method is called before the main dispatch method.
