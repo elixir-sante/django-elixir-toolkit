@@ -2,7 +2,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 
-from elixir_toolkit.forms import MultipleFileField, FileUpload
+from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField
 
 
 COLOR_CHOICES = (
@@ -56,7 +56,7 @@ class FormExample(forms.Form):
             Fieldset(
                 '🎨 Préférences visuelles',
                 Div(
-                    Div('select', css_class='column is-4'),
+                    Div(ToolkitSelectField('select', icon='fa-palette'), css_class='column is-4'),
                     Div('multi_select', css_class='column is-4'),
                     Div(Field('url'), css_class='column is-4'),
                     css_class='columns'
