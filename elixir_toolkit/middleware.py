@@ -1,6 +1,5 @@
 from django import shortcuts
 from django.utils.deprecation import MiddlewareMixin
-from elixir_toolkit.middleware import Redirect
 
 
 class RedirectException(Exception):
