@@ -14,7 +14,7 @@ class RedirectMiddleware(MiddlewareMixin):
     def process_exception(self, request, exception):
         if isinstance(exception, RedirectException):
             return shortcuts.redirect(exception.url)
-        return exception
+        return None
 
 
 def redirect_now(url):
