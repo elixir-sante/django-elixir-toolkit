@@ -18,13 +18,14 @@
 
 /* --- 3. Style de l'Input (Champ de saisie) --- */
 .control .select .selectize-control .selectize-input,
+.selectize-control.single .selectize-input,
 .selectize-control .selectize-input,
 .selectize-control .selectize-input.has-items,
 .selectize-control .selectize-input.focus {
     box-shadow: none !important;
     border: none !important;
     font-size: 16px !important;
-    padding: 0 2.5rem 0 0.75em !important; /* On laisse de la place à droite pour la croix ou la flèche */
+    padding: 0 2.5rem 0 0.75em !important;
     color: #363636 !important;
     display: flex !important;
     align-items: center !important;
