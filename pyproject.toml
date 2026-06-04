@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.7.2"
+version = "0.7.3"
 description = "UI Components Toolkit for Django based on Bulma"
 readme = "README.md"
 requires-python = ">=3.14"
