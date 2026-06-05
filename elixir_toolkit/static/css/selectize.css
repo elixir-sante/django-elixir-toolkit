@@ -11,6 +11,9 @@
 .select:not(.is-multiple):not(.is-loading)::after {
     display: none !important;
 }
+.select:not(.is-multiple){
+    height: 100% !important;
+}
 
 .select select {
     padding-right: 0.625em !important;
