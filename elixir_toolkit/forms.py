@@ -1,5 +1,15 @@
 from crispy_forms.layout import Field
+from crispy_forms.helper import FormHelper
 from django import forms
+
+
+class CustomFormHelper:
+    @property
+    def helper(self):
+        helper = FormHelper()
+        helper.form_tag = False
+        return helper
+
 
 class FileUpload(Field):
     def __init__(self, *args, **kwargs):
