@@ -7,6 +7,13 @@ import ast
 
 register = template.Library()
 
+
+@register.filter(name='split')
+def split(value):
+    if value:
+        return value.split()
+    return None
+
 @register.inclusion_tag('elixir_toolkit/components/toolkit_css.html')
 def toolkit_css(version="1.0.0"):
     return {
