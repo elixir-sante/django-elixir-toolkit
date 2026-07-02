@@ -1,0 +1,51 @@
+<div id="liveidentity-container"></div>
+<div id="li-antibot" class="li-antibot"></div>
+<script src="https://captcha.liveidentity.com/captcha/public/antibot.min.v5-latest.js" data-spKey='{{liveidentity_sp_key}}'></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("{{ form_id }}") || document.querySelector("form");
+
+    if (!form) {
+        return;
+    }
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        if (typeof LI_ANTIBOT === "undefined") {
+            form.submit();
+            return;
+        }
+
+        const options = {
+            locale: "fr",
+            divId: "li-antibot"
+        };
+
+        LI_ANTIBOT.ready(function () {
+
+            LI_ANTIBOT.execute(options).then(function (token) {
+
+                // Supprime ancien token si présent
+                let input = form.querySelector('input[name="liveidentity_token"]');
+
+                if (!input) {
+                    input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "liveidentity_token";
+                    form.appendChild(input);
+                }
+
+                input.value = token;
+
+                form.submit();
+            });
+
+        });
+
+    });
+
+});
+</script>
