@@ -44,12 +44,11 @@
                 </tr>
             {% endfor %}
         </tbody>
-        {# Bloc TFOOT dynamique ajouté au toolkit #}
         {% if totals %}
         <tfoot>
             <tr class="has-background-white-bis has-text-weight-bold">
                 {% for total in totals %}
-                    <td class="{{ total.class }} py-3">
+                    <td class="py-3">
                             <div>
                                 <span class="is-block">
                                     {% if total.value is not None %}
