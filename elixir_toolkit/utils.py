@@ -1,6 +1,8 @@
 from asgiref.sync import sync_to_async
 import base64
 import logging
+from datetime import datetime, date
+from dateutil import parser, tz
 from django.conf import settings
 from django.http import HttpRequest
 import httpx
@@ -15,7 +17,48 @@ __all__ = [
     "session_aset",
     "session_pop",
     "session_apop",
+    "parse_date",
 ]
+
+
+def parse_date(date_str, force_date=False) -> datetime | date | None:
+    """
+    Custom generic date parser from any type of date in str format
+    Works with
+        dates = [
+        '1998-02-01+01:00',
+        '1998-02-01+01:00Z',
+        '1998-02-01Z',
+        '99999999'
+        '19980201',
+        '1998/02/01',
+        '199802011555',
+        '1998-02-01T12:30',
+        '1998-02-01T12:30+02:00',
+        '1998-02-01T12:30Z',
+        ]
+    force_date = True returns a date() instead of datetime()
+    """
+    if not date_str:
+        return None
+    if date_str == '99999999':
+        date_str = '99991231'
+    try:
+        if date_str.endswith('Z'):
+            date_str = date_str[:-1] + '+00:00'
+        ret = parser.parse(date_str)
+    except (parser.ParserError):
+        try:
+            ret = parser.isoparse(date_str)
+        except (parser.ParserError):
+            raise ValueError()
+    except (parser.ParserError, ValueError, TypeError):
+        raise ValueError(f"Le format de la date '{date_str}' n'est pas reconnu.")
+    if ret.tzinfo is None:
+        ret = ret.replace(tzinfo=tz.tzlocal())
+    if force_date:
+        return ret.date()
+    return ret
 
 
 @sync_to_async
