@@ -15,7 +15,6 @@
                     {% for cell in row %}
                         <td class="{{ cell.class }}" data-label="{{ cell.header }}">
                             <div class="is-flex is-align-items-center">
-                                {# Gestion de l'icône optionnelle #}
                                 {% if cell.icon %}
                                     <span class="icon has-text-primary mr-2">
                                         <i class="fa-solid fa-{{ cell.icon }}"></i>
@@ -23,7 +22,6 @@
                                 {% endif %}
                                 
                                 <div>
-                                    {# Rendu selon le type #}
                                     <span class="is-block">
                                         {% if cell.type == 'price' %}
                                             {{ cell.value|floatformat:2 }}€
@@ -34,7 +32,6 @@
                                         {% endif %}
                                     </span>
                                     
-                                    {# Sous-ligne (ex: date, catégorie) #}
                                     {% if cell.sub_value %}
                                         <div class="is-size-7 has-text-grey">
                                             {{ cell.sub_value }}
@@ -47,5 +44,23 @@
                 </tr>
             {% endfor %}
         </tbody>
+        {# Bloc TFOOT dynamique ajouté au toolkit #}
+        {% if totals %}
+        <tfoot>
+            <tr class="has-background-white-bis has-text-weight-bold">
+                {% for total in totals %}
+                    <td class="{{ total.class }}">
+                        {% if total.value %}
+                            {% if total.type == 'price' and total.value|is_numeric %}
+                                {{ total.value|floatformat:2 }}€
+                            {% else %}
+                                {{ total.value }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        </tfoot>
+        {% endif %}
     </table>
 </div>

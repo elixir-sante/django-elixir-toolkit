@@ -120,12 +120,13 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
     }
     
 @register.inclusion_tag('elixir_toolkit/components/table.html')
-def ui_table(items, columns, css_classes=""):
+def ui_table(items, columns, css_classes="", totals=None):
     """
-    Tableau générique.
+    Tableau générique augmenté avec gestion du tfoot.
     columns: list de dicts [
         {'header': 'Titre', 'field': 'key', 'type': 'text/price/date/badge', 'icon_field': 'icon_key'}
     ]
+    totals: dict ou structure contenant les totaux alignés sur les colonnes, ex: {'echeance': 'Total', 'montantEmis': '100€'}
     """
     processed_rows = []
     
@@ -134,24 +135,36 @@ def ui_table(items, columns, css_classes=""):
         for col in columns:
             field = col.get('field')
             
-            # Helper de récupération sécurisée
             def get_val(f):
                 if not f: return None
                 return item.get(f) if isinstance(item, dict) else getattr(item, f, None)
 
             row_cells.append({
                 'value': get_val(field),
-                'header': col.get('header'), # Utile pour le responsive mobile
+                'header': col.get('header'),
                 'type': col.get('type', 'text'),
                 'icon': get_val(col.get('icon_field')),
                 'class': col.get('class', ''),
                 'sub_value': get_val(col.get('sub_field')),
-                'suffix': col.get('suffix', ''), # Ex: '€', ' points', etc.
+                'suffix': col.get('suffix', ''),
             })
         processed_rows.append(row_cells)
+
+    # Traitement du tfoot si des totaux sont fournis
+    processed_totals = []
+    if totals:
+        for col in columns:
+            field = col.get('field')
+            val = totals.get(field) if isinstance(totals, dict) else getattr(totals, field, None)
+            processed_totals.append({
+                'value': val,
+                'class': col.get('class', ''),
+                'type': col.get('type', 'text')
+            })
 
     return {
         'headers': [col.get('header') for col in columns],
         'rows': processed_rows,
+        'totals': processed_totals,  # Ajouté au contexte du template component
         'css_classes': css_classes
     }
