@@ -46,21 +46,17 @@
         </tbody>
         {# Bloc TFOOT dynamique ajouté au toolkit #}
         {% if totals %}
-        <tfoot>
-            <tr class="has-background-white-bis has-text-weight-bold">
-                {% for total in totals %}
-                    <td class="{{ total.class }}">
-                        {% if total.value %}
-                            {% if total.type == 'price' and total.value|is_numeric %}
-                                {{ total.value|floatformat:2 }}€
-                            {% else %}
+            <tfoot>
+                <tr class="has-background-white-bis has-text-weight-bold">
+                    {% for total in totals %}
+                        <td class="{{ total.class }}">
+                            {% if total.value %}
                                 {{ total.value }}
                             {% endif %}
-                        {% endif %}
-                    </td>
-                {% endfor %}
-            </tr>
-        </tfoot>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </tfoot>
         {% endif %}
     </table>
 </div>
