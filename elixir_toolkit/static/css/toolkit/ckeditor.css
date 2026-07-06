@@ -1,0 +1,21 @@
+/* Barre de progression simple pour CKeditor MyUploadAdapterPlugin */
+#uploadProgressContainer {
+  display: none;
+  width: 100%;
+  background: #eee;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+#uploadProgressBar {
+  width: 0%;
+  height: 6px;
+  background: var(--bulma-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+#uploadProgressText {
+  display: none;
+  margin-top: 5px;
+  font-size: 0.9em;
+  color: #666;
+}
