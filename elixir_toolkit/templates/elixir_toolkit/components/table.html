@@ -50,7 +50,6 @@
             <tr class="has-background-white-bis has-text-weight-bold">
                 {% for total in totals %}
                     <td class="{{ total.class }} py-3">
-                        <div class="is-flex is-align-items-center {% if 'has-text-right' in total.class %}is-justify-content-flex-end{% endif %}">
                             <div>
                                 <span class="is-block">
                                     {% if total.value is not None %}
@@ -58,7 +57,6 @@
                                     {% endif %}
                                 </span>
                             </div>
-                        </div>
                     </td>
                 {% endfor %}
             </tr>
