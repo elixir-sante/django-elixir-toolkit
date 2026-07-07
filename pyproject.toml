@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.13.0"
+version = "0.13.2"
 description = "Add ckeditor feature with fields_dependencies"
 readme = "README.md"
 requires-python = ">=3.14"

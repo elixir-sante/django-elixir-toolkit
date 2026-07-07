@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     const fields = document.querySelectorAll("[data-depends-on]");
-
     const map = {};
 
     // Construction des dépendances
@@ -11,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!map[controller]) {
             map[controller] = [];
         }
+        // On stocke directement l'ID complet du champ (ex: "id_mon_champ")
         map[controller].push(field.id);
     });
 
@@ -22,7 +22,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const isChecked = controller.checked;
 
         map[controllerId].forEach((fieldId) => {
-            const fieldWrapper = document.getElementById("field_" + fieldId);
+            // 1. On génère l'ID Crispy : "div_" + "id_mon_champ" = "div_id_mon_champ"
+            // 2. On génère l'ID classique : "field_" + "id_mon_champ" = "field_id_mon_champ"
+            const fieldWrapper = document.getElementById("div_" + fieldId) || 
+                                 document.getElementById("field_" + fieldId);
+
             if (fieldWrapper) {
                 fieldWrapper.style.display = isChecked ? "block" : "none";
             }
