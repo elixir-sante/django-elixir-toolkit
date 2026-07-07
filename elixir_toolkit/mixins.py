@@ -76,6 +76,8 @@ class AsyncCheckSessionKey:
     
 class ConfigPageMixin(object):
     success_message = "Paramètres mis à jour."
+    page_title = ""
+    page_subtitle = ""
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
