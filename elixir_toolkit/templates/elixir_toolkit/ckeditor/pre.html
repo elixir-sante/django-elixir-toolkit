@@ -1,0 +1,8 @@
+{% load static %}
+<!-- This must be load before form.media (custom upload plugin is loaded by bundle.js in form.media) -->
+<script>
+    window.CKEDITOR_UPLOAD_URL = "{{ upload_url }}";
+    window.CKEDITOR_CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+<script src="{% static 'js/toolkit/ckeditor-clipboard-manager.js' %}"></script>
+<script src="{% static 'js/toolkit/ckeditor-upload-adapter.js' %}"></script>
