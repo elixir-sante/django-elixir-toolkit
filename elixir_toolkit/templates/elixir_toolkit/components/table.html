@@ -14,7 +14,7 @@
                 <tr>
                     {% for cell in row %}
                         <td class="{{ cell.class }}" data-label="{{ cell.header }}">
-                            <div class="is-flex is-align-items-center">
+                            <div class="is-flex is-align-items-center {% if 'has-text-right' in cell.class %}is-justify-content-end{% endif %}">
                                 {% if cell.icon %}
                                     <span class="icon has-text-primary mr-2">
                                         <i class="fa-solid fa-{{ cell.icon }}"></i>
@@ -27,6 +27,22 @@
                                             {{ cell.value|floatformat:2 }}€
                                         {% elif cell.type == 'badge' %}
                                             <span class="tag is-primary is-light is-rounded">{{ cell.value }}</span>
+                                        
+                                        {% elif cell.type == 'badge_status' %}
+                                            {% if cell.value|lower == 'actif' or cell.value|lower == 'active' %}
+                                                <span class="tag is-success is-light has-text-weight-semibold"><span class="mr-1.5">●</span> {{ cell.value }}</span>
+                                            {% elif cell.value|lower == 'en résiliation' or cell.value|lower == 'en resiliation' %}
+                                                <span class="tag is-warning is-light has-text-weight-semibold"><span class="mr-1.5">●</span> {{ cell.value }}</span>
+                                            {% else %}
+                                                <span class="tag is-danger is-light has-text-weight-semibold"><span class="mr-1.5">●</span> {{ cell.value }}</span>
+                                            {% endif %}
+                                        
+                                        {% elif cell.type == 'button' %}
+                                            <a href="#" class="button is-danger is-small is-light has-text-weight-semibold">
+                                                <span>{{ cell.value|default:"Voir" }}</span>
+                                                <span class="icon is-small ml-1"><i class="fas fa-chevron-right"></i></span>
+                                            </a>
+                                        
                                         {% else %}
                                             {{ cell.value|default:"" }}{{ cell.suffix }}
                                         {% endif %}
