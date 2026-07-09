@@ -1,31 +1,19 @@
 {% load elixir_toolkit_tags %}
 
 <div class="control {% if icon %}has-icons-left{% endif %}">
-    <div class="select {{ css_classes }} {% if field.errors %}is-danger{% endif %}" style="width:100%">
+    <div class="{% if not multiple %}select{% endif %} {{ css_classes }} {% if field.errors %}is-danger{% endif %}" style="width:100%">
         {% if icon %}
         <span class="icon is-small is-left">
             <i class="fas {{ icon }}"></i>
         </span>
         {% endif %}
 
-        <select 
-            name="{{ name }}" 
-            id="{{ element_id }}" 
-            aria-label="{{ name }}"
-            class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}" 
-            {% if disabled %}disabled{% endif %}
-            {% if required %}required=""{% endif %}
-        >
-            {% if placeholder %}
-                <option class="placeholder is-size-4" value="" {% if not selected %}selected{% endif %}>{{ placeholder }}</option>
-            {% else %}
-                <option class="placeholder" value="" {% if not selected %}selected{% endif %}>
-                    Séléctionner un élement...
-                </option>
+        <select name="{{ name }}" id="{{ element_id }}" aria-label="{{ name }}" class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}" {% if disabled %}disabled{% endif %} {% if required %}required=""{% endif %} {% if multiple %}multiple{% endif %} >{% if placeholder and not multiple %}
+                <option class="placeholder is-size-4" value="" {% if not selected_list %}selected{% endif %}>{{ placeholder }}</option>
             {% endif %}
 
             {% for value, label in options %}
-                <option class="is-size-6" value="{{ value }}" {% if value|stringformat:"s" == selected %}selected{% endif %}>
+                <option class="is-size-6" value="{{ value }}" {% if value|stringformat:"s" in selected_list or value in selected_list %}selected{% endif %}>
                     {{ label }}
                 </option>
             {% endfor %}
@@ -42,7 +30,6 @@
 
 <script>
 $(document).ready(function() {
-    // Registre global pour la fermeture unique
     window.selectizeInstances = window.selectizeInstances || [];
 
     var closeOthers = function(current) {
@@ -57,8 +44,7 @@ $(document).ready(function() {
         delimiter: ',',
         persist: false,
         create: false,
-        maxItems: 1,
-        openOnFocus: false,
+        maxItems: {% if multiple %}null{% else %}1{% endif %}, openOnFocus: false,
         plugins: ['clear_button'],
         dropdownParent: 'body',
         onInitialize: function() {
@@ -72,7 +58,6 @@ $(document).ready(function() {
         }
     };
 
-    // Rendu spécifique pour le champ d'icônes
     if ("{{ name }}" === "icon") {
         config.render = {
             option: function(data, escape) {
@@ -87,12 +72,10 @@ $(document).ready(function() {
     var $select = $('#{{ element_id }}').selectize(config);
     var instance = $select[0].selectize;
 
-    // Harmonisation visuelle Bulma
     var $control = $(instance.$control);
     $control.addClass('input');
-    $('.selectize-dropdown').removeClass('input'); // Sécurité
+    $('.selectize-dropdown').removeClass('input'); 
     
-    // Force la largeur de l'input interne pour le focus
     $control.find('input').attr("style", "width: 100% !important;");
 });
 </script>
