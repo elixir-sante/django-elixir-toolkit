@@ -1,5 +1,7 @@
 {% load elixir_toolkit_tags %}
-
+{% if label %}
+    <label class="label" for="{{ element_id }}">{{ label }}</label>
+{% endif %}
 <div class="control {% if icon %}has-icons-left{% endif %}">
     <div class="{% if not multiple %}select{% endif %} {{ css_classes }} {% if field.errors %}is-danger{% endif %}" style="width:100%">
         {% if icon %}
