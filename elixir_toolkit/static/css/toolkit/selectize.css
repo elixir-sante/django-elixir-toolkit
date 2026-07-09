@@ -26,19 +26,20 @@
 .selectize-control .selectize-input.has-items,
 .selectize-control .selectize-input.focus {
     box-shadow: none !important;
-    border: none !important;
+    border: 1px solid var(--bulma-primary, #0066ff) !important;
     font-size: 16px !important;
-    padding: 0 2.5rem 0 0.75em !important;
+    padding: 0.35rem 2.5rem 0.35rem 0.75em !important;
     color: #363636 !important;
     display: flex !important;
     align-items: center !important;
+    flex-wrap: wrap !important;
     min-height: 2.5rem !important;
-    height: 2.5rem !important;
+    height: auto !important;
     border-radius: var(--bulma-input-radius, 4px);
     position: relative;
     box-sizing: border-box !important;
     width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     background-color: #fff !important; 
     background-image: none !important;
 }
@@ -207,4 +208,22 @@
     .mobile-selectize-fullwidth .selectize-control {
         width: 100% !important;
     }
+}
+
+/* Gestion des icônes Bulma à gauche - Décale tout le bloc de tags */
+.control.has-icons-left .selectize-control .selectize-input {
+    padding-left: 2.5rem !important; /* Décale les tags pour qu'ils ne chevauchent pas l'icône */
+}
+
+/* Force l'icône Bulma à rester centrée verticalement à gauche, même si le champ grandit */
+.control.has-icons-left .icon {
+    z-index: 5;
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 2.5rem !important; /* Reste calé sur la hauteur de la première ligne */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
