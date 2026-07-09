@@ -68,7 +68,6 @@
     padding: 0 !important;
     line-height: normal !important; 
     height: 100% !important;
-    min-height: calc(2.5rem - 2px) !important;
     vertical-align: middle !important;
     width: 100% !important;
     max-width: 100% !important;
