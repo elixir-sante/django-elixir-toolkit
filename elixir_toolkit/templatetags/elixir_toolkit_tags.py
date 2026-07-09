@@ -47,6 +47,21 @@ def ui_button_secondary(text, css_classes="", **kwargs):
     return ui_button(text, css_classes=new_classes, **kwargs)
 
 
+@register.inclusion_tag('elixir_toolkit/components/tabs_scroll_hints.html')
+def ui_tabs_scroll_hints():
+    """Chevrons de défilement pour une barre d'onglets qui déborde.
+
+    Usage :
+        <div class="tabs-scroll-wrapper">
+            <div class="tabs">...</div>
+            {% ui_tabs_scroll_hints %}
+        </div>
+
+    Après un swap HTMX, rappeler loadTabsScrollHints() côté JS.
+    """
+    return {}
+
+
 @register.inclusion_tag('elixir_toolkit/components/select.html')
 def ui_select(name, options, element_id=None, selected=None, placeholder="Choisissez...", icon=None, css_classes=""):
     if isinstance(options, str):
