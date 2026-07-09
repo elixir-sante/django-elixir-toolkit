@@ -65,7 +65,6 @@ class ToolkitMultipleSelectField(ToolkitSelectField):
         bound_field = form[self.fields[0]]
         placeholder = getattr(bound_field.field, 'empty_label', None) or "Sélectionnez des options..."
 
-        # Récupération de la valeur brute (QuerySet de populations ou liste d'IDs)
         val = bound_field.value()
         if hasattr(val, '__iter__') and not isinstance(val, (str, dict)):
             selected_list = [str(item.id) if hasattr(item, 'id') else str(item) for item in val]
@@ -79,12 +78,13 @@ class ToolkitMultipleSelectField(ToolkitSelectField):
             'name': bound_field.html_name,
             'element_id': bound_field.auto_id,
             'options': bound_field.field.choices,
-            'selected_list': selected_list,  # Liste propre de chaînes d'IDs
+            'selected_list': selected_list,
             'placeholder': placeholder,
             'icon': self.icon,
             'css_classes': self.css_classes,
-            'multiple': True,  # Indique au template qu'on bascule en mode multiple
+            'multiple': True,
         }
         
         context.update(custom_context)
-        return super(forms.forms.Field, self).render(form, context, template_pack, **kwargs)
+        
+        return super().render(form, context, template_pack, **kwargs)
