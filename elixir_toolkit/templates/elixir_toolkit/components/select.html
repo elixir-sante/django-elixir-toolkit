@@ -8,7 +8,17 @@
         </span>
         {% endif %}
 
-        <select name="{{ name }}" id="{{ element_id }}" aria-label="{{ name }}" class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}" {% if disabled %}disabled{% endif %} {% if required %}required=""{% endif %} {% if multiple %}multiple{% endif %} >{% if placeholder and not multiple %}
+        <select 
+            name="{{ name }}" 
+            id="{{ element_id }}" 
+            aria-label="{{ name }}" 
+            placeholder="{{ placeholder }}"
+            class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}" 
+            {% if disabled %}disabled{% endif %} 
+            {% if required %}required=""{% endif %} 
+            {% if multiple %}multiple{% endif %}
+        >
+            {% if placeholder and not multiple %}
                 <option class="placeholder is-size-4" value="" {% if not selected_list %}selected{% endif %}>{{ placeholder }}</option>
             {% endif %}
 

@@ -165,7 +165,8 @@
 }
 
 /* Alignement et centrage de la flèche Selectize native (Affichée SEULEMENT si aucun item n'est sélectionné) */
-.selectize-control.single .selectize-input:not(.has-items):after {
+.selectize-control.single .selectize-input:after,
+.selectize-control.multi .selectize-input:after {
     content: " " !important;
     display: block !important;
     border-color: #888 transparent transparent transparent !important;
@@ -175,10 +176,10 @@
     top: 50% !important;
     transform: translateY(-50%) !important;
     right: 15px !important;
-    margin-top: 2px !important;
+    margin-top: 0 !important; /* Ajusté pour le centrage flex */
+    pointer-events: none;
 }
 
-/* Masquer la flèche Selectize dès qu'il y a une sélection */
 .selectize-control.single .selectize-input.has-items:after {
     display: none !important;
 }
