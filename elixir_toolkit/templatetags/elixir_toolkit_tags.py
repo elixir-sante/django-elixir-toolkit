@@ -63,6 +63,7 @@ def ui_select(name, options, element_id=None, selected=None, placeholder="Choisi
         'element_id': element_id or f"id_{name}",
         'options': options,
         'selected': str(selected) if selected else None,
+        'selected_list': [str(selected)] if selected else [],
         'placeholder': placeholder,
         'icon': icon,
         'css_classes': css_classes,
