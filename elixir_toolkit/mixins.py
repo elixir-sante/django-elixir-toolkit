@@ -99,26 +99,19 @@ class FormReadOnlyFieldMixin:
             self._apply_readonly_fields(form)
         return form
 
-    def _apply_fields_dependencies(self, form):
+    def _apply_readonly_fields(self, form):
+        readonly_fields = list(getattr(self, "fields_readonly", []))
+
         meta = getattr(form, "Meta", None)
-        dependencies = getattr(self, "fields_dependencies", None) or getattr(meta, "fields_dependencies", None)
+        if meta and hasattr(meta, "fields_readonly"):
+            readonly_fields.extend(meta.fields_readonly)
 
-        if not dependencies:
-            return
-
-        for controller, controlled_fields in dependencies.items():
-            for field in controlled_fields:
-                if field in form.fields:
-                    widget = form.fields[field].widget
-                    
-                    widget.attrs['data-depends-on'] = controller
-                    
-                    if hasattr(form.fields[field], 'widget_attrs'):
-                        form.fields[field].widget_attrs(widget)['data-depends-on'] = controller
+        for field in readonly_fields:
+            if field in form.fields:
+                form.fields[field].disabled = True
 
 
 class FormDependencyFieldMixin:
-    """Ajoute des attributs HTML5 data-depends-on pour gérer les dépendances inter-champs."""
     fields_dependencies = None
 
     def get_form(self, form_class=None):
@@ -127,6 +120,15 @@ class FormDependencyFieldMixin:
             self._apply_fields_dependencies(form)
         return form
 
+    def _set_widget_dependency(self, form_field, controller):
+        form_field.widget.attrs['data-depends-on'] = controller
+        
+        if hasattr(form_field, 'widget_attrs'):
+            try:
+                form_field.widget_attrs(form_field.widget)['data-depends-on'] = controller
+            except Exception:
+                pass
+
     def _apply_fields_dependencies(self, form):
         meta = getattr(form, "Meta", None)
         dependencies = getattr(self, "fields_dependencies", None) or getattr(meta, "fields_dependencies", None)
@@ -137,4 +139,4 @@ class FormDependencyFieldMixin:
         for controller, controlled_fields in dependencies.items():
             for field in controlled_fields:
                 if field in form.fields:
-                    form.fields[field].widget.attrs['data-depends-on'] = controller
+                    self._set_widget_dependency(form.fields[field], controller)
