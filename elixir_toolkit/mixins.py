@@ -112,6 +112,7 @@ class FormReadOnlyFieldMixin:
 
 
 class FormDependencyFieldMixin:
+    """Ajoute des attributs HTML5 data-depends-on pour gérer les dépendances inter-champs."""
     fields_dependencies = None
 
     def get_form(self, form_class=None):
@@ -119,15 +120,6 @@ class FormDependencyFieldMixin:
         if form:
             self._apply_fields_dependencies(form)
         return form
-
-    def _set_widget_dependency(self, form_field, controller):
-        form_field.widget.attrs['data-depends-on'] = controller
-        
-        if hasattr(form_field, 'widget_attrs'):
-            try:
-                form_field.widget_attrs(form_field.widget)['data-depends-on'] = controller
-            except Exception:
-                pass
 
     def _apply_fields_dependencies(self, form):
         meta = getattr(form, "Meta", None)
@@ -139,4 +131,4 @@ class FormDependencyFieldMixin:
         for controller, controlled_fields in dependencies.items():
             for field in controlled_fields:
                 if field in form.fields:
-                    self._set_widget_dependency(form.fields[field], controller)
+                    form.fields[field].widget.attrs['data-depends-on'] = controller
