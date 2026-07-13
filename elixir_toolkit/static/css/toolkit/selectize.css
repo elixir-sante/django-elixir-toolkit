@@ -127,11 +127,12 @@
     color: var(--toolkit-select-active-color, #ffffff) !important;
 }
 
-/* État : Sélectionné */
+/* État : Sélectionné
+   Personnalisable via :root : --toolkit-select-selected-bg / --toolkit-select-selected-color */
 .selectize-dropdown .option.selected,
 .selectize-dropdown .selected {
-    background-color: #f5f5f5 !important;
-    color: #363636 !important;
+    background-color: var(--toolkit-select-selected-bg, #f5f5f5) !important;
+    color: var(--toolkit-select-selected-color, #363636) !important;
 }
 
 .selectize-dropdown .active i {
