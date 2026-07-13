@@ -99,16 +99,22 @@ class FormReadOnlyFieldMixin:
             self._apply_readonly_fields(form)
         return form
 
-    def _apply_readonly_fields(self, form):
-        readonly_fields = list(getattr(self, "fields_readonly", []))
-
+    def _apply_fields_dependencies(self, form):
         meta = getattr(form, "Meta", None)
-        if meta and hasattr(meta, "fields_readonly"):
-            readonly_fields.extend(meta.fields_readonly)
+        dependencies = getattr(self, "fields_dependencies", None) or getattr(meta, "fields_dependencies", None)
 
-        for field in readonly_fields:
-            if field in form.fields:
-                form.fields[field].disabled = True
+        if not dependencies:
+            return
+
+        for controller, controlled_fields in dependencies.items():
+            for field in controlled_fields:
+                if field in form.fields:
+                    widget = form.fields[field].widget
+                    
+                    widget.attrs['data-depends-on'] = controller
+                    
+                    if hasattr(form.fields[field], 'widget_attrs'):
+                        form.fields[field].widget_attrs(widget)['data-depends-on'] = controller
 
 
 class FormDependencyFieldMixin:
