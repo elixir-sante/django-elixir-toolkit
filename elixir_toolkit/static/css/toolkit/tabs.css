@@ -1,0 +1,36 @@
+.tabs-scroll-wrapper {
+  position: relative;
+}
+
+.tabs-scroll-wrapper .tabs ul {
+  width: max-content;
+  flex-grow: 0;
+  margin-inline: auto;
+  justify-content: flex-start;
+}
+
+.tabs-scroll-hint {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4rem;
+  border: none;
+  display: flex;
+  align-items: center;
+  color: var(--bulma-primary, #485fc7);
+  cursor: pointer;
+}
+
+.tabs-scroll-hint-right {
+  right: 0;
+  padding: 0 0.5rem 0 2rem;
+  justify-content: flex-end;
+  background: linear-gradient(to right, transparent, var(--bulma-scheme-main, #fff) 70%);
+}
+
+.tabs-scroll-hint-left {
+  left: 0;
+  padding: 0 2rem 0 0.5rem;
+  justify-content: flex-start;
+  background: linear-gradient(to left, transparent, var(--bulma-scheme-main, #fff) 70%);
+}
