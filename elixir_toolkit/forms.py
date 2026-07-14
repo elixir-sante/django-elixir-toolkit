@@ -1,9 +1,10 @@
-from crispy_forms.layout import Field
+from crispy_forms.layout import Field as CrispyField
 from crispy_forms.helper import FormHelper
 from django import forms
 
 
 class CustomFormHelper:
+    
     @property
     def helper(self):
         helper = FormHelper()
@@ -11,7 +12,7 @@ class CustomFormHelper:
         return helper
 
 
-class FileUpload(Field):
+class FileUpload(CrispyField):
     def __init__(self, *args, **kwargs):
         kwargs['template'] = "elixir_toolkit/components/fields/file_input.html"
         super().__init__(*args, **kwargs)
@@ -31,7 +32,12 @@ class MultipleFileField(forms.FileField):
             return [single_file_clean(d, initial) for d in data]
         return [single_file_clean(data, initial)]
 
-class ToolkitSelectField(Field):
+
+class PasswordWithIconField(CrispyField):
+    template = "elixir_toolkit/components/fields/password_input.html"
+
+
+class ToolkitSelectField(CrispyField):
     template = "elixir_toolkit/components/select.html"
 
     def __init__(self, *args, **kwargs):
