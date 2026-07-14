@@ -1,20 +1,20 @@
 from django import forms
-from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
-
-from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField
+from crispy_bulma.layout import IconField
+from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField, CustomFormHelper, PasswordWithIconField
 
 
 COLOR_CHOICES = (
     ('red', 'Red'), ('green', 'Green'), ('blue', 'Blue')
 )
 
-class FormExample(forms.Form):
+class FormExample(CustomFormHelper, forms.Form):
     text            = forms.CharField(label="Nom complet")
+    text_with_icon  = forms.CharField(label="Nom complet et icone")
     email           = forms.EmailField(label="Adresse Email")
     number          = forms.CharField(label="Âge", widget=forms.NumberInput())
     url             = forms.CharField(label="Site Web", widget=forms.URLInput())
-    password        = forms.CharField(label="Mot de passe", widget=forms.PasswordInput())
+    password        = forms.CharField(label="Mot de passe", widget=forms.PasswordInput(attrs={'placeholder': '********'}))
     select          = forms.ChoiceField(label="Couleur unique", choices=COLOR_CHOICES)
     multi_select    = forms.MultipleChoiceField(label="Couleurs multiples", choices=COLOR_CHOICES)
     textarea        = forms.CharField(label="Message", widget=forms.Textarea())
@@ -31,14 +31,14 @@ class FormExample(forms.Form):
                     )
     file = MultipleFileField(label="Documents justificatifs", required=True)
     file2 = forms.FileField(label="Documents test", required=True)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        # IMPORTANT: S'assurer que le template pack est bien défini ici si besoin
-        self.helper.template_pack = 'bulma' 
+    
+    @property
+    def helper(self):
+        helper = super().helper
         
-        self.helper.layout = Layout(
+        # IMPORTANT: S'assurer que le template pack est bien défini ici si besoin
+        helper.template_pack = 'bulma' 
+        helper.layout = Layout(
             Fieldset(
                 '👤 Informations personnelles',
                 Div(
@@ -47,11 +47,13 @@ class FormExample(forms.Form):
                     css_class='columns' 
                 ),
                 Div(
-                    Div(Field('password'), css_class='column is-6'),
+                    Div(PasswordWithIconField('password'), css_class='column is-6'),
                     Div(Field('number'), css_class='column is-6'),
                     css_class='columns'
                 )
             ),
+            HTML('<hr class="my-5">'),
+            Div(IconField('text_with_icon', icon_prepend="fas fa-user", icon_append="fas fa-check")),
             HTML('<hr class="my-5">'),
             Fieldset(
                 '🎨 Préférences visuelles',
@@ -85,3 +87,4 @@ class FormExample(forms.Form):
                 </div></div>
             """)
         )
+        return helper

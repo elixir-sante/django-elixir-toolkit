@@ -228,7 +228,7 @@
 }
 
 /* Force l'icône Bulma à rester centrée verticalement à gauche, même si le champ grandit */
-.control.has-icons-left .icon {
+.control.has-icons-left .select .icon {
     z-index: 5;
     pointer-events: none;
     position: absolute;
