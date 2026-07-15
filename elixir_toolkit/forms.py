@@ -55,19 +55,29 @@ class CustomFormHelper:
     
     @property
     def helper(self):
-        helper = SuperFormHelper()
-        helper.form_tag = False
-        helper.enable_form_validator = True
-        helper.enable_submit_button_loading = True
-        print("YES")
-        return helper
+        self._helper = SuperFormHelper()
+        self._helper.form_tag = False
+        self._helper.enable_form_validator = True
+        self._helper.enable_submit_button_loading = True
+        return self._helper
+
+    @helper.setter
+    def helper(self, value):
+        self._helper = value
 
 
 class FileUpload(CrispyField):
     def __init__(self, *args, **kwargs):
         kwargs['template'] = "elixir_toolkit/components/fields/file_input.html"
         super().__init__(*args, **kwargs)
+
+    def render(self, form, context, template_pack=None, **kwargs):
+        # On récupère le champ Django associé
+        bound_field = form[self.fields[0]]
+        current_attrs = bound_field.field.widget.attrs
+        bound_field.field.widget = forms.FileInput(attrs=current_attrs)
         
+        return super().render(form, context, template_pack, **kwargs)
         
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
