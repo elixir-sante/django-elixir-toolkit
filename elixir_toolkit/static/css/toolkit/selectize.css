@@ -44,6 +44,11 @@
     background-image: none !important;
 }
 
+/* Permet le contrôle de la taille du placeholder */
+.selectize-dropdown, .selectize-input, .selectize-input input {
+    font-size: 16px !important;
+}
+
 .control .select .selectize-control .selectize-input {  
     /* FIX RADICAL DU BLOC GRIS : Force le blanc partout, tout le temps */
     background-color: #fff !important; 
@@ -53,6 +58,11 @@
 
 .selectize-input.full {
     background-color: transparent !important;
+}
+
+/* Masque le champ de saisie quand le menu est ouvert pour les select unique */
+.selectize-control .selectize-input.full input {
+    display: none !important;
 }
 
 .selectize-input.focus {

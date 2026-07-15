@@ -19,6 +19,7 @@ def toolkit_css(version="1.0.0"):
     return {
         "bulma_version": version
     }
+
 @register.inclusion_tag('elixir_toolkit/components/button.html')
 def ui_button(text, css_classes="", icon=None, icon_right=False, href=None, **kwargs):
     # Nettoyage des clés (data_id -> data-id)
@@ -63,7 +64,7 @@ def ui_tabs_scroll_hints():
 
 
 @register.inclusion_tag('elixir_toolkit/components/select.html')
-def ui_select(name, options, element_id=None, selected=None, placeholder="Choisissez...", icon=None, css_classes=""):
+def ui_select(name, options, element_id=None, selected=None, multiple=None, placeholder="Choisissez...", icon=None, css_classes=""):
     if isinstance(options, str):
         try:
             options = ast.literal_eval(options)
@@ -82,6 +83,7 @@ def ui_select(name, options, element_id=None, selected=None, placeholder="Choisi
         'placeholder': placeholder,
         'icon': icon,
         'css_classes': css_classes,
+        'multiple': multiple,
     }
     
 @register.inclusion_tag('elixir_toolkit/components/filter_bar.html')
