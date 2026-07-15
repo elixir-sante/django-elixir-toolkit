@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 django = ">=6"
 django-crispy-forms = "*"
-crispy-bulma = "*"
+crispy-bulma = {ref = "main", git = "git+https://github.com/elixir-sante/crispy-bulma.git"}
 
 [dev-packages]
 coverage = "*"
