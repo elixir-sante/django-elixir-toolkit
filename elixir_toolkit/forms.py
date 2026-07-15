@@ -1,20 +1,70 @@
 from crispy_forms.layout import Field as CrispyField
+from crispy_forms.layout import HTML
 from crispy_forms.helper import FormHelper
 from django import forms
 
 
+class SuperFormHelper(FormHelper):
+    
+    enable_form_validator = False
+    enable_submit_button_loading = False
+    
+    def render_layout(self, form, context, template_pack=None):
+
+        # Ajout du script de validation au formulaire
+        if self.layout and self.enable_form_validator:
+            self.layout.append(HTML("""
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('input, textarea, select').forEach(function (input) {
+                        var validate = function () {
+                            input.classList.toggle('input-error', !input.checkValidity())
+                        }
+                        input.addEventListener('input', validate)
+                        input.addEventListener('blur', validate)
+                    })
+                })
+            </script>
+            """))
+
+        # Ajout de la propriété is-loading au bouton submit
+        if self.layout and self.enable_submit_button_loading:
+            self.layout.append(HTML("""
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('form').forEach(function (form) {
+                        form.addEventListener('submit', function (e) {
+                            var submitButton = e.submitter || form.querySelector('button[type="submit"]')
+                            if (submitButton) {
+                                submitButton.classList.add('is-loading')
+                            }
+                        })
+                    })
+                })
+            </script>
+            """))
+
+        return super().render_layout(form, context, template_pack)
+
+
 class CustomFormHelper:
+    """CustomFormHelper :
+     - ajoute automatiquement le JS de validation au formulaire
+     - permet la personnalisation du helper via la surcharge de helper
+    """
     
     @property
     def helper(self):
-        if not hasattr(self, '_helper'):
-            self._helper = FormHelper()
-            self._helper.form_tag = False
+        self._helper = SuperFormHelper()
+        self._helper.form_tag = False
+        self._helper.enable_form_validator = True
+        self._helper.enable_submit_button_loading = True
         return self._helper
 
     @helper.setter
     def helper(self, value):
         self._helper = value
+
 
 class FileUpload(CrispyField):
     def __init__(self, *args, **kwargs):
