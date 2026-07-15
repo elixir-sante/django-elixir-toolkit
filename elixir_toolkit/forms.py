@@ -7,10 +7,14 @@ class CustomFormHelper:
     
     @property
     def helper(self):
-        helper = FormHelper()
-        helper.form_tag = False
-        return helper
+        if not hasattr(self, '_helper'):
+            self._helper = FormHelper()
+            self._helper.form_tag = False
+        return self._helper
 
+    @helper.setter
+    def helper(self, value):
+        self._helper = value
 
 class FileUpload(CrispyField):
     def __init__(self, *args, **kwargs):
