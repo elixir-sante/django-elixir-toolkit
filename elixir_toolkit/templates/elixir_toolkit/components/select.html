@@ -25,7 +25,13 @@
             {% endif %}
 
             {% for value, label in options %}
-                <option class="is-size-6" value="{{ value }}" {% if value|stringformat:"s" in selected_list or value in selected_list %}selected{% endif %}>
+                <option class="is-size-6" value="{{ value }}" 
+                    {% if multiple %}
+                        {% if value|stringformat:"s" in selected_list or value in selected_list %}selected{% endif %}
+                    {% else %}
+                        {% if value|stringformat:"s" == selected or value == selected %}selected{% endif %}
+                    {% endif %}
+                >
                     {{ label }}
                 </option>
             {% endfor %}
