@@ -12,7 +12,8 @@ dependencies = [
     "django>=6.0.3",
     "django-crispy-forms>=2.0",
     "python-dateutil>=2.8",
-    "django-ckeditor-5>=0.2.20"
+    "django-ckeditor-5>=0.2.20",
+    "crispy-bulma @ git+https://github.com/elixir-sante/crispy-bulma.git@main"
 ]
 
 [tool.setuptools.packages.find]
