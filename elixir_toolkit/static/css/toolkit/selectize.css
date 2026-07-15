@@ -23,10 +23,11 @@
 .control .select .selectize-control .selectize-input,
 .selectize-control.single .selectize-input,
 .selectize-control .selectize-input,
-.selectize-control .selectize-input.has-items,
-.selectize-control .selectize-input.focus {
-    box-shadow: none !important;
-    border: 1px solid var(--bulma-primary, #0066ff) !important;
+.selectize-control .selectize-input.has-items {
+    box-shadow: none;
+    background-color: hsl(var(--bulma-input-h), var(--bulma-input-s), calc(var(--bulma-input-background-l) + var(--bulma-input-background-l-delta)));
+    border-color: hsl(var(--bulma-input-h), var(--bulma-input-s), calc(var(--bulma-input-border-l) + var(--bulma-input-border-l-delta)));
+    border-radius: var(--bulma-input-radius);
     font-size: 16px !important;
     padding: 0.35rem 2.5rem 0.35rem 0.75em !important;
     color: #363636 !important;
@@ -35,20 +36,16 @@
     flex-wrap: wrap !important;
     min-height: 2.5rem !important;
     height: auto !important;
-    border-radius: var(--bulma-input-radius, 4px);
     position: relative;
     box-sizing: border-box !important;
     width: 100% !important;
     overflow: visible !important;
-    background-color: #fff !important; 
-    background-image: none !important;
 }
 
 .control .select .selectize-control .selectize-input {  
     /* FIX RADICAL DU BLOC GRIS : Force le blanc partout, tout le temps */
     background-color: #fff !important; 
     background-image: none !important;
- 
 }
 
 .selectize-input.full {
@@ -56,8 +53,8 @@
 }
 
 .selectize-input.focus {
-    border-color: #3273dc !important;
-    border-radius: 5px;
+    border-color: hsl(var(--bulma-input-focus-h), var(--bulma-input-focus-s), var(--bulma-input-focus-l)) !important;
+    box-shadow: var(--bulma-input-focus-shadow-size) hsla(var(--bulma-input-focus-h), var(--bulma-input-focus-s), var(--bulma-input-focus-l), var(--bulma-input-focus-shadow-alpha)) !important;
 }
 
 /* Alignement et étalement parfait de l'item sélectionné - MODE UNIQUE UNIQUEMENT */
