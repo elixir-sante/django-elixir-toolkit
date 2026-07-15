@@ -55,9 +55,11 @@ $(document).ready(function() {
     var config = {
         delimiter: ',',
         persist: false,
-        create: false,
-        maxItems: {% if multiple %}null{% else %}1{% endif %}, openOnFocus: false,
-        plugins: ['clear_button'],
+        create: false,          // Empêche la création de nouvelles options
+        createOnBlur: false,    // Désactive la création à la perte de focus
+
+        maxItems: {% if multiple %}null{% else %}1{% endif %},
+        plugins: [{% if multiple %}'remove_button', {% endif %}'clear_button'],
         dropdownParent: 'body',
         onInitialize: function() {
             window.selectizeInstances.push(this);
