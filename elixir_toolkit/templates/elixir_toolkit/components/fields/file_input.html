@@ -1,5 +1,4 @@
 {% load elixir_toolkit_tags %}
-
 {% load crispy_forms_field %}
 
 <div class="field file-uploader" data-field-id="{{ field.id_for_label }}">
@@ -17,6 +16,10 @@
         </div>
     </div>
 
+    <div style="display: none;">
+        <input type="checkbox" name="{{ field.name }}-clear" id="{{ field.id_for_label }}-clear_id">
+    </div>
+
     <div id="list-{{ field.id_for_label }}" class="mt-2 tags"></div>
     <p class="help file-size has-text-grey" id="size-{{ field.id_for_label }}"></p>
     
@@ -30,7 +33,6 @@
 
 <script>
 (function() {
-    // Évite la redéfinition et les multiples écouteurs d'événements
     if (window.ElixirUploaderLoaded) return;
     window.ElixirUploaderLoaded = true;
 
@@ -38,22 +40,48 @@
         document.querySelectorAll('.file-uploader').forEach(container => {
             const fieldId = container.dataset.fieldId;
             
-            // Évite la double initialisation sur le même élément (important pour HTMX)
             if (container.dataset.initialized) return;
             
             const fileInput = container.querySelector('.file-input');
             const fileListDisplay = document.getElementById(`list-${fieldId}`);
             const fileNameLabel = document.getElementById(`name-${fieldId}`);
             const fileSizeContainer = document.getElementById(`size-${fieldId}`);
+            const clearCheckbox = document.getElementById(`${fieldId}-clear_id`);
 
             if (!fileInput || !fileListDisplay) return;
             
             container.dataset.initialized = "true";
             let allFiles = new DataTransfer();
 
-            function updateFileList() {
+            let initialFileName = fileInput.dataset.initialName || "";
+
+            function updateFileList(isInitial = false) {
                 fileListDisplay.innerHTML = '';
                 let totalSize = 0;
+
+                if (isInitial && initialFileName) {
+                    if (fileNameLabel) fileNameLabel.textContent = '1 fichier(s)';
+                    
+                    const fileControl = document.createElement('div');
+                    fileControl.className = 'control';
+                    fileControl.innerHTML = `
+                        <div class="tags has-addons">
+                            <a class="tag is-delete is-medium" id="clear-initial-${fieldId}"></a>
+                            <span class="tag is-link is-medium">${initialFileName.substring(0, 25)}</span>
+                        </div>
+                    `;
+                    
+                    fileControl.querySelector('.is-delete').onclick = (e) => {
+                        e.preventDefault();
+                        initialFileName = "";
+                        if (fileNameLabel) fileNameLabel.textContent = 'Aucun fichier';
+                        if (clearCheckbox) clearCheckbox.checked = true; // Demande à Django d'effacer le fichier
+                        updateFileList(false);
+                    };
+                    
+                    fileListDisplay.appendChild(fileControl);
+                    return;
+                }
 
                 if (!allFiles.files.length) {
                     if (fileNameLabel) fileNameLabel.textContent = 'Aucun fichier';
@@ -91,10 +119,13 @@
                 });
                 allFiles = dt;
                 fileInput.files = allFiles.files;
-                updateFileList();
+                updateFileList(false);
             }
 
             fileInput.addEventListener('change', function() {
+                initialFileName = "";
+                if (clearCheckbox) clearCheckbox.checked = false;
+
                 if (this.multiple) {
                     Array.from(this.files).forEach(file => allFiles.items.add(file));
                 } else {
@@ -102,16 +133,15 @@
                     if (this.files.length) allFiles.items.add(this.files[0]);
                 }
                 this.files = allFiles.files;
-                updateFileList();
+                updateFileList(false);
             });
+            updateFileList(true);
         });
     }
 
-    // Enregistrement des événements
     document.addEventListener('DOMContentLoaded', initElixirUploader);
     document.body.addEventListener('htmx:afterSwap', initElixirUploader);
     
-    // Initialisation immédiate si le script est injecté dynamiquement
     if (document.readyState === "complete" || document.readyState === "interactive") {
         initElixirUploader();
     }
