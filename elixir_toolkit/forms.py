@@ -59,6 +59,8 @@ class CustomFormHelper:
         self._helper.form_tag = False
         self._helper.enable_form_validator = True
         self._helper.enable_submit_button_loading = True
+        if hasattr(self, 'layout'):
+            self._helper.layout = self.layout
         return self._helper
 
     @helper.setter
