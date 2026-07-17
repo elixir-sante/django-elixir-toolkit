@@ -2,8 +2,8 @@
     background-color: var(--bulma-primary) !important; 
 }
 
-.button.is-link {
-    background-color: var(--secondary-color, #485fc7);
+.button.is-outlined {
+    background-color: var(--secondary-color, var(--bulma-primary));
     border-color: transparent;
     color: #fff;
 }
