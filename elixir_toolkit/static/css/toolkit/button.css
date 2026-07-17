@@ -1,4 +1,4 @@
-.button.is-primary {
+.button.is-primary:not(.is-outlined) {
     background-color: var(--bulma-primary) !important; 
 }
 
