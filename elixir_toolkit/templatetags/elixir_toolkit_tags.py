@@ -44,7 +44,7 @@ def ui_button_primary(text, css_classes="", **kwargs):
 @register.inclusion_tag('elixir_toolkit/components/button.html')
 def ui_button_secondary(text, css_classes="", **kwargs):
     """Bouton secondaire - Couleur 'Link' (Bleu) en dur"""
-    new_classes = f"is-link {css_classes}".strip()
+    new_classes = f"is-primary is-outlined {css_classes}".strip()
     return ui_button(text, css_classes=new_classes, **kwargs)
 
 
