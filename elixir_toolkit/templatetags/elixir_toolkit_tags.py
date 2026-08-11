@@ -140,11 +140,7 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
 @register.inclusion_tag('elixir_toolkit/components/table.html')
 def ui_table(items, columns, css_classes="", totals=None):
     """
-    Tableau générique augmenté avec gestion du tfoot.
-    columns: list de dicts [
-        {'header': 'Titre', 'field': 'key', 'type': 'text/price/date/badge', 'icon_field': 'icon_key'}
-    ]
-    totals: dict ou structure contenant les totaux alignés sur les colonnes, ex: {'echeance': 'Total', 'montantEmis': '100€'}
+    Tableau générique augmenté avec gestion du tfoot et surcharges de boutons.
     """
     processed_rows = []
     
@@ -165,10 +161,12 @@ def ui_table(items, columns, css_classes="", totals=None):
                 'class': col.get('class', ''),
                 'sub_value': get_val(col.get('sub_field')),
                 'suffix': col.get('suffix', ''),
+                # Nouveaux paramètres pour surcharger les boutons / chevrons
+                'btn_icon': col.get('btn_icon'),
+                'btn_target': f"details-row-{get_val('id')}" if col.get('type') in ('button', 'icon_button') else None,
             })
         processed_rows.append(row_cells)
 
-    # Traitement du tfoot si des totaux sont fournis
     processed_totals = []
     if totals:
         for col in columns:
@@ -183,6 +181,6 @@ def ui_table(items, columns, css_classes="", totals=None):
     return {
         'headers': [col.get('header') for col in columns],
         'rows': processed_rows,
-        'totals': processed_totals,  # Ajouté au contexte du template component
+        'totals': processed_totals,
         'css_classes': css_classes
     }

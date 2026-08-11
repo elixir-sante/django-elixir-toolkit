@@ -37,11 +37,18 @@
                                                 <span class="tag is-danger is-light has-text-weight-semibold"><span class="mr-1.5">●</span> {{ cell.value }}</span>
                                             {% endif %}
                                         
-                                        {% elif cell.type == 'button' %}
-                                            <a href="#" class="button is-danger is-small is-light has-text-weight-semibold">
-                                                <span>{{ cell.value|default:"Voir" }}</span>
-                                                <span class="icon is-small ml-1"><i class="fas fa-chevron-right"></i></span>
-                                            </a>
+                                        <!-- OVERRIDE BOUTON / CHEVRON -->
+                                        {% elif cell.type == 'button' or cell.type == 'icon_button' %}
+                                            <button type="button" 
+                                                    class="button is-small is-text toggle-details-btn p-1" 
+                                                    {% if cell.btn_target %}data-target="{{ cell.btn_target }}"{% endif %}>
+                                                {% if cell.value %}
+                                                    <span>{{ cell.value }}</span>
+                                                {% endif %}
+                                                <span class="icon is-small">
+                                                    <i class="{{ cell.btn_icon|default:'fa-solid fa-chevron-left' }}"></i>
+                                                </span>
+                                            </button>
                                         
                                         {% else %}
                                             {{ cell.value|default:"" }}{{ cell.suffix }}
@@ -65,13 +72,13 @@
             <tr class="has-background-white-bis has-text-weight-bold">
                 {% for total in totals %}
                     <td class="py-3">
-                            <div>
-                                <span class="is-block">
-                                    {% if total.value is not None %}
-                                        {{ total.value }}
-                                    {% endif %}
-                                </span>
-                            </div>
+                        <div>
+                            <span class="is-block">
+                                {% if total.value is not None %}
+                                    {{ total.value }}
+                                {% endif %}
+                            </span>
+                        </div>
                     </td>
                 {% endfor %}
             </tr>
