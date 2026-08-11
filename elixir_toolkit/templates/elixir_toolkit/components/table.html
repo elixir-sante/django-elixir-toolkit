@@ -41,6 +41,7 @@
                                         {% elif cell.type == 'button' or cell.type == 'icon_button' %}
                                             <button type="button" 
                                                     class="button is-small is-text toggle-details-btn p-1" 
+                                                    style="text-decoration: none;"
                                                     {% if cell.btn_target %}data-target="{{ cell.btn_target }}"{% endif %}>
                                                 {% if cell.value %}
                                                     <span>{{ cell.value }}</span>
