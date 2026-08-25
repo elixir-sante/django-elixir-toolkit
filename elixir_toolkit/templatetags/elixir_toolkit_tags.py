@@ -149,7 +149,7 @@ class TableBlockNode(Node):
         table_content = self.nodelist.render(context)
 
         # On charge le template du composant et on lui passe le contenu
-        t = context.template.engine.get_template('elixir_toolkit/components/table_wrapper.html')
+        t = context.template.engine.get_template('elixir_toolkit/components/table.html')
 
         # On crée un sous-contexte pour éviter de polluer le contexte global
         ctx = context.flatten()
