@@ -142,22 +142,14 @@ class TableBlockNode(Node):
         self.nodelist = nodelist
 
     def render(self, context):
-        # On évalue les classes CSS passées en paramètre
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
-
-        # On rend tout ce qu'il y a à l'intérieur du bloc (ton thead, tbody, etc.)
         table_content = self.nodelist.render(context)
 
-        # On charge le template du composant et on lui passe le contenu
-        t = context.template.engine.get_template('elixir_toolkit/components/table.html')
+        # context.render_annotated() gère directement le rendu d'un template avec le contexte actuel
+        t = template.loader.get_template('elixir_toolkit/components/table.html')
 
-        # On crée un sous-contexte pour éviter de polluer le contexte global
-        ctx = context.flatten()
-        ctx.update({
-            'css_classes': resolved_classes,
-            'table_content': table_content,
-        })
-        return t.render(template.Context(ctx))
+        with context.push({'css_classes': resolved_classes, 'table_content': table_content}):
+            return t.render(context)
 
 
 @register.tag(name="ui_table")
