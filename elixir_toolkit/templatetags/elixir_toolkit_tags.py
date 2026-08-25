@@ -180,8 +180,78 @@ def ui_table(parser, token):
     return TableBlockNode(css_classes, nodelist)
 
 
-ui_td_table
-ui_th_table
+class THBlockNode(Node):
+    def __init__(self, kwargs_filters, nodelist):
+        self.kwargs_filters = kwargs_filters
+        self.nodelist = nodelist
+
+    def render(self, context):
+        # Résout les attributs dynamiques (ex: scope="col", class="..." etc.)
+        resolved_attrs = {k: f.resolve(context) for k, f in self.kwargs_filters.items()}
+        html_attrs = {k.replace('_', '-'): v for k, v in resolved_attrs.items()}
+        
+        th_content = self.nodelist.render(context)
+        t = template.loader.get_template('elixir_toolkit/components/th.html')
+        
+        with context.push({'th_content': th_content, 'attrs': flatatt(html_attrs)}):
+            return t.render(context)
+
+
+@register.tag(name="ui_th")
+def ui_th(parser, token):
+    """
+    Usage:
+        {% ui_th scope="col" class="py-3 pl-5" %}N° section{% end_ui_th %}
+    """
+    bits = token.split_contents()[1:]
+    kwargs_filters = {}
+    
+    for bit in bits:
+        if "=" in bit:
+            key, val = bit.split("=", 1)
+            # Nettoie les guillemets éventuels autour de la valeur
+            val = val.strip('"\'')
+            kwargs_filters[key] = parser.compile_filter(val)
+
+    nodelist = parser.parse(('end_ui_th',))
+    parser.delete_first_token()
+    return THBlockNode(kwargs_filters, nodelist)
+
+
+class TDBlockNode(Node):
+    def __init__(self, kwargs_filters, nodelist):
+        self.kwargs_filters = kwargs_filters
+        self.nodelist = nodelist
+
+    def render(self, context):
+        resolved_attrs = {k: f.resolve(context) for k, f in self.kwargs_filters.items()}
+        html_attrs = {k.replace('_', '-'): v for k, v in resolved_attrs.items()}
+        
+        td_content = self.nodelist.render(context)
+        t = template.loader.get_template('elixir_toolkit/components/td.html')
+        
+        with context.push({'td_content': td_content, 'attrs': flatatt(html_attrs)}):
+            return t.render(context)
+
+
+@register.tag(name="ui_td")
+def ui_td(parser, token):
+    """
+    Usage:
+        {% ui_td class="py-3" %}{{ sub.name }}{% end_ui_td %}
+    """
+    bits = token.split_contents()[1:]
+    kwargs_filters = {}
+    
+    for bit in bits:
+        if "=" in bit:
+            key, val = bit.split("=", 1)
+            val = val.strip('"\'')
+            kwargs_filters[key] = parser.compile_filter(val)
+
+    nodelist = parser.parse(('end_ui_td',))
+    parser.delete_first_token()
+    return TDBlockNode(kwargs_filters, nodelist)
 
 
 @register.inclusion_tag('elixir_toolkit/components/tag.html')
