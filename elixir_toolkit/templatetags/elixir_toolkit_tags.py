@@ -1,9 +1,8 @@
 # elixir_toolkit/templatetags/elixir_toolkit_tags.py
 from django import template
-from django.utils.safestring import mark_safe
-from django.templatetags.static import static
 from django.forms.utils import flatatt
 import ast
+from django.template.base import Node
 
 register = template.Library()
 
@@ -136,51 +135,86 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
         'link_url_name': link_url_name,
         'css_classes': kwargs.get('css_classes', '')
     }
-    
-@register.inclusion_tag('elixir_toolkit/components/table.html')
-def ui_table(items, columns, css_classes="", totals=None):
-    """
-    Tableau générique augmenté avec gestion du tfoot et surcharges de boutons.
-    """
-    processed_rows = []
-    
-    for item in items:
-        row_cells = []
-        for col in columns:
-            field = col.get('field')
-            
-            def get_val(f):
-                if not f: return None
-                return item.get(f) if isinstance(item, dict) else getattr(item, f, None)
 
-            row_cells.append({
-                'value': get_val(field),
-                'header': col.get('header'),
-                'type': col.get('type', 'text'),
-                'icon': get_val(col.get('icon_field')),
-                'class': col.get('class', ''),
-                'sub_value': get_val(col.get('sub_field')),
-                'suffix': col.get('suffix', ''),
-                # Nouveaux paramètres pour surcharger les boutons / chevrons
-                'btn_icon': col.get('btn_icon'),
-                'btn_target': f"details-row-{get_val('id')}" if col.get('type') in ('button', 'icon_button') else None,
-            })
-        processed_rows.append(row_cells)
+class TableBlockNode(Node):
+    def __init__(self, css_classes, nodelist):
+        self.css_classes = css_classes
+        self.nodelist = nodelist
 
-    processed_totals = []
-    if totals:
-        for col in columns:
-            field = col.get('field')
-            val = totals.get(field) if isinstance(totals, dict) else getattr(totals, field, None)
-            processed_totals.append({
-                'value': val,
-                'class': col.get('class', ''),
-                'type': col.get('type', 'text')
-            })
+    def render(self, context):
+        # On évalue les classes CSS passées en paramètre
+        resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
+
+        # On rend tout ce qu'il y a à l'intérieur du bloc (ton thead, tbody, etc.)
+        table_content = self.nodelist.render(context)
+
+        # On charge le template du composant et on lui passe le contenu
+        t = context.template.engine.get_template('elixir_toolkit/components/table_wrapper.html')
+
+        # On crée un sous-contexte pour éviter de polluer le contexte global
+        ctx = context.flatten()
+        ctx.update({
+            'css_classes': resolved_classes,
+            'table_content': table_content,
+        })
+        return t.render(template.Context(ctx))
+
+
+@register.tag(name="ui_table")
+def ui_table(parser, token):
+    """
+    Usage:
+        {% ui_table css_classes="is-striped" %}
+            <thead>...</thead>
+            <tbody>...</tbody>
+        {% endui_table %}
+    """
+    bits = token.split_contents()[1:]
+    css_classes = None
+    
+    for bit in bits:
+        if bit.startswith("css_classes="):
+            val = bit.split("=")[1]
+            css_classes = parser.compile_filter(val)
+
+    # Tout ce qui se trouve entre {% ui_table %} et {% end_ui_table %}
+    nodelist = parser.parse(('end_ui_table',))
+    parser.delete_first_token() # Consomme le end_ui_table
+
+    return TableBlockNode(css_classes, nodelist)
+
+
+@register.inclusion_tag('elixir_toolkit/components/tag.html')
+def ui_tag(text, color="primary", dot=True, css_classes=""):
+    """
+    Composant Tag / Badge générique Bulma.
+    Usage:
+        {% ui_tag text="Actif" color="success" %}
+    """
+    color_class = f"is-{color}" if color else ""
 
     return {
-        'headers': [col.get('header') for col in columns],
-        'rows': processed_rows,
-        'totals': processed_totals,
-        'css_classes': css_classes
+        'text': text,
+        'color_class': color_class,
+        'dot': dot,
+        'css_classes': css_classes,
+    }
+
+
+@register.inclusion_tag('elixir_toolkit/components/chevron.html')
+def ui_chevron(direction="down", size="", css_classes=""):
+    """
+    Composant Chevron / Icône de direction générique Bulma.
+    Usage:
+        {% ui_chevron direction="right" %}
+    """
+    # Sécurité pour s'assurer que la direction est valide
+    valid_directions = ['down', 'right', 'up', 'left']
+    if direction not in valid_directions:
+        direction = 'down'
+
+    return {
+        'direction': direction,
+        'size': size,
+        'css_classes': css_classes,
     }
