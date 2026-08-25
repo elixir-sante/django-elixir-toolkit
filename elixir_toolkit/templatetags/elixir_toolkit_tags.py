@@ -136,22 +136,25 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
         'css_classes': kwargs.get('css_classes', '')
     }
 
+
 class TableBlockNode(Node):
-    def __init__(self, css_classes, nodelist):
+    def __init__(self, css_classes, expandable, nodelist):
         self.css_classes = css_classes
+        self.expandable = expandable
         self.nodelist = nodelist
 
     def render(self, context):
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
+        is_expandable = self.expandable.resolve(context) if self.expandable else False
+        
         table_content = self.nodelist.render(context)
-
         t = template.loader.get_template('elixir_toolkit/components/table.html')
         
-        # On utilise context.flatten() pour fournir un dico propre au rendu du template interne
         ctx = context.flatten()
         ctx.update({
             'css_classes': resolved_classes,
             'table_content': table_content,
+            'expandable': str(is_expandable).lower() == 'true' or is_expandable is True,
         })
         return t.render(ctx)
 
@@ -160,24 +163,27 @@ class TableBlockNode(Node):
 def ui_table(parser, token):
     """
     Usage:
-        {% ui_table css_classes="is-striped" %}
+        {% ui_table css_classes="is-striped" expandable=True %}
             <thead>...</thead>
             <tbody>...</tbody>
-        {% endui_table %}
+        {% end_ui_table %}
     """
     bits = token.split_contents()[1:]
     css_classes = None
+    expandable = None
     
     for bit in bits:
         if bit.startswith("css_classes="):
             val = bit.split("=")[1]
             css_classes = parser.compile_filter(val)
+        elif bit.startswith("expandable="):
+            val = bit.split("=")[1]
+            expandable = parser.compile_filter(val)
 
-    # Tout ce qui se trouve entre {% ui_table %} et {% end_ui_table %}
     nodelist = parser.parse(('end_ui_table',))
-    parser.delete_first_token() # Consomme le end_ui_table
+    parser.delete_first_token()
 
-    return TableBlockNode(css_classes, nodelist)
+    return TableBlockNode(css_classes, expandable, nodelist)
 
 
 class THBlockNode(Node):

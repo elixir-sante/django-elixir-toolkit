@@ -3,3 +3,29 @@
         {{ table_content }}
     </table>
 </div>
+
+{% if expandable %}
+<script>
+    document.addEventListener('click', function(event) {
+        var btn = event.target.closest('.toggle-row-btn');
+        if (!btn) return;
+
+        // On récupère l'ID cible stocké dans data-target (ex: "details-row-6")
+        var targetId = btn.getAttribute('data-target');
+        if (!targetId) return;
+
+        var targetRow = document.getElementById(targetId);
+        var icon = btn.querySelector('.fa-solid');
+
+        if (targetRow) {
+            var isHidden = targetRow.style.display === 'none';
+            targetRow.style.display = isHidden ? '' : 'none';
+            
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down', isHidden);
+                icon.classList.toggle('fa-chevron-right', !isHidden);
+            }
+        }
+    });
+</script>
+{% endif %}
