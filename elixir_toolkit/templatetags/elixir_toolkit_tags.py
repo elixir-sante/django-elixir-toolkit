@@ -187,77 +187,81 @@ def ui_table(parser, token):
 
 
 class THBlockNode(Node):
-    def __init__(self, kwargs_filters, nodelist):
-        self.kwargs_filters = kwargs_filters
+    def __init__(self, css_classes, nodelist):
+        self.css_classes = css_classes
         self.nodelist = nodelist
 
     def render(self, context):
-        # Résout les attributs dynamiques (ex: scope="col", class="..." etc.)
-        resolved_attrs = {k: f.resolve(context) for k, f in self.kwargs_filters.items()}
-        html_attrs = {k.replace('_', '-'): v for k, v in resolved_attrs.items()}
-        
+        resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
         th_content = self.nodelist.render(context)
+        
         t = template.loader.get_template('elixir_toolkit/components/th.html')
         
-        with context.push({'th_content': th_content, 'attrs': flatatt(html_attrs)}):
-            return t.render(context)
+        ctx = context.flatten()
+        ctx.update({
+            'css_classes': resolved_classes,
+            'th_content': th_content,
+        })
+        return t.render(ctx)
 
 
 @register.tag(name="ui_th")
 def ui_th(parser, token):
     """
     Usage:
-        {% ui_th scope="col" class="py-3 pl-5" %}N° section{% end_ui_th %}
+        {% ui_th css_classes="pl-5 has-text-weight-semibold" %}Titre{% end_ui_th %}
     """
     bits = token.split_contents()[1:]
-    kwargs_filters = {}
+    css_classes = None
     
     for bit in bits:
-        if "=" in bit:
-            key, val = bit.split("=", 1)
-            # Nettoie les guillemets éventuels autour de la valeur
-            val = val.strip('"\'')
-            kwargs_filters[key] = parser.compile_filter(val)
+        if bit.startswith("css_classes="):
+            val = bit.split("=")[1]
+            css_classes = parser.compile_filter(val)
 
     nodelist = parser.parse(('end_ui_th',))
     parser.delete_first_token()
-    return THBlockNode(kwargs_filters, nodelist)
+
+    return THBlockNode(css_classes, nodelist)
 
 
 class TDBlockNode(Node):
-    def __init__(self, kwargs_filters, nodelist):
-        self.kwargs_filters = kwargs_filters
+    def __init__(self, css_classes, nodelist):
+        self.css_classes = css_classes
         self.nodelist = nodelist
 
     def render(self, context):
-        resolved_attrs = {k: f.resolve(context) for k, f in self.kwargs_filters.items()}
-        html_attrs = {k.replace('_', '-'): v for k, v in resolved_attrs.items()}
-        
+        resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
         td_content = self.nodelist.render(context)
+        
         t = template.loader.get_template('elixir_toolkit/components/td.html')
         
-        with context.push({'td_content': td_content, 'attrs': flatatt(html_attrs)}):
-            return t.render(context)
+        ctx = context.flatten()
+        ctx.update({
+            'css_classes': resolved_classes,
+            'td_content': td_content,
+        })
+        return t.render(ctx)
 
 
 @register.tag(name="ui_td")
 def ui_td(parser, token):
     """
     Usage:
-        {% ui_td class="py-3" %}{{ sub.name }}{% end_ui_td %}
+        {% ui_td css_classes="pl-5" %}Valeur{% end_ui_td %}
     """
     bits = token.split_contents()[1:]
-    kwargs_filters = {}
+    css_classes = None
     
     for bit in bits:
-        if "=" in bit:
-            key, val = bit.split("=", 1)
-            val = val.strip('"\'')
-            kwargs_filters[key] = parser.compile_filter(val)
+        if bit.startswith("css_classes="):
+            val = bit.split("=")[1]
+            css_classes = parser.compile_filter(val)
 
     nodelist = parser.parse(('end_ui_td',))
     parser.delete_first_token()
-    return TDBlockNode(kwargs_filters, nodelist)
+
+    return TDBlockNode(css_classes, nodelist)
 
 
 @register.inclusion_tag('elixir_toolkit/components/tag.html')
