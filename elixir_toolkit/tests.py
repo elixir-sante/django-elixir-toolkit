@@ -226,19 +226,27 @@ class ToolkitListTest(ToolkitBaseTest):
         
 
 class ToolkitTableTest(ToolkitBaseTest):
-    def test_ui_table_multi_purpose(self):
-        """Vérifie que le tableau gère les badges, les prix et les suffixes"""
-        items = [{'name': 'Test', 'status': 'OK', 'score': 95}]
-        cols = [
-            {'header': 'Nom', 'field': 'name'},
-            {'header': 'Etat', 'field': 'status', 'type': 'badge'},
-            {'header': 'Points', 'field': 'score', 'suffix': ' pts'}
-        ]
-        template = "{% load elixir_toolkit_tags %}{% ui_table items=items columns=cols %}"
-        rendered = self.render_template(template, {'items': items, 'cols': cols})
+    def test_ui_table_structure_and_tags(self):
+        """Vérifie que le nouveau ui_table génère bien le conteneur Bulma et intègre les sous-composants"""
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_table css_classes="is-striped" %}
+                <thead>
+                    <tr><th>Nom</th><th>Statut</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Test</td>
+                        <td>{% ui_tag text="OK" color="success" %}</td>
+                    </tr>
+                </tbody>
+            {% end_ui_table %}
+        """
+        rendered = self.render_template(template)
         
-        # Vérifie le badge
-        self.assertIn('tag is-primary is-light', rendered)
+        # Vérifie la présence du conteneur responsive et des classes Bulma
+        self.assertIn('class="table-container"', rendered)
+        self.assertIn('class="table is-fullwidth is-hoverable is-striped"', rendered)
+        # Vérifie que le sous-composant tag s'est bien rendu à l'intérieur
+        self.assertIn('tag is-success is-light', rendered)
         self.assertIn('OK', rendered)
-        # Vérifie le suffixe
-        self.assertIn('95 pts', rendered)
