@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.17.2.1"
+version = "0.17.3"
 description = "add : th, td and detail section as table component"
 readme = "README.md"
 requires-python = ">=3.14"
