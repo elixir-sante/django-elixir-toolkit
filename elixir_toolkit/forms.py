@@ -1,7 +1,11 @@
+import json
+
 from crispy_forms.layout import Field as CrispyField
 from crispy_forms.layout import HTML
 from crispy_forms.helper import FormHelper
 from django import forms
+
+from elixir_toolkit.validators import FileConstraintsValidator
 
 
 class SuperFormHelper(FormHelper):
@@ -89,11 +93,29 @@ class MultipleFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('widget', MultipleFileInput())
         super().__init__(*args, **kwargs)
-    def clean(self, data, initial=None):
-        single_file_clean = super().clean
-        if isinstance(data, (list, tuple)):
-            return [single_file_clean(d, initial) for d in data]
-        return [single_file_clean(data, initial)]
+
+    def widget_attrs(self, widget):
+        attrs = super().widget_attrs(widget)
+        
+        # Recherche du FileConstraintsValidator parmi les validators du champ
+        validator = next((v for v in self.validators if isinstance(v, FileConstraintsValidator)), None)
+        
+        if validator:
+            attrs.update({
+                'data-max-size': validator.max_size,
+                'data-max-total-size': validator.max_total_size,
+                'data-allowed-extensions': json.dumps(validator.allowed_extensions),
+                'data-max-files': validator.max_files,
+            })
+        else:
+            # Valeurs par défaut du toolkit si aucun validator n'est spécifié
+            attrs.update({
+                'data-max-size': 5 * 1024 * 1024,
+                'data-max-total-size': 5 * 1024 * 1024,
+                'data-allowed-extensions': json.dumps(['pdf', 'png', 'jpg', 'jpeg']),
+                'data-max-files': 5,
+            })
+        return attrs
 
 
 class PasswordWithIconField(CrispyField):

@@ -23,6 +23,9 @@
     <div id="list-{{ field.id_for_label }}" class="mt-2 tags"></div>
     <p class="help file-size has-text-grey" id="size-{{ field.id_for_label }}"></p>
     
+    <!-- Zone dédiée aux erreurs dynamiques JS -->
+    <p class="help is-danger file-error-help mt-1" id="error-{{ field.id_for_label }}"></p>
+
     {% if field.errors %}
         {% for error in field.errors %}
             <p class="help is-danger"><strong>{{ error }}</strong></p>
@@ -39,13 +42,13 @@
     function initElixirUploader() {
         document.querySelectorAll('.file-uploader').forEach(container => {
             const fieldId = container.dataset.fieldId;
-            
             if (container.dataset.initialized) return;
             
             const fileInput = container.querySelector('.file-input');
             const fileListDisplay = document.getElementById(`list-${fieldId}`);
             const fileNameLabel = document.getElementById(`name-${fieldId}`);
             const fileSizeContainer = document.getElementById(`size-${fieldId}`);
+            const errorDisplay = document.getElementById(`error-${fieldId}`);
             const clearCheckbox = document.getElementById(`${fieldId}-clear_id`);
 
             if (!fileInput || !fileListDisplay) return;
@@ -53,39 +56,25 @@
             container.dataset.initialized = "true";
             let allFiles = new DataTransfer();
 
-            let initialFileName = fileInput.dataset.initialName || "";
+            // Lecture dynamique des limites définies par le Validator Django via les data-* attributes
+            const MAX_SIZE = parseInt(fileInput.dataset.maxSize) || (5 * 1024 * 1024);
+            const MAX_TOTAL_SIZE = parseInt(fileInput.dataset.maxTotalSize) || (5 * 1024 * 1024);
+            const MAX_FILES = parseInt(fileInput.dataset.maxFiles) || 100;
+            let ALLOWED_EXTENSIONS = [];
+            try {
+                ALLOWED_EXTENSIONS = JSON.parse(fileInput.dataset.allowedExtensions || '[]');
+            } catch (e) {
+                ALLOWED_EXTENSIONS = ['pdf', 'png', 'jpg', 'jpeg'];
+            }
 
-            function updateFileList(isInitial = false) {
+            function updateFileList() {
                 fileListDisplay.innerHTML = '';
                 let totalSize = 0;
-
-                if (isInitial && initialFileName) {
-                    if (fileNameLabel) fileNameLabel.textContent = '1 fichier(s)';
-                    
-                    const fileControl = document.createElement('div');
-                    fileControl.className = 'control';
-                    fileControl.innerHTML = `
-                        <div class="tags has-addons">
-                            <a class="tag is-delete is-medium" id="clear-initial-${fieldId}"></a>
-                            <span class="tag is-link is-medium">${initialFileName.substring(0, 25)}</span>
-                        </div>
-                    `;
-                    
-                    fileControl.querySelector('.is-delete').onclick = (e) => {
-                        e.preventDefault();
-                        initialFileName = "";
-                        if (fileNameLabel) fileNameLabel.textContent = 'Aucun fichier';
-                        if (clearCheckbox) clearCheckbox.checked = true; // Demande à Django d'effacer le fichier
-                        updateFileList(false);
-                    };
-                    
-                    fileListDisplay.appendChild(fileControl);
-                    return;
-                }
 
                 if (!allFiles.files.length) {
                     if (fileNameLabel) fileNameLabel.textContent = 'Aucun fichier';
                     if (fileSizeContainer) fileSizeContainer.textContent = '';
+                    if (errorDisplay) errorDisplay.textContent = '';
                     return;
                 }
 
@@ -108,7 +97,7 @@
 
                 if (fileNameLabel) fileNameLabel.textContent = `${allFiles.files.length} fichier(s)`;
                 if (fileSizeContainer) {
-                    fileSizeContainer.textContent = `Taille : ${(totalSize / (1024 * 1024)).toFixed(2)} Mo`;
+                    fileSizeContainer.textContent = `Taille totale : ${(totalSize / (1024 * 1024)).toFixed(2)} Mo / ${(MAX_TOTAL_SIZE / (1024 * 1024)).toFixed(0)} Mo max`;
                 }
             }
 
@@ -119,23 +108,57 @@
                 });
                 allFiles = dt;
                 fileInput.files = allFiles.files;
-                updateFileList(false);
+                if (errorDisplay) errorDisplay.textContent = '';
+                updateFileList();
             }
 
             fileInput.addEventListener('change', function() {
-                initialFileName = "";
+                if (errorDisplay) errorDisplay.textContent = '';
                 if (clearCheckbox) clearCheckbox.checked = false;
 
-                if (this.multiple) {
-                    Array.from(this.files).forEach(file => allFiles.items.add(file));
-                } else {
-                    allFiles = new DataTransfer();
-                    if (this.files.length) allFiles.items.add(this.files[0]);
+                let currentTotalSize = Array.from(allFiles.files).reduce((sum, f) => sum + f.size, 0);
+                let currentCount = allFiles.files.length;
+                let rejectionReason = "";
+
+                const newFiles = Array.from(this.files);
+
+                for (const file of newFiles) {
+                    // 1. Contrôle nombre max de fichiers
+                    if (currentCount + 1 > MAX_FILES) {
+                        rejectionReason = `Nombre maximum de fichiers atteint (${MAX_FILES} max).`;
+                        break;
+                    }
+                    // 2. Contrôle taille unitaire
+                    if (file.size > MAX_SIZE) {
+                        rejectionReason = `Le fichier "${file.name}" dépasse la taille unitaire autorisée (${MAX_SIZE / (1024*1024)} Mo).`;
+                        break;
+                    }
+                    // 3. Contrôle taille cumulée totale
+                    if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
+                        rejectionReason = `L'ajout de "${file.name}" fait dépasser la taille totale autorisée (${MAX_TOTAL_SIZE / (1024*1024)} Mo).`;
+                        break;
+                    }
+                    // 4. Contrôle extension
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    if (ALLOWED_EXTENSIONS.length > 0 && !ALLOWED_EXTENSIONS.includes(ext)) {
+                        rejectionReason = `Format de "${file.name}" non autorisé.`;
+                        break;
+                    }
+
+                    allFiles.items.add(file);
+                    currentTotalSize += file.size;
+                    currentCount++;
                 }
+
+                if (rejectionReason) {
+                    if (errorDisplay) errorDisplay.textContent = rejectionReason;
+                }
+
                 this.files = allFiles.files;
-                updateFileList(false);
+                updateFileList();
             });
-            updateFileList(true);
+
+            updateFileList();
         });
     }
 
