@@ -5,8 +5,12 @@ from crispy_forms.layout import HTML
 from crispy_forms.helper import FormHelper
 from django import forms
 
-from elixir_toolkit.validators import FileConstraintsValidator
-
+from elixir_toolkit.validators import (
+    MaxFileSizeValidator,
+    MaxTotalSizeValidator,
+    AllowedExtensionsValidator,
+    MaxFilesValidator,
+)
 
 class SuperFormHelper(FormHelper):
     
@@ -82,39 +86,78 @@ class FileUpload(CrispyField):
         bound_field = form[self.fields[0]]
         current_attrs = bound_field.field.widget.attrs
         bound_field.field.widget = forms.FileInput(attrs=current_attrs)
-        
+
         return super().render(form, context, template_pack, **kwargs)
-        
+
+
+class ToolkitFileField(forms.FileField):
+    def __init__(
+        self,
+        max_size=5 * 1024 * 1024,
+        allowed_extensions=None,
+        *args,
+        **kwargs
+    ):
+        self.max_size = max_size
+        self.allowed_extensions = allowed_extensions or ['pdf', 'png', 'jpg', 'jpeg']
+
+        # Injection des validateurs unitaires pour fichier unique
+        kwargs.setdefault('validators', [])
+        kwargs['validators'].extend([
+            MaxFileSizeValidator(self.max_size),
+            AllowedExtensionsValidator(self.allowed_extensions),
+        ])
+
+        super().__init__(*args, **kwargs)
+
+    def widget_attrs(self, widget):
+        attrs = super().widget_attrs(widget)
+        attrs.update({
+            'data-max-size': self.max_size,
+            'data-allowed-extensions': json.dumps(self.allowed_extensions),
+        })
+        return attrs
+
+
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
 
 class MultipleFileField(forms.FileField):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        max_size=5 * 1024 * 1024,
+        max_total_size=5 * 1024 * 1024,
+        allowed_extensions=None,
+        max_files=5,
+        *args,
+        **kwargs
+    ):
+        self.max_size = max_size
+        self.max_total_size = max_total_size
+        self.allowed_extensions = allowed_extensions or ['pdf', 'png', 'jpg', 'jpeg']
+        self.max_files = max_files
+
+        # Injection automatique des 4 validateurs distincts
+        kwargs.setdefault('validators', [])
+        kwargs['validators'].extend([
+            MaxFileSizeValidator(self.max_size),
+            MaxTotalSizeValidator(self.max_total_size),
+            AllowedExtensionsValidator(self.allowed_extensions),
+            MaxFilesValidator(self.max_files),
+        ])
+
         kwargs.setdefault('widget', MultipleFileInput())
         super().__init__(*args, **kwargs)
 
     def widget_attrs(self, widget):
         attrs = super().widget_attrs(widget)
-        
-        # Recherche du FileConstraintsValidator parmi les validators du champ
-        validator = next((v for v in self.validators if isinstance(v, FileConstraintsValidator)), None)
-        
-        if validator:
-            attrs.update({
-                'data-max-size': validator.max_size,
-                'data-max-total-size': validator.max_total_size,
-                'data-allowed-extensions': json.dumps(validator.allowed_extensions),
-                'data-max-files': validator.max_files,
-            })
-        else:
-            # Valeurs par défaut du toolkit si aucun validator n'est spécifié
-            attrs.update({
-                'data-max-size': 5 * 1024 * 1024,
-                'data-max-total-size': 5 * 1024 * 1024,
-                'data-allowed-extensions': json.dumps(['pdf', 'png', 'jpg', 'jpeg']),
-                'data-max-files': 5,
-            })
+        attrs.update({
+            'data-max-size': self.max_size,
+            'data-max-total-size': self.max_total_size,
+            'data-allowed-extensions': json.dumps(self.allowed_extensions),
+            'data-max-files': self.max_files,
+        })
         return attrs
 
 
