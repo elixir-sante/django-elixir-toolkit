@@ -138,14 +138,17 @@ class MultipleFileField(forms.FileField):
         self.allowed_extensions = allowed_extensions or ['pdf', 'png', 'jpg', 'jpeg']
         self.max_files = max_files
 
-        # Injection automatique des 4 validateurs distincts
+        # Validateurs appliqués fichier par fichier, dans le clean() splitté
         kwargs.setdefault('validators', [])
         kwargs['validators'].extend([
             MaxFileSizeValidator(self.max_size),
-            MaxTotalSizeValidator(self.max_total_size),
             AllowedExtensionsValidator(self.allowed_extensions),
-            MaxFilesValidator(self.max_files),
         ])
+        # Validateurs qui doivent voir la liste complète
+        self._batch_validators = [
+            MaxTotalSizeValidator(self.max_total_size),
+            MaxFilesValidator(self.max_files),
+        ]
 
         kwargs.setdefault('widget', MultipleFileInput())
         super().__init__(*args, **kwargs)
@@ -159,6 +162,27 @@ class MultipleFileField(forms.FileField):
             'data-max-files': self.max_files,
         })
         return attrs
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+
+        if isinstance(data, (list, tuple)):
+            cleaned = [single_file_clean(d, initial) for d in data]
+            self._run_batch_validators(cleaned)
+            return cleaned
+
+        if not data:
+            return single_file_clean(data, initial)
+
+        cleaned = [single_file_clean(data, initial)]
+        self._run_batch_validators(cleaned)
+        return cleaned[0]
+
+    def _run_batch_validators(self, cleaned_files):
+        if not cleaned_files:
+            return
+        for validator in self._batch_validators:
+            validator(cleaned_files)
 
 
 class PasswordWithIconField(CrispyField):
