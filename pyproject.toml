@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.17.5"
-description = "fix : clean form missing"
+version = "0.17.6"
+description = "fix : error message for big files"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
