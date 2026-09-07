@@ -54,38 +54,44 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    window.selectizeInstances = window.selectizeInstances || [];
+(function() {
+    var elementId = "{{ element_id }}";
 
-    var closeOthers = function(current) {
-        window.selectizeInstances.forEach(function(instance) {
-            if (instance !== current && instance.isOpen) {
-                instance.close();
+    function initSelectize() {
+        var $el = $('#' + elementId);
+        if ($el.length === 0 || $el[0].selectize) return;
+
+        window.selectizeInstances = window.selectizeInstances || [];
+
+        var closeOthers = function(current) {
+            window.selectizeInstances.forEach(function(instance) {
+                if (instance !== current && instance.isOpen) {
+                    instance.close();
+                }
+            });
+        };
+
+        var config = {
+            delimiter: ',',
+            persist: false,
+            create: false,          // Empêche la création de nouvelles options
+            createOnBlur: false,    // Désactive la création à la perte de focus
+
+            maxItems: {% if multiple %}null{% else %}1{% endif %},
+            plugins: [{% if multiple %}'remove_button', {% endif %}'clear_button'],
+            dropdownParent: 'body',
+            onInitialize: function() {
+                window.selectizeInstances.push(this);
+                if ($el.is(':disabled')) {
+                    this.disable();
+                }
+            },
+            onDropdownOpen: function() {
+                closeOthers(this);
             }
-        });
-    };
+        };
 
-    var config = {
-        delimiter: ',',
-        persist: false,
-        create: false,          // Empêche la création de nouvelles options
-        createOnBlur: false,    // Désactive la création à la perte de focus
-
-        maxItems: {% if multiple %}null{% else %}1{% endif %},
-        plugins: [{% if multiple %}'remove_button', {% endif %}'clear_button'],
-        dropdownParent: 'body',
-        onInitialize: function() {
-            window.selectizeInstances.push(this);
-            if ($('#{{ element_id }}').is(':disabled')) {
-                this.disable();
-            }
-        },
-        onDropdownOpen: function() {
-            closeOthers(this);
-        }
-    };
-
-    if ("{{ name }}" === "icon") {
+        {% if name == "icon" %}
         config.render = {
             option: function(data, escape) {
                 return '<div class="is-size-6"><i class="fas p-2 fa-' + escape(data.value) + ' mr-2"></i>' + escape(data.text) + '</div>';
@@ -94,14 +100,36 @@ $(document).ready(function() {
                 return '<div class="is-size-6"><i class="fas fa-' + escape(data.value) + ' mr-1"></i>' + escape(data.text) + '</div>';
             }
         };
+        {% endif %}
+
+        var $select = $el.selectize(config);
+        var instance = $select[0].selectize;
+
+        var $control = $(instance.$control);
+        $control.addClass('input');
+        $('.selectize-dropdown').removeClass('input'); 
     }
 
-    var $select = $('#{{ element_id }}').selectize(config);
-    var instance = $select[0].selectize;
+    function destroySelectize() {
+        var $el = $('#' + elementId);
+        if ($el.length > 0 && $el[0].selectize) {
+            $el[0].selectize.destroy();
+        }
+    }
 
-    var $control = $(instance.$control);
-    $control.addClass('input');
-    $('.selectize-dropdown').removeClass('input'); 
-    
-});
+    $(document).ready(function() {
+        initSelectize();
+    });
+
+    var el = document.getElementById(elementId);
+    if (el) {
+        el.addEventListener('htmx:beforeSwap', destroySelectize);
+    }
+
+    document.body.addEventListener('htmx:afterSettle', function(event) {
+        if (event.detail.target.querySelector('#' + elementId) || event.detail.target.id === elementId) {
+            initSelectize();
+        }
+    });
+})();
 </script>
