@@ -121,10 +121,11 @@
         initSelectize();
     });
 
-    var el = document.getElementById(elementId);
-    if (el) {
-        el.addEventListener('htmx:beforeSwap', destroySelectize);
-    }
+    document.body.addEventListener('htmx:beforeSwap', function(event) {
+        if (event.detail.target.querySelector('#' + elementId) || event.detail.target.id === elementId) {
+            destroySelectize();
+        }
+    });
 
     document.body.addEventListener('htmx:afterSettle', function(event) {
         if (event.detail.target.querySelector('#' + elementId) || event.detail.target.id === elementId) {
