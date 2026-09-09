@@ -29,7 +29,8 @@ def parse_date(date_str, force_date=False) -> datetime | date | None:
         '1998-02-01+01:00',
         '1998-02-01+01:00Z',
         '1998-02-01Z',
-        '99999999'
+        '99999999',
+        '00000000',
         '19980201',
         '1998/02/01',
         '199802011555',
@@ -41,7 +42,8 @@ def parse_date(date_str, force_date=False) -> datetime | date | None:
     """
     if not date_str:
         return None
-    if date_str == '99999999':
+    if (date_str == '99999999' or
+        date_str == '00000000'):
         date_str = '99991231'
     try:
         if date_str.endswith('Z'):
