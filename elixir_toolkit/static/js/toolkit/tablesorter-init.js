@@ -32,7 +32,7 @@
         initTablesorter();
     });
 
-    document.body.addEventListener('htmx:afterSettle', function() {
+    document.addEventListener('htmx:afterSettle', function() {
         initTablesorter();
     });
 
