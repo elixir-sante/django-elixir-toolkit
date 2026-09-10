@@ -2,7 +2,7 @@
 
 **Django Elixir Toolkit** est une bibliothèque de composants UI réutilisables pour Django, basée sur le framework CSS **Bulma** et optimisée pour **Django Crispy Forms** avec **crispy-bulma**.
 
-Copyright (C) 2024 Elixir Santé
+Copyright (C) 2026 Elixir Santé
 
 ---
 
