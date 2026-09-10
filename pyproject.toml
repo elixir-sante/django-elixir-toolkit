@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.17.9"
-description = "fix : selectize bug -> htmx beforeswap"
+version = "0.18.0"
+description = ""
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
