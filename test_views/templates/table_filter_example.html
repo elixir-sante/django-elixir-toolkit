@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+{% load elixir_toolkit_tags %}
+
+{% block body %}
+<style>
+    :root {
+        color-scheme: light;
+    }
+    html, body {
+        background-color: white !important;
+        color: #363636 !important;
+    }
+</style>
+<div style="min-height: 100vh;">
+<h1 class="title">Exemple de filtrage de tableau</h1>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 1: Filtrage simple sur toutes les colonnes</h2>
+    
+    <div class="field has-addons mb-4">
+        <div class="control is-expanded">
+            <input type="text" id="search-all" class="input" placeholder="Rechercher dans toutes les colonnes...">
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" orderable=True filterable=True filter_target="#search-all" %}
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in donnees_inventaire %}
+            <tr>
+                <td>
+                    <span class="icon">
+                        <i class="fas fa-{{ item.icon_item }}"></i>
+                    </span>
+                    <strong>{{ item.nom }}</strong>
+                    <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+                </td>
+                <td>{% ui_tag text=item.categorie color="primary" %}</td>
+                <td class="has-text-weight-bold">{{ item.prix|floatformat:2 }} €</td>
+                <td>{{ item.stock }} unités</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    {% end_ui_table %}
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 2: Filtrage sur colonnes spécifiques (Nom et Catégorie uniquement)</h2>
+    
+    <div class="field has-addons mb-4">
+        <div class="control is-expanded">
+            <input type="text" id="search-specific" class="input" placeholder="Rechercher dans Nom et Catégorie...">
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" orderable=True filterable=True filter_columns="0,1" filter_target="#search-specific" %}
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in donnees_inventaire %}
+            <tr>
+                <td>
+                    <span class="icon">
+                        <i class="fas fa-{{ item.icon_item }}"></i>
+                    </span>
+                    <strong>{{ item.nom }}</strong>
+                    <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+                </td>
+                <td>{% ui_tag text=item.categorie color="primary" %}</td>
+                <td class="has-text-weight-bold">{{ item.prix|floatformat:2 }} €</td>
+                <td>{{ item.stock }} unités</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    {% end_ui_table %}
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 3: Filtrage sur une seule colonne (Catégorie uniquement)</h2>
+    
+    <div class="field has-addons mb-4">
+        <div class="control is-expanded">
+            <input type="text" id="search-category" class="input" placeholder="Rechercher par catégorie...">
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_columns="1" filter_target="#search-category" %}
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in donnees_inventaire %}
+            <tr>
+                <td>
+                    <span class="icon">
+                        <i class="fas fa-{{ item.icon_item }}"></i>
+                    </span>
+                    <strong>{{ item.nom }}</strong>
+                    <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+                </td>
+                <td>{% ui_tag text=item.categorie color="primary" %}</td>
+                <td class="has-text-weight-bold">{{ item.prix|floatformat:2 }} €</td>
+                <td>{{ item.stock }} unités</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    {% end_ui_table %}
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 4: Avec identifiant personnalisé</h2>
+    <p class="mb-4">Utilisation de la classe <code>.table-filter</code> et <code>data-filter-id</code></p>
+    
+    <div class="field has-addons mb-4">
+        <div class="control is-expanded">
+            <input type="text" class="input table-filter" data-filter-id="custom-table" placeholder="Rechercher...">
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_id="custom-table" filter_columns="0,1,2" %}
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in donnees_inventaire %}
+            <tr>
+                <td>
+                    <span class="icon">
+                        <i class="fas fa-{{ item.icon_item }}"></i>
+                    </span>
+                    <strong>{{ item.nom }}</strong>
+                    <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+                </td>
+                <td>{% ui_tag text=item.categorie color="primary" %}</td>
+                <td class="has-text-weight-bold">{{ item.prix|floatformat:2 }} €</td>
+                <td>{{ item.stock }} unités</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    {% end_ui_table %}
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Instructions</h2>
+    <div class="content">
+        <ul>
+            <li><strong>Exemple 1</strong> : Filtre sur toutes les colonnes par défaut</li>
+            <li><strong>Exemple 2</strong> : Filtre uniquement sur les colonnes Produit (0) et Catégorie (1)</li>
+            <li><strong>Exemple 3</strong> : Filtre uniquement sur la colonne Catégorie (1)</li>
+            <li><strong>Exemple 4</strong> : Utilisation de l'identifiant personnalisé pour lier le champ au tableau</li>
+        </ul>
+        <p>Essayez de taper :</p>
+        <ul>
+            <li><code>Hardware</code> pour voir les produits matériels</li>
+            <li><code>Accessoire</code> pour voir les accessoires</li>
+            <li><code>PyCharm</code> pour trouver le logiciel</li>
+            <li><code>27</code> pour trouver l'écran</li>
+        </ul>
+    </div>
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 5: Avec attributs data-search (champs cachés)</h2>
+    <p>Ce tableau utilise l'attribut <code>data-search</code> sur les lignes pour inclure des informations cachées dans la recherche.</p>
+    
+    <div class="field has-addons mb-4">
+        <div class="control is-expanded">
+            <input type="text" id="search-data-search" class="input" placeholder="Rechercher (y compris dans les champs cachés)...">
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target="#search-data-search" %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Martin</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="lyon 69 rhone-alpes">
+                <td>Restaurant Le Bistro</td>
+                <td>Restauration</td>
+                <td>Lyon</td>
+            </tr>
+            <tr data-search="marseille 13 provence-alpes-cote-d-azur">
+                <td>Hôtel de la Mer</td>
+                <td>Hébergement</td>
+                <td>Marseille</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Café des Arts</td>
+                <td>Restauration</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="toulouse 31 occitanie">
+                <td>Librairie du Sud</td>
+                <td>Commerce</td>
+                <td>Toulouse</td>
+            </tr>
+            <tr data-search="bordeaux 33 nouvelle-aquitaine">
+                <td>Cave à Vin</td>
+                <td>Commerce</td>
+                <td>Bordeaux</td>
+            </tr>
+        </tbody>
+    {% end_ui_table %}
+    
+    <p class="help mt-2">
+        <strong>Essayez :</strong>
+        <code>75</code> (trouvera les établissements à Paris),
+        <code>ile-de-france</code> (trouvera les établissements en Île-de-France),
+        <code>restauration</code> (trouvera par type),
+        <code>lyon</code> (trouvera par ville visible)
+    </p>
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 6: Plusieurs champs de filtre (logique ET)</h2>
+    <p>Utilisez plusieurs champs pour filtrer simultanément. Les filtres s'additionnent avec une logique ET.</p>
+    
+    <div class="field has-addons mb-4">
+        <div class="control">
+            <input type="text" id="multi-filter-nom" name="nom" class="input" placeholder="Filtrer par nom..." data-filter-column="0">
+        </div>
+        <div class="control">
+            <input type="text" id="multi-filter-ville" name="ville" class="input" placeholder="Filtrer par ville..." data-filter-column="2">
+        </div>
+        <div class="control">
+            <input type="text" id="multi-filter-type" name="type" class="input" placeholder="Filtrer par type..." data-filter-column="1">
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target="#multi-filter-nom, #multi-filter-ville, #multi-filter-type" %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Martin</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="lyon 69 rhone-alpes">
+                <td>Restaurant Le Bistro</td>
+                <td>Restauration</td>
+                <td>Lyon</td>
+            </tr>
+            <tr data-search="marseille 13 provence-alpes-cote-d-azur">
+                <td>Hôtel de la Mer</td>
+                <td>Hébergement</td>
+                <td>Marseille</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Café des Arts</td>
+                <td>Restauration</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="toulouse 31 occitanie">
+                <td>Librairie du Sud</td>
+                <td>Commerce</td>
+                <td>Toulouse</td>
+            </tr>
+            <tr data-search="bordeaux 33 nouvelle-aquitaine">
+                <td>Cave à Vin</td>
+                <td>Commerce</td>
+                <td>Bordeaux</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Dupont</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+            </tr>
+        </tbody>
+    {% end_ui_table %}
+    
+    <p class="help mt-2">
+        <strong>Exemples :</strong>
+        <code>Nom: "Boulangerie", Ville: "Paris"</code> → Trouvera les boulangeries à Paris,
+        <code>Type: "Commerce", Ville: "Paris"</code> → Trouvera tous les commerces à Paris,
+        <code>Nom: "Café", Type: "Restauration"</code> → Trouvera le Café des Arts
+    </p>
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 7: Filtres par cases à cocher</h2>
+    <p>Sélectionnez les types d'établissements à afficher (logique OU entre les cases cochées).</p>
+    
+    <div class="field mb-4">
+        <div class="control">
+            <label class="checkbox">
+                <input type="checkbox" name="ex7_type_filter" class="filter-checkbox-ex7" value="Commerce" checked> Commerce
+            </label>
+        </div>
+        <div class="control">
+            <label class="checkbox">
+                <input type="checkbox" name="ex7_type_filter" class="filter-checkbox-ex7" value="Restauration" checked> Restauration
+            </label>
+        </div>
+        <div class="control">
+            <label class="checkbox">
+                <input type="checkbox" name="ex7_type_filter" class="filter-checkbox-ex7" value="Hébergement" checked> Hébergement
+            </label>
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target=".filter-checkbox-ex7" %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Martin</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="lyon 69 rhone-alpes">
+                <td>Restaurant Le Bistro</td>
+                <td>Restauration</td>
+                <td>Lyon</td>
+            </tr>
+            <tr data-search="marseille 13 provence-alpes-cote-d-azur">
+                <td>Hôtel de la Mer</td>
+                <td>Hébergement</td>
+                <td>Marseille</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Café des Arts</td>
+                <td>Restauration</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="toulouse 31 occitanie">
+                <td>Librairie du Sud</td>
+                <td>Commerce</td>
+                <td>Toulouse</td>
+            </tr>
+            <tr data-search="bordeaux 33 nouvelle-aquitaine">
+                <td>Cave à Vin</td>
+                <td>Commerce</td>
+                <td>Bordeaux</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Dupont</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+            </tr>
+        </tbody>
+    {% end_ui_table %}
+    
+    <p class="help mt-2">
+        <strong>Exemples (logique OU entre checkboxes) :</strong>
+        <code>Cochez "Commerce" et "Restauration"</code> → Affiche les commerces OU les restaurants,
+        <code>Cochez uniquement "Commerce"</code> → Seuls les commerces s'affichent,
+        <code>Décochez tout</code> → Tous les établissements s'affichent (aucun filtre actif)
+    </p>
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 8: Filtre avec select</h2>
+    <p>Utilisez un menu déroulant pour filtrer par ville.</p>
+    
+    <div class="field has-addons mb-4">
+        <div class="control">
+            <div class="select is-fullwidth">
+                <select id="ex8-ville-select" data-filter-column="2">
+                    <option value="">Toutes les villes</option>
+                    <option value="Paris">Paris</option>
+                    <option value="Lyon">Lyon</option>
+                    <option value="Marseille">Marseille</option>
+                    <option value="Toulouse">Toulouse</option>
+                    <option value="Bordeaux">Bordeaux</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target="#ex8-ville-select" %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Martin</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="lyon 69 rhone-alpes">
+                <td>Restaurant Le Bistro</td>
+                <td>Restauration</td>
+                <td>Lyon</td>
+            </tr>
+            <tr data-search="marseille 13 provence-alpes-cote-d-azur">
+                <td>Hôtel de la Mer</td>
+                <td>Hébergement</td>
+                <td>Marseille</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Café des Arts</td>
+                <td>Restauration</td>
+                <td>Paris</td>
+            </tr>
+            <tr data-search="toulouse 31 occitanie">
+                <td>Librairie du Sud</td>
+                <td>Commerce</td>
+                <td>Toulouse</td>
+            </tr>
+            <tr data-search="bordeaux 33 nouvelle-aquitaine">
+                <td>Cave à Vin</td>
+                <td>Commerce</td>
+                <td>Bordeaux</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Dupont</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+            </tr>
+        </tbody>
+    {% end_ui_table %}
+    
+    <p class="help mt-2">
+        <strong>Exemples :</strong>
+        <code>Sélectionnez "Paris"</code> → Seuls les établissements à Paris s'affichent,
+        <code>Sélectionnez "Toutes les villes"</code> → Tous les établissements s'affichent
+    </p>
+</div>
+
+<div class="box">
+    <h2 class="subtitle">Exemple 9: Combinaison complète (select + 3 inputs + checkboxes)</h2>
+    <p>Combiner un select pour la région, 3 inputs texte (nom, type, ville) et des checkboxes pour des catégories supplémentaires.</p>
+    
+    <div class="mb-4">
+        <div class="field has-addons mb-3">
+            <div class="control">
+                <div class="select">
+                    <select id="ex9-region-select" data-filter-column="3">
+                        <option value="">Toutes les régions</option>
+                        <option value="ile-de-france">Île-de-France</option>
+                        <option value="rhone-alpes">Rhône-Alpes</option>
+                        <option value="provence">Provence</option>
+                        <option value="occitanie">Occitanie</option>
+                        <option value="nouvelle-aquitaine">Nouvelle-Aquitaine</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="field has-addons mb-3">
+                <div class="control">
+                    <input type="text" id="ex9-nom-input" class="input" placeholder="Filtrer par nom..." data-filter-column="0">
+                </div>
+                <div class="control">
+                    <input type="text" id="ex9-type-input" class="input" placeholder="Filtrer par type..." data-filter-column="1">
+                </div>
+                <div class="control">
+                    <input type="text" id="ex9-ville-input" class="input" placeholder="Filtrer par ville..." data-filter-column="2">
+                </div>
+            </div>
+            
+            <div class="field">
+                <p class="mb-2">Catégories supplémentaires :</p>
+                <div class="control">
+                    <label class="checkbox mr-3">
+                        <input type="checkbox" name="ex9_categories" class="filter-checkbox-ex9" value="Premium" checked> Premium
+                    </label>
+                    <label class="checkbox mr-3">
+                        <input type="checkbox" name="ex9_categories" class="filter-checkbox-ex9" value="Bio" checked> Bio
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="ex9_categories" class="filter-checkbox-ex9" value="Local" checked> Local
+                    </label>
+                </div>
+            </div>
+        </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target="#ex9-region-select, #ex9-nom-input, #ex9-type-input, #ex9-ville-input, .filter-checkbox-ex9" %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+                <th>Région</th>
+                <th>Catégories</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-search="paris 75 ile-de-france premium bio">
+                <td>Boulangerie Martin</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+                <td>Île-de-France</td>
+                <td>{% ui_tag text="Premium" color="success" %} {% ui_tag text="Bio" color="info" %}</td>
+            </tr>
+            <tr data-search="lyon 69 rhone-alpes premium local">
+                <td>Restaurant Le Bistro</td>
+                <td>Restauration</td>
+                <td>Lyon</td>
+                <td>Rhône-Alpes</td>
+                <td>{% ui_tag text="Premium" color="success" %} {% ui_tag text="Local" color="warning" %}</td>
+            </tr>
+            <tr data-search="marseille 13 provence bio local">
+                <td>Hôtel de la Mer</td>
+                <td>Hébergement</td>
+                <td>Marseille</td>
+                <td>Provence</td>
+                <td>{% ui_tag text="Bio" color="info" %} {% ui_tag text="Local" color="warning" %}</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france premium">
+                <td>Café des Arts</td>
+                <td>Restauration</td>
+                <td>Paris</td>
+                <td>Île-de-France</td>
+                <td>{% ui_tag text="Premium" color="success" %}</td>
+            </tr>
+            <tr data-search="toulouse 31 occitanie bio">
+                <td>Librairie du Sud</td>
+                <td>Commerce</td>
+                <td>Toulouse</td>
+                <td>Occitanie</td>
+                <td>{% ui_tag text="Bio" color="info" %}</td>
+            </tr>
+            <tr data-search="bordeaux 33 nouvelle-aquitaine local">
+                <td>Cave à Vin</td>
+                <td>Commerce</td>
+                <td>Bordeaux</td>
+                <td>Nouvelle-Aquitaine</td>
+                <td>{% ui_tag text="Local" color="warning" %}</td>
+            </tr>
+            <tr data-search="paris 75 ile-de-france premium bio local">
+                <td>Boulangerie Dupont</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+                <td>Île-de-France</td>
+                <td>{% ui_tag text="Premium" color="success" %} {% ui_tag text="Bio" color="info" %} {% ui_tag text="Local" color="warning" %}</td>
+            </tr>
+        </tbody>
+    {% end_ui_table %}
+    
+    <p class="help mt-2">
+        <strong>Exemples (logique OU entre checkboxes, ET avec les autres filtres) :</strong>
+        <code>Région: "Île-de-France", Nom: "Boulangerie"</code> → Trouve les boulangeries en Île-de-France,
+        <code>Type: "Commerce", Catégories: Bio OU Premium cochés</code> → Trouve les commerces qui ont au moins une des catégories,
+        <code>Ville: "Paris", Catégories: Premium coché</code> → Trouve les établissements Premium à Paris
+    </p>
+</div>
+
+<a href="/" class="button is-primary mt-4">Retour à la page principale</a>
+</div>
+{% endblock %}

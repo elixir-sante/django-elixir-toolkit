@@ -258,10 +258,44 @@ elixir_toolkit/
 {% end_ui_table %}
 ```
 
+#### Tableau avec filtrage
+```html
+<!-- Inclure jQuery et le script de filtrage -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'elixir_toolkit/js/table-filter.js' %}"></script>
+
+<!-- Champ de recherche -->
+<input type="text" id="search-input" placeholder="Rechercher...">
+
+<!-- Tableau avec filtrage -->
+{% ui_table filterable=True filter_target="#search-input" filter_columns="0,1" %}
+    <thead>
+        <tr>
+            {% ui_th %}Nom{% end_ui_th %}
+            {% ui_th %}Description{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% ui_td %}Produit 1{% end_ui_td %}
+            {% ui_td %}Description du produit 1{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}Produit 2{% end_ui_td %}
+            {% ui_td %}Description du produit 2{% end_ui_td %}
+        </tr>
+    </tbody>
+{% end_ui_table %}
+```
+
 **Paramètres :**
 - `css_classes` : Classes CSS
 - `expandable` : Mode expandable
 - `orderable` : Active le tri des colonnes avec des icônes Font Awesome (fa-sort, fa-sort-up, fa-sort-down)
+- `filterable` : Active le filtrage côté client
+- `filter_target` : Sélecteur jQuery du champ de formulaire (ex: "#search-input")
+- `filter_columns` : Colonnes à filtrer (index 0-based, séparés par des virgules, ex: "0,1,2")
+- `filter_id` : Identifiant unique pour le tableau (pour la méthode alternative de liaison)
 
 ---
 

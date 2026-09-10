@@ -138,16 +138,24 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
 
 
 class TableBlockNode(Node):
-    def __init__(self, css_classes, expandable, orderable, nodelist):
+    def __init__(self, css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, nodelist):
         self.css_classes = css_classes
         self.expandable = expandable
         self.orderable = orderable
+        self.filterable = filterable
+        self.filter_id = filter_id
+        self.filter_columns = filter_columns
+        self.filter_target = filter_target
         self.nodelist = nodelist
 
     def render(self, context):
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
         is_expandable = self.expandable.resolve(context) if self.expandable else False
         is_orderable = self.orderable.resolve(context) if self.orderable else False
+        is_filterable = self.filterable.resolve(context) if self.filterable else False
+        resolved_filter_id = self.filter_id.resolve(context) if self.filter_id else ""
+        resolved_filter_columns = self.filter_columns.resolve(context) if self.filter_columns else ""
+        resolved_filter_target = self.filter_target.resolve(context) if self.filter_target else ""
         
         table_content = self.nodelist.render(context)
         t = template.loader.get_template('elixir_toolkit/components/table.html')
@@ -158,6 +166,10 @@ class TableBlockNode(Node):
             'table_content': table_content,
             'expandable': str(is_expandable).lower() == 'true' or is_expandable is True,
             'orderable': str(is_orderable).lower() == 'true' or is_orderable is True,
+            'filterable': str(is_filterable).lower() == 'true' or is_filterable is True,
+            'filter_id': resolved_filter_id,
+            'filter_columns': resolved_filter_columns,
+            'filter_target': resolved_filter_target,
         })
         return t.render(ctx)
 
@@ -170,11 +182,28 @@ def ui_table(parser, token):
             <thead>...</thead>
             <tbody>...</tbody>
         {% end_ui_table %}
+        
+        Avec filtrage:
+        {% ui_table css_classes="is-striped" filterable=True filter_columns="0,1,2" filter_target="#search-input" %}
+            <thead>...</thead>
+            <tbody>...</tbody>
+        {% end_ui_table %}
+        
+        Ou avec identifiant pour lier manuellement:
+        {% ui_table css_classes="is-striped" filterable=True filter_id="my-table" filter_columns="0,2" %}
+            <thead>...</thead>
+            <tbody>...</tbody>
+        {% end_ui_table %}
+        <input type="text" class="table-filter" data-filter-id="my-table">
     """
     bits = token.split_contents()[1:]
     css_classes = None
     expandable = None
     orderable = None
+    filterable = None
+    filter_id = None
+    filter_columns = None
+    filter_target = None
     
     for bit in bits:
         if bit.startswith("css_classes="):
@@ -186,11 +215,23 @@ def ui_table(parser, token):
         elif bit.startswith("orderable="):
             val = bit.split("=")[1]
             orderable = parser.compile_filter(val)
+        elif bit.startswith("filterable="):
+            val = bit.split("=")[1]
+            filterable = parser.compile_filter(val)
+        elif bit.startswith("filter_id="):
+            val = bit.split("=")[1]
+            filter_id = parser.compile_filter(val)
+        elif bit.startswith("filter_columns="):
+            val = bit.split("=")[1]
+            filter_columns = parser.compile_filter(val)
+        elif bit.startswith("filter_target="):
+            val = bit.split("=")[1]
+            filter_target = parser.compile_filter(val)
 
     nodelist = parser.parse(('end_ui_table',))
     parser.delete_first_token()
 
-    return TableBlockNode(css_classes, expandable, orderable, nodelist)
+    return TableBlockNode(css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, nodelist)
 
 
 class THBlockNode(Node):

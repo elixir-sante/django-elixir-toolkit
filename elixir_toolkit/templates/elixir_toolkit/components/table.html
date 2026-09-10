@@ -1,4 +1,4 @@
-<div class="table-container" {% if orderable %}data-orderable="true"{% endif %}>
+<div class="table-container" {% if orderable %}data-orderable="true"{% endif %}{% if filterable %} data-filterable="true"{% if filter_id %} data-filter-id="{{ filter_id }}"{% endif %}{% if filter_columns %} data-filter-columns="{{ filter_columns }}"{% endif %}{% if filter_target %} data-filter-target="{{ filter_target }}"{% endif %}{% endif %}>
     <table class="table is-fullwidth is-hoverable {{ css_classes }}" {{ attrs }}>
         {{ table_content }}
     </table>

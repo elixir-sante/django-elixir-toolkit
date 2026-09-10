@@ -17,10 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from test_views.views import FormTestView
+from test_views.views import FormTestView, TableFilterExampleView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", FormTestView.as_view()),
+    path('table-filter-example/', TableFilterExampleView.as_view(), name='table_filter_example'),
 ]

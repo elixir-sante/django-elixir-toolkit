@@ -250,3 +250,80 @@ class ToolkitTableTest(ToolkitBaseTest):
         # Vérifie que le sous-composant tag s'est bien rendu à l'intérieur
         self.assertIn('tag is-success is-light', rendered)
         self.assertIn('OK', rendered)
+
+    def test_ui_table_filterable_basic(self):
+        """Vérifie que le ui_table avec filtrage génère les bons attributs data"""
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_table css_classes="is-striped" filterable=True %}
+                <thead>
+                    <tr><th>Nom</th><th>Statut</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Test</td><td>OK</td></tr>
+                </tbody>
+            {% end_ui_table %}
+        """
+        rendered = self.render_template(template)
+        
+        # Vérifie la présence des attributs de filtrage
+        self.assertIn('data-filterable="true"', rendered)
+        self.assertIn('class="table-container"', rendered)
+
+    def test_ui_table_filterable_with_columns(self):
+        """Vérifie que le ui_table avec filtrage sur colonnes spécifiques génère les bons attributs"""
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_table css_classes="is-striped" filterable=True filter_columns="0,2" %}
+                <thead>
+                    <tr><th>Nom</th><th>Statut</th><th>Email</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Test</td><td>OK</td><td>test@example.com</td></tr>
+                </tbody>
+            {% end_ui_table %}
+        """
+        rendered = self.render_template(template)
+        
+        # Vérifie la présence des attributs de filtrage avec colonnes
+        self.assertIn('data-filterable="true"', rendered)
+        self.assertIn('data-filter-columns="0,2"', rendered)
+
+    def test_ui_table_filterable_with_target(self):
+        """Vérifie que le ui_table avec filtrage et cible spécifique génère les bons attributs"""
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_table css_classes="is-striped" filterable=True filter_target="#search-input" %}
+                <thead>
+                    <tr><th>Nom</th><th>Statut</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Test</td><td>OK</td></tr>
+                </tbody>
+            {% end_ui_table %}
+        """
+        rendered = self.render_template(template)
+        
+        # Vérifie la présence des attributs de filtrage avec cible
+        self.assertIn('data-filterable="true"', rendered)
+        self.assertIn('data-filter-target="#search-input"', rendered)
+
+    def test_ui_table_filterable_with_id(self):
+        """Vérifie que le ui_table avec filtrage et identifiant personnalisé génère les bons attributs"""
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_table css_classes="is-striped" filterable=True filter_id="my-custom-table" filter_columns="1" %}
+                <thead>
+                    <tr><th>Nom</th><th>Statut</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Test</td><td>OK</td></tr>
+                </tbody>
+            {% end_ui_table %}
+        """
+        rendered = self.render_template(template)
+        
+        # Vérifie la présence des attributs de filtrage avec identifiant
+        self.assertIn('data-filterable="true"', rendered)
+        self.assertIn('data-filter-id="my-custom-table"', rendered)
+        self.assertIn('data-filter-columns="1"', rendered)

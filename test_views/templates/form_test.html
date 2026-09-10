@@ -1,9 +1,18 @@
 {% extends "base.html" %}
-{% block body %}
 {% load elixir_toolkit_tags %}
 {% load crispy_forms_tags %}
 
+{% block body %}
 <h1>Django Elixir toolkit</h1>
+
+<div class="mb-4">
+    <a href="{% url 'table_filter_example' %}" class="button is-info is-small">
+        <span class="icon">
+            <i class="fas fa-filter"></i>
+        </span>
+        <span>Voir les exemples de filtrage de tableau</span>
+    </a>
+</div>
 
 <h2>Simple components</h2>
 
@@ -242,7 +251,154 @@
     </tbody>
 {% end_ui_table %}
 
+<br>
+<br>
 
+<h2>Tableau avec filtrage (test)</h2>
+
+<!-- Champ de recherche pour le filtrage -->
+<div class="field has-addons mb-4">
+    <div class="control is-expanded">
+        <input type="text" id="table-filter-input" class="input" placeholder="Rechercher dans le tableau...">
+    </div>
+    <div class="control">
+        <button class="button is-info" onclick="document.getElementById('table-filter-input').value = ''; $('#table-filter-input').trigger('input');">
+            Effacer
+        </button>
+    </div>
+</div>
+
+<!-- Tableau avec filtrage activé -->
+{% ui_table css_classes="is-striped is-narrow" filterable=True filter_target="#table-filter-input" filter_columns="0,1,2" %}
+    <thead>
+        <tr>
+            {% ui_th %}Produit{% end_ui_th %}
+            {% ui_th %}Catégorie{% end_ui_th %}
+            {% ui_th %}Prix Unit.{% end_ui_th %}
+            {% ui_th %}Quantité{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in donnees_inventaire %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-{{ item.icon_item }}"></i>
+                </span>
+                <strong>{{ item.nom }}</strong>
+                <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text=item.categorie color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}{{ item.prix|floatformat:2 }} €{% end_ui_td %}
+            {% ui_td %}{{ item.stock }} unités{% end_ui_td %}
+        </tr>
+        {% endfor %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-laptop"></i>
+                </span>
+                <strong>Ordinateur Portable Pro</strong>
+                <div class="is-size-7 has-text-grey">ORD-2024-001</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Électronique" color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}1299.99 €{% end_ui_td %}
+            {% ui_td %}15 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-mouse"></i>
+                </span>
+                <strong>Souris Sans Fil</strong>
+                <div class="is-size-7 has-text-grey">MOU-2024-045</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Accessoire" color="info" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}29.99 €{% end_ui_td %}
+            {% ui_td %}42 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-keyboard"></i>
+                </span>
+                <strong>Clavier Mécanique</strong>
+                <div class="is-size-7 has-text-grey">CLA-2024-032</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Accessoire" color="info" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}89.50 €{% end_ui_td %}
+            {% ui_td %}23 unités{% end_ui_td %}
+        </tr>
+    </tbody>
+{% end_ui_table %}
+
+<br>
+<br>
+
+<h2>Tableau avec filtrage sur colonne spécifique (test)</h2>
+<p>Ce tableau ne filtre que sur la colonne "Catégorie" (colonne 1)</p>
+
+<!-- Champ de recherche pour le filtrage sur colonne spécifique -->
+<div class="field has-addons mb-4">
+    <div class="control is-expanded">
+        <input type="text" id="category-filter-input" class="input" placeholder="Rechercher par catégorie...">
+    </div>
+</div>
+
+<!-- Tableau avec filtrage sur colonne spécifique -->
+{% ui_table css_classes="is-striped is-narrow" filterable=True filter_target="#category-filter-input" filter_columns="1" %}
+    <thead>
+        <tr>
+            {% ui_th %}Produit{% end_ui_th %}
+            {% ui_th %}Catégorie{% end_ui_th %}
+            {% ui_th %}Prix Unit.{% end_ui_th %}
+            {% ui_th %}Quantité{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in donnees_inventaire %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-{{ item.icon_item }}"></i>
+                </span>
+                <strong>{{ item.nom }}</strong>
+                <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text=item.categorie color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}{{ item.prix|floatformat:2 }} €{% end_ui_td %}
+            {% ui_td %}{{ item.stock }} unités{% end_ui_td %}
+        </tr>
+        {% endfor %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-laptop"></i>
+                </span>
+                <strong>Ordinateur Portable Pro</strong>
+                <div class="is-size-7 has-text-grey">ORD-2024-001</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Électronique" color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}1299.99 €{% end_ui_td %}
+            {% ui_td %}15 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-mouse"></i>
+                </span>
+                <strong>Souris Sans Fil</strong>
+                <div class="is-size-7 has-text-grey">MOU-2024-045</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Accessoire" color="info" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}29.99 €{% end_ui_td %}
+            {% ui_td %}42 unités{% end_ui_td %}
+        </tr>
+    </tbody>
+{% end_ui_table %}
+
+<br>
+<br>
 
 <h2>Form</h2>
 

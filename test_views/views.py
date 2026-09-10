@@ -1,4 +1,4 @@
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from test_views.forms import FormExample
 
 class FormTestView(FormView):
@@ -73,6 +73,59 @@ class FormTestView(FormView):
                 'prix': 199.00,
                 'stock': 50,
                 'icon_item': 'code'
+            }
+        ]
+        
+        return context
+
+
+class TableFilterExampleView(TemplateView):
+    template_name = "table_filter_example.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Données pour l'exemple de filtrage
+        context['donnees_inventaire'] = [
+            {
+                'nom': 'MacBook Pro M3',
+                'sku': 'APP-MBP-2024',
+                'categorie': 'Hardware',
+                'prix': 2499.00,
+                'stock': 12,
+                'icon_item': 'laptop'
+            },
+            {
+                'nom': 'Licence PyCharm',
+                'sku': 'SOFT-JB-001',
+                'categorie': 'Software',
+                'prix': 199.00,
+                'stock': 50,
+                'icon_item': 'code'
+            },
+            {
+                'nom': 'Souris Gaming',
+                'sku': 'ACCESS-MOUSE-001',
+                'categorie': 'Accessoire',
+                'prix': 89.99,
+                'stock': 35,
+                'icon_item': 'mouse'
+            },
+            {
+                'nom': 'Clavier Mécanique',
+                'sku': 'ACCESS-KEYB-002',
+                'categorie': 'Accessoire',
+                'prix': 129.50,
+                'stock': 20,
+                'icon_item': 'keyboard'
+            },
+            {
+                'nom': 'Écran 27"',
+                'sku': 'MON-27-4K',
+                'categorie': 'Hardware',
+                'prix': 599.00,
+                'stock': 8,
+                'icon_item': 'desktop'
             }
         ]
         
