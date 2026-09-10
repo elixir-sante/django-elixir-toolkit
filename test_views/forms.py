@@ -29,8 +29,8 @@ class FormExample(CustomFormHelper, forms.Form):
                         choices=COLOR_CHOICES,
                         widget=forms.RadioSelect()
                     )
-    file = MultipleFileField(label="Documents justificatifs", required=True)
-    file2 = forms.FileField(label="Documents test", required=True)
+    # file = MultipleFileField(label="Documents justificatifs", required=True)
+    # file2 = forms.FileField(label="Documents test", required=True)
     
     @property
     def helper(self):
@@ -72,11 +72,11 @@ class FormExample(CustomFormHelper, forms.Form):
                     Div('checkboxes', css_class='column is-4'),
                     Div('radios', css_class='column is-4'),
                     # On repasse en mode explicite pour éviter le bug de détection
-                    Div(FileUpload('file'), css_class='column is-4'),
-                    css_class='columns'
+                    # Div(FileUpload('file'), css_class='column is-4'),
+                    # css_class='columns'
                 ),
-                Div(Div(FileUpload('file2'), css_class='column is-4'),),
-                'checkbox',
+                # Div(Div(FileUpload('file2'), css_class='column is-4'),),
+                # 'checkbox',
             ),
             HTML("""
                 <div class="field mt-5"><div class="control">

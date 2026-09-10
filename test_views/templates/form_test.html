@@ -52,7 +52,32 @@
 <br>
 <br>
 
-{% ui_table items=donnees_inventaire columns=config_colonnes css_classes="is-striped is-narrow" %}
+{% ui_table css_classes="is-striped is-narrow" %}
+    <thead>
+        <tr>
+            {% ui_th %}Produit{% end_ui_th %}
+            {% ui_th %}Catégorie{% end_ui_th %}
+            {% ui_th %}Prix Unit.{% end_ui_th %}
+            {% ui_th %}Quantité{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in donnees_inventaire %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-{{ item.icon_item }}"></i>
+                </span>
+                <strong>{{ item.nom }}</strong>
+                <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text=item.categorie color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}{{ item.prix|floatformat:2 }} €{% end_ui_td %}
+            {% ui_td %}{{ item.stock }} unités{% end_ui_td %}
+        </tr>
+        {% endfor %}
+    </tbody>
+{% end_ui_table %}
 
 <br>
 <br>

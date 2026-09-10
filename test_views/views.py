@@ -75,31 +75,5 @@ class FormTestView(FormView):
                 'icon_item': 'code'
             }
         ]
-
-        # 2. La configuration des colonnes (L'ordre compte !)
-        context['config_colonnes'] = [
-            {
-                'header': 'Produit', 
-                'field': 'nom', 
-                'sub_field': 'sku',     # Affiche le SKU sous le nom
-                'icon_field': 'icon_item' # Icône dynamique par ligne
-            },
-            {
-                'header': 'Catégorie', 
-                'field': 'categorie', 
-                'type': 'badge'         # Rendu sous forme de tag Bulma
-            },
-            {
-                'header': 'Prix Unit.', 
-                'field': 'prix', 
-                'type': 'price', 
-                'class': 'has-text-weight-bold'
-            },
-            {
-                'header': 'Quantité', 
-                'field': 'stock', 
-                'suffix': ' unités'     # Ajoute un suffixe personnalisé
-            }
-        ]
         
         return context
