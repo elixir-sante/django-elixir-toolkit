@@ -138,14 +138,16 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
 
 
 class TableBlockNode(Node):
-    def __init__(self, css_classes, expandable, nodelist):
+    def __init__(self, css_classes, expandable, orderable, nodelist):
         self.css_classes = css_classes
         self.expandable = expandable
+        self.orderable = orderable
         self.nodelist = nodelist
 
     def render(self, context):
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
         is_expandable = self.expandable.resolve(context) if self.expandable else False
+        is_orderable = self.orderable.resolve(context) if self.orderable else False
         
         table_content = self.nodelist.render(context)
         t = template.loader.get_template('elixir_toolkit/components/table.html')
@@ -155,6 +157,7 @@ class TableBlockNode(Node):
             'css_classes': resolved_classes,
             'table_content': table_content,
             'expandable': str(is_expandable).lower() == 'true' or is_expandable is True,
+            'orderable': str(is_orderable).lower() == 'true' or is_orderable is True,
         })
         return t.render(ctx)
 
@@ -163,7 +166,7 @@ class TableBlockNode(Node):
 def ui_table(parser, token):
     """
     Usage:
-        {% ui_table css_classes="is-striped" expandable=True %}
+        {% ui_table css_classes="is-striped" expandable=True orderable=True %}
             <thead>...</thead>
             <tbody>...</tbody>
         {% end_ui_table %}
@@ -171,6 +174,7 @@ def ui_table(parser, token):
     bits = token.split_contents()[1:]
     css_classes = None
     expandable = None
+    orderable = None
     
     for bit in bits:
         if bit.startswith("css_classes="):
@@ -179,11 +183,14 @@ def ui_table(parser, token):
         elif bit.startswith("expandable="):
             val = bit.split("=")[1]
             expandable = parser.compile_filter(val)
+        elif bit.startswith("orderable="):
+            val = bit.split("=")[1]
+            orderable = parser.compile_filter(val)
 
     nodelist = parser.parse(('end_ui_table',))
     parser.delete_first_token()
 
-    return TableBlockNode(css_classes, expandable, nodelist)
+    return TableBlockNode(css_classes, expandable, orderable, nodelist)
 
 
 class THBlockNode(Node):

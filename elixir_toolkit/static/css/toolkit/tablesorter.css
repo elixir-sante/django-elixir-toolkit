@@ -1,0 +1,60 @@
+/* Tablesorter custom styles for Bulma integration */
+
+/* Sort icon container */
+th .sort-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Default sort icon (fa-sort) */
+th .sort-icon i {
+    font-size: 0.8em;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+/* Hover effect */
+th:hover .sort-icon i {
+    opacity: 0.8;
+}
+
+/* Show default icon */
+th.sort-none .sort-icon i.fa-sort,
+th .sort-icon i.fa-sort {
+    display: inline;
+}
+
+/* Hide default icon when sorting */
+th.sort-asc .sort-icon i.fa-sort,
+th.sort-desc .sort-icon i.fa-sort {
+    display: none;
+}
+
+/* Ascending sort icon (fa-sort-up) */
+th.sort-asc .sort-icon::after {
+    content: "\f0de";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 0.8em;
+    opacity: 1;
+    display: inline;
+}
+
+/* Descending sort icon (fa-sort-down) */
+th.sort-desc .sort-icon::after {
+    content: "\f0dd";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 0.8em;
+    opacity: 1;
+    display: inline;
+}
+
+/* Ensure table headers are clickable */
+th {
+    cursor: pointer;
+}
