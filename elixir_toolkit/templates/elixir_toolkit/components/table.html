@@ -1,4 +1,4 @@
-<div class="table-container">
+<div class="table-container" {% if orderable %}data-orderable="true"{% endif %}>
     <table class="table is-fullwidth is-hoverable {{ css_classes }}" {{ attrs }}>
         {{ table_content }}
     </table>

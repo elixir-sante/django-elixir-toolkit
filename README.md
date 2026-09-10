@@ -51,6 +51,7 @@ Ce tag charge automatiquement :
 - Font Awesome (via CDN)
 - Selectize CSS/JS (via CDN)
 - jQuery (via CDN)
+- Tablesorter JS (via CDN)
 - Tous les CSS/JS personnalisés du toolkit
 
 ---
@@ -232,9 +233,35 @@ elixir_toolkit/
 {% end_ui_table %}
 ```
 
+#### Tableau avec tri (orderable)
+```html
+{% ui_table orderable=True css_classes="is-striped is-narrow" %}
+    <thead>
+        <tr>
+            {% ui_th %}Produit{% end_ui_th %}
+            {% ui_th %}Catégorie{% end_ui_th %}
+            {% ui_th %}Prix{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% ui_td %}Produit 1{% end_ui_td %}
+            {% ui_td %}Catégorie A{% end_ui_td %}
+            {% ui_td %}10.00 €{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}Produit 2{% end_ui_td %}
+            {% ui_td %}Catégorie B{% end_ui_td %}
+            {% ui_td %}20.00 €{% end_ui_td %}
+        </tr>
+    </tbody>
+{% end_ui_table %}
+```
+
 **Paramètres :**
 - `css_classes` : Classes CSS
 - `expandable` : Mode expandable
+- `orderable` : Active le tri des colonnes avec des icônes Font Awesome (fa-sort, fa-sort-up, fa-sort-down)
 
 ---
 

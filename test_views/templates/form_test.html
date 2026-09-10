@@ -52,7 +52,7 @@
 <br>
 <br>
 
-{% ui_table css_classes="is-striped is-narrow" %}
+{% ui_table css_classes="is-striped is-narrow" orderable=True %}
     <thead>
         <tr>
             {% ui_th %}Produit{% end_ui_th %}
@@ -76,6 +76,102 @@
             {% ui_td %}{{ item.stock }} unités{% end_ui_td %}
         </tr>
         {% endfor %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-laptop"></i>
+                </span>
+                <strong>Ordinateur Portable Pro</strong>
+                <div class="is-size-7 has-text-grey">ORD-2024-001</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Électronique" color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}1299.99 €{% end_ui_td %}
+            {% ui_td %}15 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-mouse"></i>
+                </span>
+                <strong>Souris Sans Fil</strong>
+                <div class="is-size-7 has-text-grey">MOU-2024-045</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Accessoire" color="info" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}29.99 €{% end_ui_td %}
+            {% ui_td %}42 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-keyboard"></i>
+                </span>
+                <strong>Clavier Mécanique</strong>
+                <div class="is-size-7 has-text-grey">CLA-2024-032</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Accessoire" color="info" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}89.50 €{% end_ui_td %}
+            {% ui_td %}23 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </span>
+                <strong>Smartphone Galaxy</strong>
+                <div class="is-size-7 has-text-grey">SMG-2024-012</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Électronique" color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}799.00 €{% end_ui_td %}
+            {% ui_td %}8 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-headphones"></i>
+                </span>
+                <strong>Casque Audio Bluetooth</strong>
+                <div class="is-size-7 has-text-grey">CAS-2024-067</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Audio" color="success" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}149.95 €{% end_ui_td %}
+            {% ui_td %}18 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-chair"></i>
+                </span>
+                <strong>Chaise de Bureau</strong>
+                <div class="is-size-7 has-text-grey">CHA-2024-008</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Mobilier" color="warning" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}199.99 €{% end_ui_td %}
+            {% ui_td %}5 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-desktop"></i>
+                </span>
+                <strong>Écran 27 pouces</strong>
+                <div class="is-size-7 has-text-grey">ECR-2024-022</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Électronique" color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}349.99 €{% end_ui_td %}
+            {% ui_td %}12 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-usb"></i>
+                </span>
+                <strong>Clé USB 128Go</strong>
+                <div class="is-size-7 has-text-grey">USB-2024-089</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Stockage" color="dark" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}19.99 €{% end_ui_td %}
+            {% ui_td %}56 unités{% end_ui_td %}
+        </tr>
     </tbody>
 {% end_ui_table %}
 
