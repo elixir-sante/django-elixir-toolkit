@@ -265,11 +265,12 @@ def ui_td(parser, token):
 
 
 @register.inclusion_tag('elixir_toolkit/components/tag.html')
-def ui_tag(text, color="primary", dot=True, css_classes=""):
+def ui_tag(text, color="primary", dot=True, css_classes="", icon=None):
     """
     Composant Tag / Badge générique Bulma.
     Usage:
         {% ui_tag text="Actif" color="success" %}
+        {% ui_tag text="Success" color="success" icon="fas fa-check-square" %}
     """
     color_class = f"is-{color}" if color else ""
 
@@ -278,6 +279,7 @@ def ui_tag(text, color="primary", dot=True, css_classes=""):
         'color_class': color_class,
         'dot': dot,
         'css_classes': css_classes,
+        'icon': icon,
     }
 
 

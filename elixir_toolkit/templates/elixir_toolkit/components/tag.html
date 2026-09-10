@@ -1,3 +1,10 @@
 <span class="tag {{ color_class }} is-light has-text-weight-semibold {{ css_classes }}">
+    {% if icon %}
+    <span class="icon">
+        <i class="{{ icon }}"></i>
+    </span>
+    <span>{{ text }}</span>
+    {% else %}
     {{ text }}
+    {% endif %}
 </span>
