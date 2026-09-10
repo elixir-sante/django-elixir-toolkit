@@ -194,12 +194,14 @@ def ui_table(parser, token):
 
 
 class THBlockNode(Node):
-    def __init__(self, css_classes, nodelist):
+    def __init__(self, css_classes, orderable, nodelist):
         self.css_classes = css_classes
+        self.orderable = orderable
         self.nodelist = nodelist
 
     def render(self, context):
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
+        is_orderable = self.orderable.resolve(context) if self.orderable else True
         th_content = self.nodelist.render(context)
         
         t = template.loader.get_template('elixir_toolkit/components/th.html')
@@ -208,6 +210,7 @@ class THBlockNode(Node):
         ctx.update({
             'css_classes': resolved_classes,
             'th_content': th_content,
+            'orderable': str(is_orderable).lower() == 'true' or is_orderable is True,
         })
         return t.render(ctx)
 
@@ -216,20 +219,24 @@ class THBlockNode(Node):
 def ui_th(parser, token):
     """
     Usage:
-        {% ui_th css_classes="pl-5 has-text-weight-semibold" %}Titre{% end_ui_th %}
+        {% ui_th css_classes="pl-5 has-text-weight-semibold" orderable=False %}Titre{% end_ui_th %}
     """
     bits = token.split_contents()[1:]
     css_classes = None
+    orderable = None
     
     for bit in bits:
         if bit.startswith("css_classes="):
             val = bit.split("=")[1]
             css_classes = parser.compile_filter(val)
+        elif bit.startswith("orderable="):
+            val = bit.split("=")[1]
+            orderable = parser.compile_filter(val)
 
     nodelist = parser.parse(('end_ui_th',))
     parser.delete_first_token()
 
-    return THBlockNode(css_classes, nodelist)
+    return THBlockNode(css_classes, orderable, nodelist)
 
 
 class TDBlockNode(Node):

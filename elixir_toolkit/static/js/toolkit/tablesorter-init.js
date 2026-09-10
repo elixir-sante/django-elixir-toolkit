@@ -15,7 +15,7 @@
         cssAsc: 'sort-asc',
         cssDesc: 'sort-desc',
         cssNone: 'sort-none',
-        selectorHeaders: '> thead th'
+        selectorHeaders: '> thead th[data-orderable!="false"]'
     };
 
     // Fonction pour initialiser tablesorter sur un conteneur
@@ -32,10 +32,8 @@
         initTablesorter();
     });
 
-    // Support HTMX : réinitialiser après un swap
-    if (typeof htmx !== 'undefined') {
-        document.body.addEventListener('htmx:afterSettle', function(event) {
-            initTablesorter(event.detail.elt);
-        });
-    }
+    document.body.addEventListener('htmx:afterSettle', function() {
+        initTablesorter();
+    });
+
 })(jQuery);

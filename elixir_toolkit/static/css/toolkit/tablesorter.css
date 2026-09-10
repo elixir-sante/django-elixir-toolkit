@@ -58,3 +58,12 @@ th.sort-desc .sort-icon::after {
 th {
     cursor: pointer;
 }
+
+/* Disable sorting for non-orderable columns */
+th[data-orderable="false"] {
+    cursor: default;
+}
+
+th[data-orderable="false"] .sort-icon {
+    display: none !important;
+}
