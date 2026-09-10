@@ -52,6 +52,73 @@
 <br>
 <br>
 
+{% ui_table css_classes="is-striped is-narrow" %}
+    <thead>
+        <tr>
+            {% ui_th %}Produit{% end_ui_th %}
+            {% ui_th %}Catégorie{% end_ui_th %}
+            {% ui_th %}Prix Unit.{% end_ui_th %}
+            {% ui_th %}Quantité{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in donnees_inventaire %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-{{ item.icon_item }}"></i>
+                </span>
+                <strong>{{ item.nom }}</strong>
+                <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text=item.categorie color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}{{ item.prix|floatformat:2 }} €{% end_ui_td %}
+            {% ui_td %}{{ item.stock }} unités{% end_ui_td %}
+        </tr>
+        {% endfor %}
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-laptop"></i>
+                </span>
+                <strong>Ordinateur Portable Pro</strong>
+                <div class="is-size-7 has-text-grey">ORD-2024-001</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Électronique" color="primary" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}1299.99 €{% end_ui_td %}
+            {% ui_td %}15 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-mouse"></i>
+                </span>
+                <strong>Souris Sans Fil</strong>
+                <div class="is-size-7 has-text-grey">MOU-2024-045</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Accessoire" color="info" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}29.99 €{% end_ui_td %}
+            {% ui_td %}42 unités{% end_ui_td %}
+        </tr>
+        <tr>
+            {% ui_td %}
+                <span class="icon">
+                    <i class="fas fa-keyboard"></i>
+                </span>
+                <strong>Clavier Mécanique</strong>
+                <div class="is-size-7 has-text-grey">CLA-2024-032</div>
+            {% end_ui_td %}
+            {% ui_td %}{% ui_tag text="Accessoire" color="info" %}{% end_ui_td %}
+            {% ui_td css_classes="has-text-weight-bold" %}89.50 €{% end_ui_td %}
+            {% ui_td %}23 unités{% end_ui_td %}
+        </tr>
+    </tbody>
+{% end_ui_table %}
+
+<br>
+<br>
+
+
 {% ui_table css_classes="is-striped is-narrow" orderable=True %}
     <thead>
         <tr>
@@ -175,8 +242,7 @@
     </tbody>
 {% end_ui_table %}
 
-<br>
-<br>
+
 
 <h2>Form</h2>
 
