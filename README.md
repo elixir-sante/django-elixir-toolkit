@@ -297,6 +297,14 @@ elixir_toolkit/
 - `filter_columns` : Colonnes à filtrer (index 0-based, séparés par des virgules, ex: "0,1,2")
 - `filter_id` : Identifiant unique pour le tableau (pour la méthode alternative de liaison)
 
+**Fonctionnalités de filtrage :**
+- **Champs texte** : Filtrage en temps réel sur toutes les colonnes ou colonnes spécifiées
+- **Select** : Filtrage par sélection dans un menu déroulant
+- **Checkboxes en groupe** : Logique OU entre les cases cochées du même groupe (ex: filtrer par "Commerce" OU "Restauration")
+- **Checkbox unique** : Filtrage classique (cochée = filtre par sa valeur, décochée = affiche tout)
+- **Attribut `data-search`** : Permet d'ajouter des données cachées pour le filtrage sur les lignes (`<tr data-search="valeur1 valeur2">`)
+- **Combinaison multiple** : Logique ET entre différents types de filtres (texte + select + checkboxes)
+
 ---
 
 ### Tag / Badge
