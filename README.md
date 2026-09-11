@@ -43,7 +43,7 @@ Dans votre template de base, chargez les CSS et JS nécessaires :
 
 ```html
 {% load elixir_toolkit_tags %}
-{% toolkit_css %}
+{% toolkit_assets %}
 ```
 
 Ce tag charge automatiquement :
@@ -75,7 +75,7 @@ elixir_toolkit/
 │       │   ├── tag.html            # Badge/Tag
 │       │   ├── td.html             # Cellule de tableau
 │       │   ├── th.html             # En-tête de tableau
-│       │   └── toolkit_css.html     # Chargement des ressources
+│       │   └── toolkit_assets.html   # Chargement des ressources (CSS/JS)
 │       └── components/fields/
 │           ├── file_input.html     # Champ de fichier
 │           └── password_input.html # Champ mot de passe
@@ -465,7 +465,7 @@ class MyForm(forms.Form):
 ### Template
 ```html
 {% load elixir_toolkit_tags %}
-{% toolkit_css %}
+{% toolkit_assets %}
 
 <div class="container">
     <h1 class="title">Bienvenue</h1>

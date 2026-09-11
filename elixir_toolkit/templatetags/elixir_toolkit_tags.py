@@ -13,8 +13,8 @@ def split(value):
         return value.split()
     return None
 
-@register.inclusion_tag('elixir_toolkit/components/toolkit_css.html')
-def toolkit_css(version="1.0.0"):
+@register.inclusion_tag('elixir_toolkit/components/toolkit_assets.html')
+def toolkit_assets(version="1.0.0"):
     return {
         "bulma_version": version
     }
