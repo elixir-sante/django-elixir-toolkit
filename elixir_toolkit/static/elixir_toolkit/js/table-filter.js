@@ -197,10 +197,12 @@
         // Pour les checkboxes, stocker aussi toutes les valeurs possibles de chaque groupe
         var checkboxGroupValues = {};
         
-        // D'abord, collecter TOUTES les checkboxes par nom dans le DOM
+        // D'abord, collecter UNIQUEMENT les groupes de checkboxes (ceux qui ont plusieurs éléments avec le même name)
         $filterInputs.filter('[type="checkbox"]').each(function() {
             var name = $(this).attr('name') || 'filter_' + $filterInputs.index(this);
-            if (!checkboxGroupValues[name]) {
+            // Vérifier si c'est un groupe (plusieurs checkboxes avec le même name)
+            var isGroup = $('[name="' + name + '"]').length > 1;
+            if (isGroup && !checkboxGroupValues[name]) {
                 checkboxGroupValues[name] = {
                     allValues: [],
                     checkedValues: []
@@ -232,7 +234,8 @@
             filterConfig[filterName] = {
                 column: filterColumn ? parseInt(filterColumn, 10) : null,
                 value: initialValue,
-                isCheckbox: $input.is('[type="checkbox"]')
+                isCheckbox: $input.is('[type="checkbox"]'),
+                isSingleCheckbox: $input.is('[type="checkbox"]') && $('[name="' + filterName + '"]').length === 1
             };
             
             // Stocker le nom directement dans les données de l'élément
@@ -240,28 +243,38 @@
             
             // Gestion différente pour les checkboxes
             if ($input.is('[type="checkbox"]')) {
+                // Vérifier si c'est une checkbox unique (pas de groupe)
+                var isSingleCheckbox = $('[name="' + filterName + '"]').length === 1;
+                
                 // Gestion de l'événement change pour les checkboxes
                 $input.on('change', function() {
                     var name = $(this).data('filter-name');
-                    // Pour les checkboxes, mettre à jour la valeur dans filterConfig
-                    // Si au moins une checkbox du groupe est cochée, on garde la valeur, sinon on met vide
-                    var anyChecked = false;
-                    $('[name="' + name + '"]').each(function() {
-                        if ($(this).is(':checked')) {
-                            anyChecked = true;
-                            return false;
-                        }
-                    });
-                    filterConfig[name].value = anyChecked ? $(this).val() : '';
                     
-                    // Mettre à jour les valeurs cochées pour ce groupe
-                    var checkedValues = [];
-                    $('[name="' + name + '"]').each(function() {
-                        if ($(this).is(':checked')) {
-                            checkedValues.push(normalizeString($(this).val()));
-                        }
-                    });
-                    checkboxGroupValues[name].checkedValues = checkedValues;
+                    if (isSingleCheckbox) {
+                        // Pour une checkbox unique, traiter comme un filtre classique
+                        // Si cochée, utiliser sa valeur, sinon valeur vide
+                        filterConfig[name].value = $(this).is(':checked') ? $(this).val() : '';
+                    } else {
+                        // Pour les checkboxes de groupe, mettre à jour la valeur dans filterConfig
+                        // Si au moins une checkbox du groupe est cochée, on garde la valeur, sinon on met vide
+                        var anyChecked = false;
+                        $('[name="' + name + '"]').each(function() {
+                            if ($(this).is(':checked')) {
+                                anyChecked = true;
+                                return false;
+                            }
+                        });
+                        filterConfig[name].value = anyChecked ? $(this).val() : '';
+                        
+                        // Mettre à jour les valeurs cochées pour ce groupe
+                        var checkedValues = [];
+                        $('[name="' + name + '"]').each(function() {
+                            if ($(this).is(':checked')) {
+                                checkedValues.push(normalizeString($(this).val()));
+                            }
+                        });
+                        checkboxGroupValues[name].checkedValues = checkedValues;
+                    }
                     
                     filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
                 });
@@ -379,12 +392,25 @@
     function filterTableMulti($table, filterConfig, columns, checkboxGroupValues) {
         var $rows = $table.find('tbody tr');
         
-        // Séparer les filtres en deux catégories : checkboxes et autres
+        // Séparer les filtres en deux catégories : checkboxes (groupes) et autres (y compris checkboxes uniques)
         var otherFilters = {};
+        var checkboxGroupFilters = {};
         
         for (var key in filterConfig) {
             var config = filterConfig[key];
-            if (!config.isCheckbox && config.value && config.value.trim() !== '') {
+            
+            // Les checkboxes uniques sont traitées comme des filtres classiques
+            if (config.isSingleCheckbox) {
+                if (config.value && config.value.trim() !== '') {
+                    otherFilters[key] = config;
+                }
+            }
+            // Les checkboxes de groupe sont traitées séparément
+            else if (config.isCheckbox && !config.isSingleCheckbox) {
+                checkboxGroupFilters[key] = config;
+            }
+            // Les autres types de filtres (text, select, etc.)
+            else if (!config.isCheckbox && config.value && config.value.trim() !== '') {
                 otherFilters[key] = config;
             }
         }
@@ -394,7 +420,7 @@
         
         // Vérifier si au moins un groupe de checkboxes a des cases cochées
         var hasActiveCheckboxFilters = false;
-        if (checkboxGroupValues) {
+        if (checkboxGroupValues && Object.keys(checkboxGroupValues).length > 0) {
             for (var key in checkboxGroupValues) {
                 if (checkboxGroupValues[key] && checkboxGroupValues[key].checkedValues.length > 0) {
                     // Vérifier si toutes les cases sont cochées
@@ -484,7 +510,7 @@
             
             // Vérifier les filtres checkbox (logique OU entre les checkboxes du même groupe)
             // Chaque groupe de checkboxes est un filtre OU, mais combiné avec ET aux autres filtres
-            if (checkboxGroupValues) {
+            if (checkboxGroupValues && Object.keys(checkboxGroupValues).length > 0) {
                 for (var filterName in checkboxGroupValues) {
                     var groupData = checkboxGroupValues[filterName];
                     
