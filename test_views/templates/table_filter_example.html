@@ -582,6 +582,65 @@
     </p>
 </div>
 
+<!-- NOUVEL EXEMPLE : Filtre par checkbox avec data-filter-checkbox -->
+<div class="box">
+    <h2 class="subtitle">Exemple 10: Filtre par checkbox (Afficher/Masquer selon un mot-clé)</h2>
+    <p>
+        Cochez/décochez pour afficher ou masquer les lignes contenant le mot-clé "<strong>actif</strong>"
+        dans leur attribut <code>data-search</code>.
+    </p>
+
+    <div class="field mb-4">
+        <label class="checkbox">
+            <input type="checkbox" id="filter-actif" data-filter-checkbox="iwanaseethis" checked>
+            Masquer les "inactif"
+        </label>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target="#filter-actif" %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Statut</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-search="iwanaseethis actif premium">
+                <td>Boulangerie Martin</td>
+                <td>{% ui_tag text="Actif" color="success" %}</td>
+                <td>Boulangerie à Paris (Premium)</td>
+            </tr>
+            <tr data-search="inactif">
+                <td>Restaurant Le Bistro</td>
+                <td>{% ui_tag text="Inactif" color="danger" %}</td>
+                <td>Restaurant à Lyon</td>
+            </tr>
+            <tr data-search="iwanaseethis actif">
+                <td>Hôtel de la Mer</td>
+                <td>{% ui_tag text="Actif" color="success" %}</td>
+                <td>Hôtel à Marseille</td>
+            </tr>
+            <tr data-search="inactif">
+                <td>Café des Arts</td>
+                <td>{% ui_tag text="Inactif" color="danger" %}</td>
+                <td>Café à Paris</td>
+            </tr>
+            <tr data-search="iwanaseethis actif bio">
+                <td>Librairie du Sud</td>
+                <td>{% ui_tag text="Actif" color="success" %}</td>
+                <td>Librairie à Toulouse (Bio)</td>
+            </tr>
+        </tbody>
+    {% end_ui_table %}
+
+    <p class="help mt-2">
+        <strong>Fonctionnement :</strong>
+        <code>Coché</code> → Affiche uniquement les lignes avec "actif" dans <code>data-search</code>,
+        <code>Décoché</code> → Affiche toutes les lignes.
+    </p>
+</div>
+
 <a href="/" class="button is-primary mt-4">Retour à la page principale</a>
 </div>
 {% endblock %}

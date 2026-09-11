@@ -72,6 +72,12 @@ def session_get(request, key, default=None):
 
 @sync_to_async
 def session_aset(request, **kwargs):
+    """
+    Should be used as:
+    `await session_aset(request, key1=value1, key2=value2)`
+    or
+    await session_aset(self.request, **{"key1": value1, "key2": value2})
+    """
     for k, v in kwargs.items():
         request.session[k] = v
     request.session.modified = True

@@ -262,7 +262,7 @@ elixir_toolkit/
 ```html
 <!-- Inclure jQuery et le script de filtrage -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{% static 'elixir_toolkit/js/table-filter.js' %}"></script>
+<script src="{% static 'js/toolkit/table-filter.js' %}"></script>
 
 <!-- Champ de recherche -->
 <input type="text" id="search-input" placeholder="Rechercher...">
@@ -296,6 +296,72 @@ elixir_toolkit/
 - `filter_target` : Sélecteur jQuery du champ de formulaire (ex: "#search-input")
 - `filter_columns` : Colonnes à filtrer (index 0-based, séparés par des virgules, ex: "0,1,2")
 - `filter_id` : Identifiant unique pour le tableau (pour la méthode alternative de liaison)
+
+**Filtrage avec checkbox isolée :**
+
+Vous pouvez utiliser une checkbox avec `data-filter-checkbox` pour afficher/masquer des lignes selon un mot-clé :
+
+```html
+<!-- Checkbox de filtrage -->
+<input type="checkbox" id="filter-actif" data-filter-checkbox="actif" checked>
+
+<!-- Tableau -->
+{% ui_table filterable=True filter_target="#filter-actif" %}
+    <thead>
+        <tr>
+            {% ui_th %}Nom{% end_ui_th %}
+            {% ui_th %}Statut{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-search="actif premium">
+            {% ui_td %}Produit 1{% end_ui_td %}
+            {% ui_td %}Actif{% end_ui_td %}
+        </tr>
+        <tr data-search="inactif">
+            {% ui_td %}Produit 2{% end_ui_td %}
+            {% ui_td %}Inactif{% end_ui_td %}
+        </tr>
+    </tbody>
+{% end_ui_table %}
+```
+
+**Comportement :**
+- Cochée : Affiche uniquement les lignes dont `data-search` contient la valeur de `data-filter-checkbox`
+- Décochée : Affiche toutes les lignes
+
+**Note :** Pour les groupes de checkboxes (logique OU), utilisez la méthode standard sans `data-filter-checkbox` (voir exemple 7).
+
+---
+
+#### Filtrage avec attributs data-search
+
+Vous pouvez ajouter des données cachées dans l'attribut `data-search` des lignes pour inclure des informations supplémentaires dans la recherche :
+
+```html
+<input type="text" id="search-input" placeholder="Rechercher...">
+
+{% ui_table filterable=True filter_target="#search-input" %}
+    <thead>
+        <tr>
+            {% ui_th %}Nom{% end_ui_th %}
+            {% ui_th %}Ville{% end_ui_th %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-search="paris 75 ile-de-france">
+            {% ui_td %}Boulangerie{% end_ui_td %}
+            {% ui_td %}Paris{% end_ui_td %}
+        </tr>
+        <tr data-search="lyon 69 rhone-alpes">
+            {% ui_td %}Restaurant{% end_ui_td %}
+            {% ui_td %}Lyon{% end_ui_td %}
+        </tr>
+    </tbody>
+{% end_ui_table %}
+```
+
+Rechercher "75" ou "ile-de-france" trouvera la boulangerie à Paris.
 
 ---
 

@@ -1,10 +1,11 @@
 /**
  * Filtrage de tableau avec jQuery
- * Utilisation: 
+ * Utilisation : 
  * 1. Ajouter data-filterable="true" sur le conteneur du tableau
  * 2. Ajouter data-filter-columns="0,1,2" pour spécifier les colonnes à filtrer (index 0-based)
  * 3. Ajouter data-filter-target="#mon-input" pour lier à un champ de formulaire
  * 4. Ou utiliser la classe .table-filter sur l'input et data-filter-id="mon-id" sur le tableau
+ * 5. Pour les checkboxes : data-filter-checkbox="valeur" pour filtrer les lignes contenant "valeur" dans data-search
  */
 
 (function($) {
@@ -61,7 +62,7 @@
                 var $filterInputs = $();
                 
                 selectors.forEach(function(selector) {
-                    var $input = $(selector);
+                    var $input = $container.find(selector);
                     if ($input.length) {
                         $filterInputs = $filterInputs.add($input);
                     }
@@ -101,6 +102,7 @@
                 }
             }
         });
+
     }
 
     /**
@@ -155,6 +157,56 @@
     }
 
     /**
+     * Configure le filtrage pour une checkbox avec data-filter-checkbox
+     */
+    function setupCheckboxFilter($checkbox) {
+        var filterValue = $checkbox.attr('data-filter-checkbox');
+        if (!filterValue) return;
+
+        // Trouver le tableau le plus proche ou le tableau parent
+        var $table = $checkbox.closest('table');
+        if (!$table.length) {
+            // Si pas de tableau parent, chercher dans le conteneur filterable suivant
+            var $container = $checkbox.nextAll('[data-filterable="true"]').first();
+            if ($container.length) {
+                $table = $container.find('table');
+            } else {
+                // Sinon, chercher le conteneur filterable parent
+                $container = $checkbox.closest('[data-filterable="true"]');
+                if ($container.length) {
+                    $table = $container.find('table');
+                } else {
+                    // Sinon, chercher le tableau suivant dans le DOM
+                    $table = $checkbox.nextAll('table').first();
+                }
+            }
+        }
+
+        if (!$table.length) return;
+
+        // Gestion de l'événement change
+        $checkbox.on('change', function() {
+            var isChecked = $(this).is(':checked');
+            var $rows = $table.find('tbody tr');
+
+            $rows.each(function() {
+                var $row = $(this);
+                var rowSearchData = $row.attr('data-search') || '';
+                var normalizedRowSearch = normalizeString(rowSearchData);
+                var normalizedFilterValue = normalizeString(filterValue);
+
+                // Si la checkbox est cochée, on affiche uniquement les lignes qui contiennent la valeur
+                // Si décochée, on affiche toutes les lignes
+                var shouldShow = !isChecked || normalizedRowSearch.includes(normalizedFilterValue);
+                $row.toggle(shouldShow);
+            });
+        });
+
+        // Appliquer le filtre initial
+        $checkbox.trigger('change');
+    }
+
+    /**
      * Configure le filtrage pour un tableau spécifique (version simple avec un seul champ)
      */
     function setupTableFilter($container, $filterInput, columnsAttr) {
@@ -194,11 +246,12 @@
         // Stocker les valeurs des filtres avec leur colonne associée
         var filterConfig = {};
         
-        // Pour les checkboxes, stocker aussi toutes les valeurs possibles de chaque groupe
+        // Pour les checkboxes de groupe (sans data-filter-checkbox), stocker toutes les valeurs possibles
         var checkboxGroupValues = {};
         
-        // D'abord, collecter TOUTES les checkboxes par nom dans le DOM
-        $filterInputs.filter('[type="checkbox"]').each(function() {
+        // D'abord, collecter TOUTES les checkboxes de groupe par nom dans le DOM
+        // (on ignore les checkboxes isolées avec data-filter-checkbox)
+        $filterInputs.filter('[type="checkbox"]').not('[data-filter-checkbox]').each(function() {
             var name = $(this).attr('name') || 'filter_' + $filterInputs.index(this);
             if (!checkboxGroupValues[name]) {
                 checkboxGroupValues[name] = {
@@ -210,7 +263,7 @@
         
         // Collecter toutes les valeurs possibles pour chaque groupe de checkboxes
         for (var name in checkboxGroupValues) {
-            $('[name="' + name + '"]').each(function() {
+            $('[name="' + name + '"]').not('[data-filter-checkbox]').each(function() {
                 var normalizedValue = normalizeString($(this).val());
                 checkboxGroupValues[name].allValues.push(normalizedValue);
                 if ($(this).is(':checked')) {
@@ -224,15 +277,29 @@
             var $input = $(this);
             var filterName = $input.attr('name') || 'filter_' + index;
             var filterColumn = $input.attr('data-filter-column'); // Quelle colonne ce filtre contrôle
+            var isSingleCheckbox = $input.is('[type="checkbox"]') && $input.attr('data-filter-checkbox');
             
             // Pour les checkboxes, la valeur initiale dépend de l'état coché
-            var initialValue = $input.is('[type="checkbox"]') && !$input.is(':checked') ? '' : $input.val();
+            // Pour une checkbox isolée avec data-filter-checkbox, utiliser cet attribut
+            var initialValue = '';
+            if ($input.is('[type="checkbox"]')) {
+                if (isSingleCheckbox) {
+                    // Checkbox isolée : utiliser data-filter-checkbox si cochée
+                    initialValue = $input.is(':checked') ? $input.attr('data-filter-checkbox') : '';
+                } else {
+                    // Checkbox de groupe : utiliser val() si cochée
+                    initialValue = $input.is(':checked') ? $input.val() : '';
+                }
+            } else {
+                initialValue = $input.val();
+            }
             
             // Stocker la configuration
             filterConfig[filterName] = {
                 column: filterColumn ? parseInt(filterColumn, 10) : null,
                 value: initialValue,
-                isCheckbox: $input.is('[type="checkbox"]')
+                isCheckbox: $input.is('[type="checkbox"]'),
+                isSingleCheckbox: isSingleCheckbox
             };
             
             // Stocker le nom directement dans les données de l'élément
@@ -243,25 +310,33 @@
                 // Gestion de l'événement change pour les checkboxes
                 $input.on('change', function() {
                     var name = $(this).data('filter-name');
-                    // Pour les checkboxes, mettre à jour la valeur dans filterConfig
-                    // Si au moins une checkbox du groupe est cochée, on garde la valeur, sinon on met vide
-                    var anyChecked = false;
-                    $('[name="' + name + '"]').each(function() {
-                        if ($(this).is(':checked')) {
-                            anyChecked = true;
-                            return false;
-                        }
-                    });
-                    filterConfig[name].value = anyChecked ? $(this).val() : '';
+                    var $this = $(this);
                     
-                    // Mettre à jour les valeurs cochées pour ce groupe
-                    var checkedValues = [];
-                    $('[name="' + name + '"]').each(function() {
-                        if ($(this).is(':checked')) {
-                            checkedValues.push(normalizeString($(this).val()));
-                        }
-                    });
-                    checkboxGroupValues[name].checkedValues = checkedValues;
+                    if (filterConfig[name].isSingleCheckbox) {
+                        // Checkbox isolée avec data-filter-checkbox
+                        filterConfig[name].value = $this.is(':checked') ? $this.attr('data-filter-checkbox') : '';
+                    } else {
+                        // Checkbox de groupe (exemple 7 et 9)
+                        // Pour les checkboxes, mettre à jour la valeur dans filterConfig
+                        // Si au moins une checkbox du groupe est cochée, on garde la valeur, sinon on met vide
+                        var anyChecked = false;
+                        $('[name="' + name + '"]').each(function() {
+                            if ($(this).is(':checked')) {
+                                anyChecked = true;
+                                return false;
+                            }
+                        });
+                        filterConfig[name].value = anyChecked ? $this.val() : '';
+                        
+                        // Mettre à jour les valeurs cochées pour ce groupe
+                        var checkedValues = [];
+                        $('[name="' + name + '"]').each(function() {
+                            if ($(this).is(':checked')) {
+                                checkedValues.push(normalizeString($(this).val()));
+                            }
+                        });
+                        checkboxGroupValues[name].checkedValues = checkedValues;
+                    }
                     
                     filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
                 });
@@ -379,18 +454,25 @@
     function filterTableMulti($table, filterConfig, columns, checkboxGroupValues) {
         var $rows = $table.find('tbody tr');
         
-        // Séparer les filtres en deux catégories : checkboxes et autres
+        // Séparer les filtres en trois catégories
         var otherFilters = {};
+        var singleCheckboxFilters = {};
         
         for (var key in filterConfig) {
             var config = filterConfig[key];
-            if (!config.isCheckbox && config.value && config.value.trim() !== '') {
+            if (config.isCheckbox) {
+                if (config.isSingleCheckbox && config.value && config.value.trim() !== '') {
+                    // Checkbox isolée avec data-filter-checkbox
+                    singleCheckboxFilters[key] = config;
+                }
+                // Les checkboxes de groupe sont gérées via checkboxGroupValues
+            } else if (config.value && config.value.trim() !== '') {
                 otherFilters[key] = config;
             }
         }
         
         // Vérifier si tous les filtres sont vides
-        var allEmpty = Object.keys(otherFilters).length === 0;
+        var allEmpty = Object.keys(otherFilters).length === 0 && Object.keys(singleCheckboxFilters).length === 0;
         
         // Vérifier si au moins un groupe de checkboxes a des cases cochées
         var hasActiveCheckboxFilters = false;
@@ -477,6 +559,66 @@
             }
             
             // Si les filtres précédents ont déjà exclu la ligne, pas besoin de vérifier les checkboxes
+            if (!isVisible) {
+                $row.toggle(false);
+                return;
+            }
+            
+            // Vérifier les checkboxes isolées avec data-filter-checkbox (logique ET)
+            for (var filterName in singleCheckboxFilters) {
+                var config = singleCheckboxFilters[filterName];
+                var filterValue = config.value;
+                var searchTerm = normalizeString(filterValue);
+                var filterMatched = false;
+                var targetColumn = config.column;
+                
+                // Vérifier d'abord l'attribut data-search sur la ligne
+                var rowSearchData = $row.attr('data-search');
+                if (rowSearchData) {
+                    var rowSearchText = normalizeString(rowSearchData);
+                    if (rowSearchText.includes(searchTerm)) {
+                        filterMatched = true;
+                    }
+                }
+                
+                // Si pas encore matched, vérifier les cellules
+                if (!filterMatched) {
+                    if (targetColumn !== null) {
+                        if (targetColumn >= 0 && targetColumn < $cells.length) {
+                            var cellText = normalizeString($cells.eq(targetColumn).text());
+                            if (cellText.includes(searchTerm)) {
+                                filterMatched = true;
+                            }
+                        }
+                    } else if (columns === null) {
+                        $cells.each(function() {
+                            var cellText = normalizeString($(this).text());
+                            if (cellText.includes(searchTerm)) {
+                                filterMatched = true;
+                                return false;
+                            }
+                        });
+                    } else {
+                        for (var i = 0; i < columns.length; i++) {
+                            var colIndex = columns[i];
+                            if (colIndex >= 0 && colIndex < $cells.length) {
+                                var cellText = normalizeString($cells.eq(colIndex).text());
+                                if (cellText.includes(searchTerm)) {
+                                    filterMatched = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (!filterMatched) {
+                    isVisible = false;
+                    break;
+                }
+            }
+            
+            // Si les filtres précédents ont déjà exclu la ligne, pas besoin de vérifier les groupes de checkboxes
             if (!isVisible) {
                 $row.toggle(false);
                 return;
