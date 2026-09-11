@@ -582,6 +582,89 @@
     </p>
 </div>
 
+
+<div class="box">
+    <h2 class="subtitle">Exemple 11: Filtre avec 1 case à cocher cocher</h2>
+    <p>Sélectionnez les types d'établissements à afficher (ouvert / pas ouvert).</p>
+    
+    <div class="field mb-4">
+        <div class="control">
+            <label class="checkbox">
+                <input type="checkbox" name="ex11_type_filter" id="filter-open" value="ouvert" checked> Voir uniquement les ouverts
+            </label>
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target="#filter-open" %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+                <th>Ouvert ?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-search="paris 75 ile-de-france ouvert">
+                <td>Boulangerie Martin</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+                <td>Oui</td>
+            </tr>
+            <tr data-search="lyon 69 rhone-alpes ouvert">
+                <td>Restaurant Le Bistro</td>
+                <td>Restauration</td>
+                <td>Lyon</td>
+                <td>Oui</td>
+
+            </tr>
+            <tr data-search="marseille 13 provence-alpes-cote-d-azur ouvert">
+                <td>Hôtel de la Mer</td>
+                <td>Hébergement</td>
+                <td>Marseille</td>
+                <td>Oui</td>
+
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Café des Arts</td>
+                <td>Restauration</td>
+                <td>Paris</td>
+                <td>Non</td>
+
+            </tr>
+            <tr data-search="toulouse 31 occitanie">
+                <td>Librairie du Sud</td>
+                <td>Commerce</td>
+                <td>Toulouse</td>
+                <td>Non</td>
+
+            </tr>
+            <tr data-search="bordeaux 33 nouvelle-aquitaine ouvert">
+                <td>Cave à Vin</td>
+                <td>Commerce</td>
+                <td>Bordeaux</td>
+                <td>Oui</td>
+
+            </tr>
+            <tr data-search="paris 75 ile-de-france">
+                <td>Boulangerie Dupont</td>
+                <td>Commerce</td>
+                <td>Paris</td>
+                <td>Non</td>
+
+            </tr>
+        </tbody>
+    {% end_ui_table %}
+    
+    <p class="help mt-2">
+        <strong>Exemples (logique OU entre checkboxes) :</strong>
+        <code>Cochez "Commerce" et "Restauration"</code> → Affiche les commerces OU les restaurants,
+        <code>Cochez uniquement "Commerce"</code> → Seuls les commerces s'affichent,
+        <code>Décochez tout</code> → Tous les établissements s'affichent (aucun filtre actif)
+    </p>
+</div>
+
+
 <a href="/" class="button is-primary mt-4">Retour à la page principale</a>
 </div>
 {% endblock %}
