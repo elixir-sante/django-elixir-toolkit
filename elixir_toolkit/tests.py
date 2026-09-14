@@ -327,3 +327,59 @@ class ToolkitTableTest(ToolkitBaseTest):
         self.assertIn('data-filterable="true"', rendered)
         self.assertIn('data-filter-id="my-custom-table"', rendered)
         self.assertIn('data-filter-columns="1"', rendered)
+
+
+class ToolkitDateInputTest(ToolkitBaseTest):
+    def _form(self, data=None, initial=None):
+        from elixir_toolkit.forms import ToolkitDateField
+
+        class DateForm(forms.Form):
+            date_effet = ToolkitDateField(label="Date d'effet", required=False)
+
+        return DateForm(data=data, initial=initial)
+
+    def test_empty_date_renders_wrapper_and_clear_button(self):
+        rendered = str(self._form()['date_effet'])
+
+        self.assertIn('class="toolkit-date-input is-empty"', rendered)
+        self.assertIn('type="date"', rendered)
+        self.assertIn('name="date_effet"', rendered)
+        self.assertIn('toolkit-date-input__clear', rendered)
+        self.assertIn('aria-label="Effacer la date"', rendered)
+
+    def test_filled_date_is_not_empty_and_uses_iso_format(self):
+        from datetime import date
+
+        rendered = str(self._form(initial={'date_effet': date(2024, 2, 1)})['date_effet'])
+
+        self.assertIn('class="toolkit-date-input"', rendered)
+        self.assertIn('value="2024-02-01"', rendered)
+
+    def test_date_field_cleans_iso_value(self):
+        from datetime import date
+
+        form = self._form(data={'date_effet': '2024-02-01'})
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['date_effet'], date(2024, 2, 1))
+
+    def test_custom_clear_label(self):
+        from elixir_toolkit.forms import ToolkitDateInput
+
+        rendered = ToolkitDateInput(clear_label="Vider").render('date_fin', None)
+
+        self.assertIn('aria-label="Vider"', rendered)
+
+    def test_crispy_render_keeps_widget_markup(self):
+        template = "{% load crispy_forms_tags %}{% crispy form %}"
+        form = self._form()
+        rendered = self.render_template(template, {'form': form})
+
+        self.assertIn('toolkit-date-input', rendered)
+        self.assertIn('class="input', rendered)
+
+    def test_toolkit_assets_include_date_input(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+
+        self.assertIn('elixir_toolkit/js/date-input.js', rendered)
+        self.assertIn('elixir_toolkit/css/date-input.css', rendered)

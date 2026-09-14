@@ -1,0 +1,58 @@
+/* Champ date : placeholder grisé + croix de réinitialisation */
+
+.toolkit-date-input {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.toolkit-date-input > input[type="date"] {
+    position: relative;
+    width: 100%;
+    /* Place pour la croix et l'icône calendrier */
+    padding-right: 4rem;
+}
+
+.toolkit-date-input > input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    margin: 0;
+    cursor: pointer;
+    opacity: 0.55;
+}
+
+.toolkit-date-input > input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* « jj/mm/aaaa » affiché comme un placeholder tant que le champ est vide */
+.toolkit-date-input.is-empty > input[type="date"] {
+    color: var(--bulma-input-placeholder-color, rgba(54, 54, 54, 0.3));
+}
+
+.toolkit-date-input__clear {
+    position: absolute;
+    top: 50%;
+    right: 2.5rem;
+    transform: translateY(-50%);
+    z-index: 4;
+}
+
+.toolkit-date-input.is-empty > .toolkit-date-input__clear,
+.toolkit-date-input > input:disabled ~ .toolkit-date-input__clear,
+.toolkit-date-input > input[readonly] ~ .toolkit-date-input__clear {
+    display: none;
+}
+
+/* Firefox : l'icône calendrier reste dans la zone de contenu, la croix passe à droite */
+@supports (-moz-appearance: none) {
+    .toolkit-date-input > input[type="date"] {
+        padding-right: 2.25rem;
+    }
+
+    .toolkit-date-input__clear {
+        right: 0.75rem;
+    }
+}

@@ -1,7 +1,7 @@
 from django import forms
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 from crispy_bulma.layout import IconField
-from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField, CustomFormHelper, PasswordWithIconField
+from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField, CustomFormHelper, PasswordWithIconField, ToolkitDateField
 
 
 COLOR_CHOICES = (
@@ -15,6 +15,7 @@ class FormExample(CustomFormHelper, forms.Form):
     number          = forms.CharField(label="Âge", widget=forms.NumberInput())
     url             = forms.CharField(label="Site Web", widget=forms.URLInput())
     password        = forms.CharField(label="Mot de passe", widget=forms.PasswordInput(attrs={'placeholder': '********'}))
+    birth_date      = ToolkitDateField(label="Date de naissance", required=False)
     select          = forms.ChoiceField(label="Couleur unique", choices=COLOR_CHOICES)
     multi_select    = forms.MultipleChoiceField(label="Couleurs multiples", choices=COLOR_CHOICES)
     textarea        = forms.CharField(label="Message", widget=forms.Textarea())
@@ -47,8 +48,9 @@ class FormExample(CustomFormHelper, forms.Form):
                     css_class='columns' 
                 ),
                 Div(
-                    Div(PasswordWithIconField('password'), css_class='column is-6'),
-                    Div(Field('number'), css_class='column is-6'),
+                    Div(PasswordWithIconField('password'), css_class='column is-4'),
+                    Div(Field('number'), css_class='column is-4'),
+                    Div(Field('birth_date'), css_class='column is-4'),
                     css_class='columns'
                 )
             ),

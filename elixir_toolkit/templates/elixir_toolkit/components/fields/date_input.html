@@ -1,0 +1,4 @@
+<div class="toolkit-date-input{% if not widget.value %} is-empty{% endif %}">
+    {% include "django/forms/widgets/input.html" %}
+    <button type="button" class="delete is-small toolkit-date-input__clear" aria-label="{{ widget.clear_label }}" title="{{ widget.clear_label }}"></button>
+</div>

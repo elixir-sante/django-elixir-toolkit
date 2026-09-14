@@ -185,6 +185,32 @@ class MultipleFileField(forms.FileField):
             validator(cleaned_files)
 
 
+class ToolkitDateInput(forms.DateInput):
+    """Champ date natif :
+     - texte « jj/mm/aaaa » grisé tant qu'aucune date n'est saisie
+     - croix pour vider le champ (déclenche `input` et `change`)
+    """
+    input_type = "date"
+    template_name = "elixir_toolkit/components/fields/date_input.html"
+
+    def __init__(self, attrs=None, format="%Y-%m-%d", clear_label="Effacer la date"):
+        attrs = dict(attrs or {})
+        css_classes = attrs.get("class", "").split()
+        if "input" not in css_classes:
+            attrs["class"] = " ".join(["input", *css_classes])
+        super().__init__(attrs=attrs, format=format)
+        self.clear_label = clear_label
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context["widget"]["clear_label"] = self.clear_label
+        return context
+
+
+class ToolkitDateField(forms.DateField):
+    widget = ToolkitDateInput
+
+
 class PasswordWithIconField(CrispyField):
     template = "elixir_toolkit/components/fields/password_input.html"
 

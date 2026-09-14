@@ -393,6 +393,27 @@ Affiche une icône de cadenas à gauche et un bouton toggle à droite.
 
 ---
 
+### Champ Date avec Réinitialisation
+
+```python
+from elixir_toolkit.forms import ToolkitDateField, ToolkitDateInput
+
+class MyForm(forms.Form):
+    date_effet = ToolkitDateField(label="Date d'effet")
+    # ou sur un DateField existant
+    date_fin = forms.DateField(widget=ToolkitDateInput(attrs={"aria-label": "Date de fin"}))
+```
+
+- Input HTML5 `type="date"` (valeur au format `%Y-%m-%d`).
+- Tant qu'aucune date n'est saisie, « jj/mm/aaaa » prend la couleur du placeholder (`--bulma-input-placeholder-color`).
+- Une croix (`.delete`) vide le champ et déclenche `input` / `change` (compatible filtres HTMX).
+- Fonctionne avec ou sans crispy (rendu par le widget), y compris pour le contenu injecté via HTMX.
+- `clear_label` : libellé accessible de la croix (défaut : « Effacer la date »).
+
+Nécessite `{% toolkit_assets %}` (`date-input.css` et `date-input.js`).
+
+---
+
 ### Sélecteur avec Crispy Forms
 
 ```python
@@ -535,6 +556,7 @@ class MyForm(forms.Form):
 
 ## Historique des Versions
 
+- **v0.22.0** : Ajout du champ date `ToolkitDateField` / `ToolkitDateInput` (placeholder grisé + croix de réinitialisation)
 - **v0.18.0** : Ajout des icon dans le composant ui_tag
 - **v0.17.9** : Correction de la date dans le format de date
 - **v0.17.8** : Fix du bug Selectize avec HTMX beforeSwap
