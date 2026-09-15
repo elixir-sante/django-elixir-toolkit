@@ -18,6 +18,8 @@ class FormTestView(FormView):
             
         context['etapes_simples'] = ["Identité", "Coordonnées", "Paiement", "Confirmation"]
 
+        context['etapes_simples_6'] = ["Compte", "Compte", "Compte", "Compte", "Compte", "Compte"]
+
         context['etapes_detaillees'] = [
             {'label': 'Compte', 'description': 'Email et mot de passe', 'icon': 'fas fa-user'},
             {'label': 'Profil', 'description': 'Informations personnelles', 'icon': 'fas fa-id-card'},
