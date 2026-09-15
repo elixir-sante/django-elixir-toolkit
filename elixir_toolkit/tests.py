@@ -327,3 +327,57 @@ class ToolkitTableTest(ToolkitBaseTest):
         self.assertIn('data-filterable="true"', rendered)
         self.assertIn('data-filter-id="my-custom-table"', rendered)
         self.assertIn('data-filter-columns="1"', rendered)
+
+
+class ToolkitStepperTest(ToolkitBaseTest):
+    STEPS = ["Identification", "Question secrète", "Nouveau mot de passe"]
+
+    def render_stepper(self, arguments="", **context):
+        template = "{% load elixir_toolkit_tags %}{% ui_stepper steps " + arguments + " %}"
+        return self.render_template(template, {"steps": self.STEPS, **context})
+
+    def test_stepper_basic_render(self):
+        """Vérifie la liste ordonnée, les numéros et les libellés"""
+        rendered = self.render_stepper()
+
+        self.assertIn('<ol class="ui-stepper " aria-label="Progression">', rendered)
+        self.assertEqual(rendered.count('class="ui-stepper-step"'), 3)
+        for label in self.STEPS:
+            self.assertIn(f'<span class="ui-stepper-label">{label}</span>', rendered)
+        self.assertNotIn('aria-current', rendered)
+        self.assertNotIn('fa-check', rendered)
+
+    def test_stepper_current_marks_previous_steps_done(self):
+        """Par défaut, les étapes avant l'étape active sont complétées"""
+        rendered = self.render_stepper("current=3")
+
+        self.assertEqual(rendered.count('class="ui-stepper-step is-done"'), 2)
+        self.assertIn('class="ui-stepper-step is-current" aria-current="step"', rendered)
+        self.assertEqual(rendered.count('fa-check'), 2)
+        self.assertIn('Étape 2 terminée', rendered)
+
+    def test_stepper_explicit_completed(self):
+        """Les étapes complétées peuvent être passées explicitement"""
+        rendered = self.render_stepper('current=1 completed="2,3"')
+
+        self.assertIn('class="ui-stepper-step is-current"', rendered)
+        self.assertEqual(rendered.count('class="ui-stepper-step is-done"'), 2)
+
+        rendered = self.render_stepper("current=2 completed=done", done=[])
+        self.assertNotIn('is-done', rendered)
+
+    def test_stepper_dict_steps(self):
+        """Les étapes acceptent une description et une icône"""
+        steps = [
+            {"label": "Salarié", "description": "Identité", "icon": "fas fa-user"},
+            {"label": "Observations"},
+        ]
+        rendered = self.render_stepper("current=2 css_classes='mb-0'", steps=steps)
+
+        self.assertIn('<ol class="ui-stepper mb-0"', rendered)
+        self.assertIn('<span class="ui-stepper-description">Identité</span>', rendered)
+        # Étape complétée : la coche remplace l'icône
+        self.assertNotIn('fas fa-user', rendered)
+
+        rendered = self.render_stepper("current=1", steps=steps)
+        self.assertIn('<i class="fas fa-user" aria-hidden="true"></i>', rendered)

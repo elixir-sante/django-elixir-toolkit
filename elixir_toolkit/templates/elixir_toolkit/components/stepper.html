@@ -1,0 +1,21 @@
+<ol class="ui-stepper {{ css_classes }}" aria-label="{{ aria_label }}">
+    {% for step in steps %}
+    <li class="ui-stepper-step{% if step.is_done %} is-done{% endif %}{% if step.is_current %} is-current{% endif %}"{% if step.is_current %} aria-current="step"{% endif %}>
+        <span class="ui-stepper-marker">
+            {% if step.is_done %}
+            <i class="fas fa-check" aria-hidden="true"></i>
+            <span class="is-sr-only">Étape {{ step.number }} terminée</span>
+            {% elif step.icon %}
+            <i class="{{ step.icon }}" aria-hidden="true"></i>
+            <span class="is-sr-only">Étape {{ step.number }}</span>
+            {% else %}
+            {{ step.number }}
+            {% endif %}
+        </span>
+        <span class="ui-stepper-label">{{ step.label }}</span>
+        {% if step.description %}
+        <span class="ui-stepper-description">{{ step.description }}</span>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ol>

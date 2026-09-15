@@ -70,6 +70,7 @@ elixir_toolkit/
 │       │   ├── filter_bar.html     # Barre de filtres
 │       │   ├── list.html           # Liste d'éléments
 │       │   ├── select.html         # Sélecteur avec Selectize
+│       │   ├── stepper.html        # Parcours en plusieurs étapes
 │       │   ├── table.html          # Tableau
 │       │   ├── tabs_scroll_hints.html # Indicateurs de défilement
 │       │   ├── tag.html            # Badge/Tag
@@ -332,6 +333,37 @@ elixir_toolkit/
 **Paramètres :**
 - `direction` : `down`, `right`, `up`, `left`
 - `size` : Taille
+
+---
+
+### Stepper
+
+Représente un parcours en plusieurs étapes : pastilles numérotées reliées par un trait, étape active mise en avant, étapes complétées marquées d'une coche.
+
+```python
+# views.py
+STEPS = ["Identification", "Question secrète", "Nouveau mot de passe"]
+
+# Ou avec une description et une icône par étape
+STEPS = [
+    {"label": "Salarié", "description": "Identité"},
+    {"label": "Coordonnées", "icon": "fas fa-address-card"},
+]
+```
+
+```html
+{% ui_stepper steps current=2 %}
+{% ui_stepper steps current=3 completed="1,2" aria_label="Création de compte" css_classes="mb-5" %}
+```
+
+**Paramètres :**
+- `steps` : Liste de libellés, ou de dicts `{"label", "description", "icon"}` (requis)
+- `current` : Numéro de l'étape active, à partir de 1
+- `completed` : Numéros des étapes complétées (liste ou `"1,2"`). Par défaut, les étapes qui précèdent `current`
+- `aria_label` : Libellé accessible de la liste (défaut : `Progression`)
+- `css_classes` : Classes CSS additionnelles
+
+**Personnalisation (variables CSS sur `.ui-stepper`) :** `--ui-stepper-size`, `--ui-stepper-line-color`, `--ui-stepper-active-color`, `--ui-stepper-text-color`
 
 ---
 
