@@ -355,3 +355,43 @@ def ui_chevron(direction="down", size="", css_classes=""):
         'size': size,
         'css_classes': css_classes,
     }
+
+@register.inclusion_tag('elixir_toolkit/components/stepper.html')
+def ui_stepper(steps, current=None, completed=None, aria_label="Progression", css_classes=""):
+    """
+    Composant Stepper : parcours en plusieurs étapes numérotées.
+    Usage:
+        {% ui_stepper steps current=2 %}
+        {% ui_stepper steps current=3 completed="1,2" aria_label="Création de compte" %}
+
+    - steps : liste de libellés, ou de dicts {"label", "description", "icon"}
+    - current : numéro (à partir de 1) de l'étape active
+    - completed : numéros des étapes complétées (liste ou "1,2") ;
+      par défaut, toutes celles qui précèdent l'étape active
+    """
+    current = int(current) if current not in (None, "") else None
+
+    if completed is None:
+        completed = range(1, current) if current else ()
+    elif isinstance(completed, str):
+        completed = [number for number in completed.split(",") if number.strip()]
+    completed = {int(number) for number in completed}
+
+    items = []
+    for number, step in enumerate(steps, start=1):
+        if not isinstance(step, dict):
+            step = {"label": step}
+        items.append({
+            'number': number,
+            'label': step.get("label", ""),
+            'description': step.get("description", ""),
+            'icon': step.get("icon"),
+            'is_current': number == current,
+            'is_done': number in completed,
+        })
+
+    return {
+        'steps': items,
+        'aria_label': aria_label,
+        'css_classes': css_classes,
+    }
