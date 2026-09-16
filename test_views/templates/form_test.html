@@ -414,6 +414,39 @@
 <br>
 <br>
 
+<h2>Champ date</h2>
+<p>Un <code>forms.DateField</code> standard suffit (voir la section « Dates » du formulaire ci-dessous). Un <code>&lt;input type="date"&gt;</code> écrit à la main est aussi pris en charge :</p>
+
+<div class="columns mt-3">
+    <div class="column is-4">
+        <div class="field">
+            <label class="label" for="date-html-vide">Vide</label>
+            <div class="control">
+                <input type="date" id="date-html-vide" name="date_html_vide">
+            </div>
+        </div>
+    </div>
+    <div class="column is-4">
+        <div class="field">
+            <label class="label" for="date-html-remplie">Remplie, libellé de croix personnalisé</label>
+            <div class="control">
+                <input type="date" id="date-html-remplie" name="date_html_remplie" value="2024-02-01" data-clear-label="Effacer la date de fin">
+            </div>
+        </div>
+    </div>
+    <div class="column is-4">
+        <div class="field">
+            <label class="label" for="date-html-readonly">Lecture seule</label>
+            <div class="control">
+                <input type="date" id="date-html-readonly" name="date_html_readonly" value="2024-02-01" readonly>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+<br>
+
 <h2>Form</h2>
 
 <form method="post">

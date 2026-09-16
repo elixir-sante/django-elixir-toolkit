@@ -1,3 +1,5 @@
+from datetime import date
+
 from django import forms
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 from crispy_bulma.layout import IconField
@@ -29,6 +31,10 @@ class FormExample(CustomFormHelper, forms.Form):
                         choices=COLOR_CHOICES,
                         widget=forms.RadioSelect()
                     )
+    # DateField standard : input natif, placeholder grisé et croix automatiques
+    date_vide       = forms.DateField(label="Date d'effet", required=False)
+    date_remplie    = forms.DateField(label="Date de naissance", required=False, initial=date(1990, 5, 14))
+    date_disabled   = forms.DateField(label="Date de création (désactivée)", required=False, initial=date(2024, 2, 1), disabled=True)
     # file = MultipleFileField(label="Documents justificatifs", required=True)
     # file2 = forms.FileField(label="Documents test", required=True)
     
@@ -54,6 +60,16 @@ class FormExample(CustomFormHelper, forms.Form):
             ),
             HTML('<hr class="my-5">'),
             Div(IconField('text_with_icon', icon_prepend="fas fa-user", icon_append="fas fa-check")),
+            HTML('<hr class="my-5">'),
+            Fieldset(
+                '📅 Dates',
+                Div(
+                    Div('date_vide', css_class='column is-4'),
+                    Div('date_remplie', css_class='column is-4'),
+                    Div('date_disabled', css_class='column is-4'),
+                    css_class='columns'
+                )
+            ),
             HTML('<hr class="my-5">'),
             Fieldset(
                 '🎨 Préférences visuelles',

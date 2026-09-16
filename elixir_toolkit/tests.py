@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 from django.template import Context, Template
 from django import forms
@@ -381,3 +383,62 @@ class ToolkitStepperTest(ToolkitBaseTest):
 
         rendered = self.render_stepper("current=1", steps=steps)
         self.assertIn('<i class="fas fa-user" aria-hidden="true"></i>', rendered)
+
+
+class ToolkitDateInputTest(ToolkitBaseTest):
+    """`ElixirToolkitConfig.ready()` patche `forms.DateInput` au démarrage : le
+    `DateField` standard de Django suffit, sans widget spécifique à retenir.
+    """
+
+    def _form(self, data=None, initial=None):
+        class DateForm(forms.Form):
+            date_effet = forms.DateField(label="Date d'effet", required=False)
+
+        return DateForm(data=data, initial=initial)
+
+    def test_plain_date_field_renders_native_input(self):
+        rendered = str(self._form()["date_effet"])
+
+        self.assertIn('type="date"', rendered)
+        self.assertIn('name="date_effet"', rendered)
+
+    def test_plain_date_field_uses_iso_format(self):
+        rendered = str(self._form(initial={"date_effet": date(2024, 2, 1)})["date_effet"])
+
+        self.assertIn('value="2024-02-01"', rendered)
+
+    def test_explicit_date_input_widget_is_native_too(self):
+        class DateForm(forms.Form):
+            date_effet = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
+
+        rendered = str(DateForm(initial={"date_effet": date(2024, 2, 1)})["date_effet"])
+
+        self.assertIn('type="date"', rendered)
+        self.assertIn('value="2024-02-01"', rendered)
+
+    def test_explicit_format_stays_prioritary(self):
+        rendered = forms.DateInput(format="%d/%m/%Y").render("date_fin", date(2024, 2, 1))
+
+        self.assertIn('value="01/02/2024"', rendered)
+
+    def test_date_field_cleans_iso_value(self):
+        form = self._form(data={"date_effet": "2024-02-01"})
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["date_effet"], date(2024, 2, 1))
+
+    def test_datetime_and_time_inputs_are_untouched(self):
+        self.assertNotIn('type="date"', forms.DateTimeInput().render("d", None))
+        self.assertNotIn('type="date"', forms.TimeInput().render("t", None))
+
+    def test_explicit_widget_override_still_wins(self):
+        class DateForm(forms.Form):
+            date_effet = forms.DateField(widget=forms.TextInput)
+
+        self.assertIn('type="text"', str(DateForm()["date_effet"]))
+
+    def test_toolkit_assets_loads_date_input_css_and_js(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+
+        self.assertIn('elixir_toolkit/css/date-input.css', rendered)
+        self.assertIn('elixir_toolkit/js/date-input.js', rendered)

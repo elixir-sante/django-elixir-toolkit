@@ -52,7 +52,7 @@ Ce tag charge automatiquement :
 - Selectize CSS/JS (via CDN)
 - jQuery (via CDN)
 - Tablesorter JS (via CDN)
-- Tous les CSS/JS personnalisés du toolkit
+- Tous les CSS/JS personnalisés du toolkit (dont le champ date, cf. [Champ Date](#champ-date))
 
 ---
 
@@ -85,6 +85,7 @@ elixir_toolkit/
 │   │   ├── button.css
 │   │   ├── bulma-list.css
 │   │   ├── ckeditor.css
+│   │   ├── date-input.css
 │   │   ├── selectize.css
 │   │   ├── spinner.css
 │   │   └── tabs.css
@@ -92,8 +93,10 @@ elixir_toolkit/
 │       ├── ckeditor-clipboard-manager.js
 │       ├── ckeditor-load-external-plugins.js
 │       ├── ckeditor-upload-adapter.js
+│       ├── date-input.js
 │       ├── fields-dependencies.js
 │       └── tabs-scroll-hints.js
+├── apps.py                      # Patch de forms.DateInput (champ date natif)
 └── forms.py                     # Champs et helpers
 ```
 
@@ -379,6 +382,37 @@ STEPS = [
 ---
 
 ## Champs de Formulaire
+
+### Champ Date
+
+Rien à importer : un `DateField` Django standard suffit.
+
+```python
+class MyForm(forms.Form):
+    date_effet = forms.DateField(label="Date d'effet", required=False)
+```
+
+Dès que `elixir_toolkit` est dans `INSTALLED_APPS` et que `{% toolkit_assets %}` est chargé :
+- `forms.DateInput` est rendu en `<input type="date">` natif, valeur au format ISO (`2024-02-01`) imposé par la spec HTML
+- un `format=` explicite reste prioritaire : `forms.DateInput(format="%d/%m/%Y")`
+- « jj/mm/aaaa » grisé tant que le champ est vide
+- croix de réinitialisation à gauche de l'icône calendrier, masquée si le champ est vide, `disabled` ou `readonly`
+- la croix vide le champ et déclenche `input` / `change` (filtres HTMX, validations...)
+- fonctionne aussi pour un `<input type="date">` écrit à la main et pour le contenu injecté dynamiquement (HTMX)
+
+`DateTimeInput` et `TimeInput` ne sont pas modifiés. Pour garder un champ texte, passer un widget explicite (`widget=forms.TextInput`).
+
+**Libellé de la croix** (défaut : « Effacer la date ») :
+
+```python
+date_effet = forms.DateField(widget=forms.DateInput(attrs={"data-clear-label": "Effacer la date d'effet"}))
+```
+
+```html
+<input type="date" name="date_fin" data-clear-label="Effacer la date de fin">
+```
+
+---
 
 ### Champ de Fichier avec Upload
 
