@@ -4,6 +4,9 @@ from django.test import TestCase
 from django.template import Context, Template
 from django import forms
 
+from elixir_toolkit.forms import limit_length
+from elixir_toolkit.mixins import FormMaxLengthFieldMixin
+
 class ToolkitBaseTest(TestCase):
     """Classe de base pour partager la logique de rendu des templates."""
     def render_template(self, string, context=None):
@@ -442,3 +445,101 @@ class ToolkitDateInputTest(ToolkitBaseTest):
 
         self.assertIn('elixir_toolkit/css/date-input.css', rendered)
         self.assertIn('elixir_toolkit/js/date-input.js', rendered)
+
+
+class ToolkitMaxLengthTest(ToolkitBaseTest):
+    """`limit_length` / `FormMaxLengthFieldMixin` : blocage navigateur via
+    `data-max-length` (max-length.js) et validation serveur équivalente.
+    """
+
+    def _form(self, data=None, widget=None):
+        class MessageForm(forms.Form):
+            message = forms.CharField(required=False, widget=widget or forms.Textarea)
+
+        form = MessageForm(data=data)
+        limit_length(form.fields["message"], 10)
+        return form
+
+    def _rich_widget(self):
+        # Classe posée par django_ckeditor_5.widgets.CKEditor5Widget
+        return forms.Textarea(attrs={"class": "django_ckeditor_5"})
+
+    def test_text_field_gets_native_maxlength_and_data_attribute(self):
+        rendered = str(self._form()["message"])
+
+        self.assertIn('maxlength="10"', rendered)
+        self.assertIn('data-max-length="10"', rendered)
+
+    def test_text_field_rejects_too_long_value(self):
+        form = self._form(data={"message": "x" * 11})
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("message", form.errors)
+
+    def test_text_field_counts_crlf_as_one_char(self):
+        form = self._form(data={"message": "12345\r\n789"})
+
+        self.assertTrue(form.is_valid())
+
+    def test_rich_text_field_has_no_native_maxlength(self):
+        rendered = str(self._form(widget=self._rich_widget())["message"])
+
+        self.assertNotIn('maxlength=', rendered)
+        self.assertIn('data-max-length="10"', rendered)
+
+    def test_rich_text_field_counts_visible_text_only(self):
+        form = self._form(data={"message": "<p><strong>" + "&amp;" * 10 + "</strong></p>"}, widget=self._rich_widget())
+
+        self.assertTrue(form.is_valid())
+
+    def test_rich_text_field_rejects_too_long_visible_text(self):
+        form = self._form(data={"message": "<p>" + "x" * 11 + "</p>"}, widget=self._rich_widget())
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("message", form.errors)
+
+    def test_mixin_reads_limits_from_form_meta(self):
+        class MessageForm(forms.Form):
+            message = forms.CharField(required=False)
+            other = forms.CharField(required=False)
+
+            class Meta:
+                fields_max_length = {"message": 5, "unknown": 5}
+
+        class BaseView:
+            def get_form(self, form_class=None):
+                return MessageForm(data={"message": "x" * 6, "other": "x" * 6})
+
+        class View(FormMaxLengthFieldMixin, BaseView):
+            pass
+
+        form = View().get_form()
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("message", form.errors)
+        self.assertNotIn("other", form.errors)
+
+    def test_mixin_view_limits_take_precedence(self):
+        class MessageForm(forms.Form):
+            message = forms.CharField(required=False)
+
+            class Meta:
+                fields_max_length = {"message": 5}
+
+        class BaseView:
+            def get_form(self, form_class=None):
+                return MessageForm(data={"message": "x" * 6})
+
+        class View(FormMaxLengthFieldMixin, BaseView):
+            fields_max_length = {"message": 6}
+
+        self.assertTrue(View().get_form().is_valid())
+
+    def test_toolkit_assets_loads_max_length_js_after_ckeditor_loader(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+
+        self.assertIn('elixir_toolkit/js/max-length.js', rendered)
+        self.assertLess(
+            rendered.index('elixir_toolkit/js/ckeditor-load-external-plugins.js'),
+            rendered.index('elixir_toolkit/js/max-length.js'),
+        )

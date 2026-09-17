@@ -10,7 +10,28 @@ from elixir_toolkit.validators import (
     MaxTotalSizeValidator,
     AllowedExtensionsValidator,
     MaxFilesValidator,
+    TextMaxLengthValidator,
+    RichTextMaxLengthValidator,
 )
+
+
+def limit_length(field, max_length):
+    """Limite la saisie d'un champ de formulaire à `max_length` caractères.
+
+    - validation serveur : `RichTextMaxLengthValidator` pour un éditeur CKEditor
+      (texte visible), `TextMaxLengthValidator` sinon ;
+    - `data-max-length` sur le widget : `elixir_toolkit/js/max-length.js` bloque
+      la frappe et le collage au-delà de la limite et affiche un compteur ;
+    - `maxlength` natif en plus pour les `input` / `textarea`.
+    """
+    widget = field.widget
+    # Classe posée par CKEditor5Widget : évite d'importer django_ckeditor_5
+    if "django_ckeditor_5" in widget.attrs.get("class", "").split():
+        field.validators.append(RichTextMaxLengthValidator(max_length))
+    else:
+        field.validators.append(TextMaxLengthValidator(max_length))
+        widget.attrs["maxlength"] = str(max_length)
+    widget.attrs["data-max-length"] = str(max_length)
 
 class SuperFormHelper(FormHelper):
     

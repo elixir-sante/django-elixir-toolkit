@@ -52,7 +52,7 @@ Ce tag charge automatiquement :
 - Selectize CSS/JS (via CDN)
 - jQuery (via CDN)
 - Tablesorter JS (via CDN)
-- Tous les CSS/JS personnalisés du toolkit (dont le champ date, cf. [Champ Date](#champ-date))
+- Tous les CSS/JS personnalisés du toolkit (dont le champ date, cf. [Champ Date](#champ-date), et la limite de caractères, cf. [Limite de caractères](#limite-de-caractères))
 
 ---
 
@@ -95,6 +95,7 @@ elixir_toolkit/
 │       ├── ckeditor-upload-adapter.js
 │       ├── date-input.js
 │       ├── fields-dependencies.js
+│       ├── max-length.js
 │       └── tabs-scroll-hints.js
 ├── apps.py                      # Patch de forms.DateInput (champ date natif)
 └── forms.py                     # Champs et helpers
@@ -414,6 +415,63 @@ date_effet = forms.DateField(widget=forms.DateInput(attrs={"data-clear-label": "
 
 ---
 
+### Limite de caractères
+
+Bloque la saisie d'un champ à n caractères, avec compteur et validation serveur équivalente. Fonctionne pour les `input`, les `textarea` et les éditeurs CKEditor (`CKEditor5Field`).
+
+**Depuis la vue ou le `Meta` du formulaire** (même principe que `fields_dependencies`) :
+
+```python
+from elixir_toolkit.mixins import FormMaxLengthFieldMixin
+
+class InsurerConfigView(FormMaxLengthFieldMixin, UpdateView):
+    fields_max_length = {"config_first_login_message_content": 400}
+
+# ou
+class InsurerConfigForm(forms.ModelForm):
+    class Meta:
+        fields_max_length = {"config_first_login_message_content": 400}
+```
+
+La vue doit hériter de `FormMaxLengthFieldMixin` dans les deux cas ; la déclaration de la vue est prioritaire sur celle du `Meta`.
+
+**Sans vue** (formulaire utilisé ailleurs, limite dynamique...) :
+
+```python
+from elixir_toolkit.forms import limit_length
+
+class MyForm(forms.Form):
+    message = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        limit_length(self.fields["message"], 400)
+```
+
+Avec `{% toolkit_assets %}` chargé :
+- `input` / `textarea` : attribut `maxlength` natif, et compteur « n / 400 caractères » sous les `textarea`
+- CKEditor : frappe bloquée à la limite, texte collé tronqué, compteur sous l'éditeur (remplace le compteur mots / caractères de django_ckeditor_5). Seul le texte visible est compté : balises ignorées, entité (`&amp;`) = 1 caractère
+- compteur en rouge une fois la limite atteinte
+- contenu déjà trop long (valeur en base, glisser-déposer) : message d'erreur et boutons submit du formulaire désactivés jusqu'à correction
+- validation serveur : `RichTextMaxLengthValidator` (CKEditor) ou `TextMaxLengthValidator` (retour à la ligne = 1 caractère, comme `maxlength`)
+
+**Message d'erreur** (défaut : « Ce champ est limité à 400 caractères. ») :
+
+```python
+limit_length(self.fields["message"], 400)
+self.fields["message"].widget.attrs["data-max-length-message"] = "Le message est limité à 400 caractères."
+```
+
+**Brancher un script sur les éditeurs CKEditor** : `ckeditorRegisterCallback` de django_ckeditor_5 ne garde qu'un callback par éditeur, déjà utilisé par le toolkit. Utiliser plutôt :
+
+```js
+window.elixirOnCkeditorReady(function (editor) {
+    // appelé une fois pour chaque éditeur, existant ou créé plus tard (HTMX)
+});
+```
+
+---
+
 ### Champ de Fichier avec Upload
 
 ```python
@@ -513,6 +571,8 @@ from elixir_toolkit.validators import (
     MaxTotalSizeValidator,
     AllowedExtensionsValidator,
     MaxFilesValidator,
+    TextMaxLengthValidator,
+    RichTextMaxLengthValidator,
 )
 
 class MyForm(forms.Form):

@@ -2,6 +2,7 @@ import logging
 from asgiref.sync import sync_to_async
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
+from elixir_toolkit.forms import limit_length
 from elixir_toolkit.utils import session_aget
 from elixir_toolkit.middleware import redirect_now
 
@@ -132,3 +133,28 @@ class FormDependencyFieldMixin:
             for field in controlled_fields:
                 if field in form.fields:
                     form.fields[field].widget.attrs['data-depends-on'] = controller
+
+
+class FormMaxLengthFieldMixin:
+    """Limite la saisie de champs à n caractères (cf. `elixir_toolkit.forms.limit_length`).
+
+    `fields_max_length = {"nom_du_champ": 400}` sur la vue ou dans le `Meta` du formulaire.
+    """
+    fields_max_length = None
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        if form:
+            self._apply_fields_max_length(form)
+        return form
+
+    def _apply_fields_max_length(self, form):
+        meta = getattr(form, "Meta", None)
+        limits = getattr(self, "fields_max_length", None) or getattr(meta, "fields_max_length", None)
+
+        if not limits:
+            return
+
+        for field, max_length in limits.items():
+            if field in form.fields:
+                limit_length(form.fields[field], max_length)
