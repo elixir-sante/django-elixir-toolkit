@@ -7,6 +7,8 @@ name = "pypi"
 django = ">=6"
 django-crispy-forms = "*"
 crispy-bulma = {ref = "main", git = "git+https://github.com/elixir-sante/crispy-bulma.git"}
+django-ckeditor-5 = "*"
+httpx = "*"
 
 [dev-packages]
 coverage = "*"

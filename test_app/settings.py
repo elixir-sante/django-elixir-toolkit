@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bulma',
+    'django_ckeditor_5',
     'test_views',
     'elixir_toolkit',
 ]
