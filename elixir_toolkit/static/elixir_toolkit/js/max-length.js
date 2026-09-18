@@ -1,5 +1,5 @@
 /**
- * Limite de caractères des champs `[data-max-length]` (posé par `elixir_toolkit.forms.limit_length`)
+ * Limite de caractères des champs `[data-max-length]` (posé sur tout `forms.CharField` avec `max_length`, cf. `elixir_toolkit/apps.py`)
  * - compteur « n / max caractères » sous les `textarea` et les éditeurs CKEditor, en rouge à la limite
  * - `input` / `textarea` : blocage natif via l'attribut `maxlength`
  * - CKEditor : bloque la frappe et tronque le texte collé au-delà de la limite

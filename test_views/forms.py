@@ -4,7 +4,7 @@ from django import forms
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 from crispy_bulma.layout import IconField
 from django_ckeditor_5.widgets import CKEditor5Widget
-from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField, CustomFormHelper, PasswordWithIconField, limit_length
+from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField, CustomFormHelper, PasswordWithIconField
 
 
 COLOR_CHOICES = (
@@ -21,11 +21,12 @@ class FormExample(CustomFormHelper, forms.Form):
     select          = forms.ChoiceField(label="Couleur unique", choices=COLOR_CHOICES)
     multi_select    = forms.MultipleChoiceField(label="Couleurs multiples", choices=COLOR_CHOICES)
     textarea        = forms.CharField(label="Message", widget=forms.Textarea())
-    textarea_limite = forms.CharField(label="Message limité à 50 caractères", widget=forms.Textarea(), required=False)
+    textarea_limite = forms.CharField(label="Message limité à 50 caractères", widget=forms.Textarea(), required=False, max_length=50)
     ckeditor_limite = forms.CharField(
                         label="Texte riche limité à 100 caractères",
                         widget=CKEditor5Widget(config_name='light'),
                         required=False,
+                        max_length=100,
                         initial="<p>Le texte <strong>visible</strong> est compté, pas les balises HTML.</p>",
                     )
     checkbox        = forms.BooleanField(label="J'accepte les conditions", required=True)
@@ -46,12 +47,6 @@ class FormExample(CustomFormHelper, forms.Form):
     # file = MultipleFileField(label="Documents justificatifs", required=True)
     # file2 = forms.FileField(label="Documents test", required=True)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Compteur + blocage de la saisie (max-length.js) et validation serveur
-        limit_length(self.fields['textarea_limite'], 50)
-        limit_length(self.fields['ckeditor_limite'], 100)
-    
     @property
     def helper(self):
         helper = super().helper

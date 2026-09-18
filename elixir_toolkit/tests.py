@@ -3,9 +3,11 @@ from datetime import date
 from django.test import TestCase
 from django.template import Context, Template
 from django import forms
+from django.core import validators
+from django.core.exceptions import ValidationError
+from django_ckeditor_5.fields import CKEditor5Field
 
 from elixir_toolkit.forms import limit_length
-from elixir_toolkit.mixins import FormMaxLengthFieldMixin
 
 class ToolkitBaseTest(TestCase):
     """Classe de base pour partager la logique de rendu des templates."""
@@ -448,17 +450,16 @@ class ToolkitDateInputTest(ToolkitBaseTest):
 
 
 class ToolkitMaxLengthTest(ToolkitBaseTest):
-    """`limit_length` / `FormMaxLengthFieldMixin` : blocage navigateur via
-    `data-max-length` (max-length.js) et validation serveur équivalente.
+    """`max_length` d'un `forms.CharField` (patché dans `apps.py`) : blocage
+    navigateur via `data-max-length` (max-length.js) et validation serveur
+    équivalente.
     """
 
-    def _form(self, data=None, widget=None):
+    def _form(self, data=None, widget=None, max_length=10):
         class MessageForm(forms.Form):
-            message = forms.CharField(required=False, widget=widget or forms.Textarea)
+            message = forms.CharField(required=False, max_length=max_length, widget=widget or forms.Textarea)
 
-        form = MessageForm(data=data)
-        limit_length(form.fields["message"], 10)
-        return form
+        return MessageForm(data=data)
 
     def _rich_widget(self):
         # Classe posée par django_ckeditor_5.widgets.CKEditor5Widget
@@ -470,11 +471,17 @@ class ToolkitMaxLengthTest(ToolkitBaseTest):
         self.assertIn('maxlength="10"', rendered)
         self.assertIn('data-max-length="10"', rendered)
 
+    def test_field_without_max_length_is_untouched(self):
+        rendered = str(self._form(max_length=None)["message"])
+
+        self.assertNotIn('maxlength', rendered)
+        self.assertNotIn('data-max-length', rendered)
+
     def test_text_field_rejects_too_long_value(self):
         form = self._form(data={"message": "x" * 11})
 
         self.assertFalse(form.is_valid())
-        self.assertIn("message", form.errors)
+        self.assertEqual(len(form.errors["message"]), 1)
 
     def test_text_field_counts_crlf_as_one_char(self):
         form = self._form(data={"message": "12345\r\n789"})
@@ -498,42 +505,50 @@ class ToolkitMaxLengthTest(ToolkitBaseTest):
         self.assertFalse(form.is_valid())
         self.assertIn("message", form.errors)
 
-    def test_mixin_reads_limits_from_form_meta(self):
+    def test_widget_replaced_after_init_uses_matching_validator(self):
+        form = self._form(data={"message": "<p>" + "x" * 10 + "</p>"})
+        form.fields["message"].widget = self._rich_widget()
+
+        self.assertTrue(form.is_valid())
+
+    def test_max_length_error_reported_with_other_errors(self):
         class MessageForm(forms.Form):
-            message = forms.CharField(required=False)
-            other = forms.CharField(required=False)
+            message = forms.CharField(max_length=5, validators=[validators.RegexValidator(r"^\d+$")])
 
-            class Meta:
-                fields_max_length = {"message": 5, "unknown": 5}
-
-        class BaseView:
-            def get_form(self, form_class=None):
-                return MessageForm(data={"message": "x" * 6, "other": "x" * 6})
-
-        class View(FormMaxLengthFieldMixin, BaseView):
-            pass
-
-        form = View().get_form()
+        form = MessageForm(data={"message": "abcdefgh"})
 
         self.assertFalse(form.is_valid())
-        self.assertIn("message", form.errors)
-        self.assertNotIn("other", form.errors)
+        self.assertEqual(len(form.errors["message"]), 2)
 
-    def test_mixin_view_limits_take_precedence(self):
+    def test_custom_max_length_error_message(self):
         class MessageForm(forms.Form):
-            message = forms.CharField(required=False)
+            message = forms.CharField(max_length=5, error_messages={"max_length": "Trop long."})
 
-            class Meta:
-                fields_max_length = {"message": 5}
+        form = MessageForm(data={"message": "x" * 6})
 
-        class BaseView:
-            def get_form(self, form_class=None):
-                return MessageForm(data={"message": "x" * 6})
+        self.assertEqual(form.errors["message"], ["Trop long."])
 
-        class View(FormMaxLengthFieldMixin, BaseView):
-            fields_max_length = {"message": 6}
+    def test_explicit_max_length_validator_is_kept(self):
+        class MessageForm(forms.Form):
+            message = forms.CharField(max_length=10, validators=[validators.MaxLengthValidator(3)])
 
-        self.assertTrue(View().get_form().is_valid())
+        self.assertFalse(MessageForm(data={"message": "x" * 4}).is_valid())
+
+    def test_ckeditor_model_field_max_length_reaches_form(self):
+        form_field = CKEditor5Field(max_length=10).formfield()
+
+        self.assertEqual(form_field.widget.attrs["data-max-length"], "10")
+        self.assertNotIn("maxlength", form_field.widget.attrs)
+        with self.assertRaises(ValidationError):
+            form_field.clean("<p>" + "x" * 11 + "</p>")
+        self.assertEqual(form_field.clean("<p>" + "x" * 10 + "</p>"), "<p>" + "x" * 10 + "</p>")
+
+    def test_limit_length_changes_limit_after_init(self):
+        form = self._form(data={"message": "x" * 11})
+        limit_length(form.fields["message"], 20)
+
+        self.assertIn('maxlength="20"', str(form["message"]))
+        self.assertTrue(form.is_valid())
 
     def test_toolkit_assets_loads_max_length_js_after_ckeditor_loader(self):
         rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
