@@ -12,6 +12,21 @@ from elixir_toolkit.validators import (
     MaxFilesValidator,
 )
 
+
+def is_rich_text_widget(widget):
+    """Widget CKEditor : classe posée par CKEditor5Widget, évite d'importer django_ckeditor_5."""
+    return "django_ckeditor_5" in widget.attrs.get("class", "").split()
+
+
+def limit_length(field, max_length):
+    """Change après coup le `max_length` d'un `forms.CharField` (limite dynamique).
+
+    Pour une limite fixe, passer directement `max_length` au champ (cf. `apps._patch_char_field`).
+    """
+    field.max_length = max_length
+    field.widget.attrs.pop("maxlength", None)
+    field.widget.attrs.update(field.widget_attrs(field.widget))
+
 class SuperFormHelper(FormHelper):
     
     enable_form_validator = False

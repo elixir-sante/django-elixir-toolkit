@@ -52,7 +52,7 @@ Ce tag charge automatiquement :
 - Selectize CSS/JS (via CDN)
 - jQuery (via CDN)
 - Tablesorter JS (via CDN)
-- Tous les CSS/JS personnalisés du toolkit (dont le champ date, cf. [Champ Date](#champ-date))
+- Tous les CSS/JS personnalisés du toolkit (dont le champ date, cf. [Champ Date](#champ-date), et la limite de caractères, cf. [Limite de caractères](#limite-de-caractères))
 
 ---
 
@@ -95,6 +95,7 @@ elixir_toolkit/
 │       ├── ckeditor-upload-adapter.js
 │       ├── date-input.js
 │       ├── fields-dependencies.js
+│       ├── max-length.js
 │       └── tabs-scroll-hints.js
 ├── apps.py                      # Patch de forms.DateInput (champ date natif)
 └── forms.py                     # Champs et helpers
@@ -414,6 +415,65 @@ date_effet = forms.DateField(widget=forms.DateInput(attrs={"data-clear-label": "
 
 ---
 
+### Limite de caractères
+
+Bloque la saisie d'un champ à n caractères, avec compteur et validation serveur équivalente. Fonctionne pour les `input`, les `textarea` et les éditeurs CKEditor (`CKEditor5Field`).
+
+Rien de spécifique à retenir : le `max_length` standard de Django suffit (`forms.CharField` est patché au démarrage de l'app, cf. `elixir_toolkit/apps.py`).
+
+```python
+# Sur le modèle : repris automatiquement par les ModelForm
+class Insurer(models.Model):
+    config_first_login_message_content = CKEditor5Field(max_length=400, blank=True)
+    note = models.TextField(max_length=400, blank=True)
+
+# ou directement dans le formulaire
+class MyForm(forms.Form):
+    message = forms.CharField(max_length=400, widget=forms.Textarea)
+```
+
+`max_length` sur un `TextField` / `CKEditor5Field` génère une migration, sans effet sur la base.
+
+**Limite dynamique** (connue seulement à l'init du formulaire) :
+
+```python
+from elixir_toolkit.forms import limit_length
+
+class MyForm(forms.Form):
+    message = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        limit_length(self.fields["message"], self.get_limit())
+```
+
+Avec `{% toolkit_assets %}` chargé :
+- `input` / `textarea` : attribut `maxlength` natif, et compteur « n / 400 caractères » sous les `textarea`
+- CKEditor : frappe bloquée à la limite, texte collé tronqué, compteur sous l'éditeur (remplace le compteur mots / caractères de django_ckeditor_5). Seul le texte visible est compté : balises ignorées, entité (`&amp;`) = 1 caractère
+- compteur en rouge une fois la limite atteinte
+- contenu déjà trop long (valeur en base, glisser-déposer) : message d'erreur et boutons submit du formulaire désactivés jusqu'à correction
+- validation serveur : le `MaxLengthValidator` de Django est remplacé par `RichTextMaxLengthValidator` (CKEditor) ou `TextMaxLengthValidator` (retour à la ligne = 1 caractère, comme `maxlength`), choisi selon le widget du champ
+
+**Messages d'erreur** (navigateur, défaut : « Ce champ est limité à 400 caractères. » ; serveur : message Django `max_length`) :
+
+```python
+message = forms.CharField(
+    max_length=400,
+    widget=forms.Textarea(attrs={"data-max-length-message": "Le message est limité à 400 caractères."}),
+    error_messages={"max_length": "Le message est limité à 400 caractères."},
+)
+```
+
+**Brancher un script sur les éditeurs CKEditor** : `ckeditorRegisterCallback` de django_ckeditor_5 ne garde qu'un callback par éditeur, déjà utilisé par le toolkit. Utiliser plutôt :
+
+```js
+window.elixirOnCkeditorReady(function (editor) {
+    // appelé une fois pour chaque éditeur, existant ou créé plus tard (HTMX)
+});
+```
+
+---
+
 ### Champ de Fichier avec Upload
 
 ```python
@@ -513,6 +573,8 @@ from elixir_toolkit.validators import (
     MaxTotalSizeValidator,
     AllowedExtensionsValidator,
     MaxFilesValidator,
+    TextMaxLengthValidator,
+    RichTextMaxLengthValidator,
 )
 
 class MyForm(forms.Form):

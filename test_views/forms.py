@@ -3,6 +3,7 @@ from datetime import date
 from django import forms
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 from crispy_bulma.layout import IconField
+from django_ckeditor_5.widgets import CKEditor5Widget
 from elixir_toolkit.forms import MultipleFileField, FileUpload, ToolkitSelectField, CustomFormHelper, PasswordWithIconField
 
 
@@ -20,6 +21,14 @@ class FormExample(CustomFormHelper, forms.Form):
     select          = forms.ChoiceField(label="Couleur unique", choices=COLOR_CHOICES)
     multi_select    = forms.MultipleChoiceField(label="Couleurs multiples", choices=COLOR_CHOICES)
     textarea        = forms.CharField(label="Message", widget=forms.Textarea())
+    textarea_limite = forms.CharField(label="Message limité à 50 caractères", widget=forms.Textarea(), required=False, max_length=50)
+    ckeditor_limite = forms.CharField(
+                        label="Texte riche limité à 100 caractères",
+                        widget=CKEditor5Widget(config_name='light'),
+                        required=False,
+                        max_length=100,
+                        initial="<p>Le texte <strong>visible</strong> est compté, pas les balises HTML.</p>",
+                    )
     checkbox        = forms.BooleanField(label="J'accepte les conditions", required=True)
     checkboxes      = forms.MultipleChoiceField(
                         label="Options à cocher",
@@ -37,7 +46,7 @@ class FormExample(CustomFormHelper, forms.Form):
     date_disabled   = forms.DateField(label="Date de création (désactivée)", required=False, initial=date(2024, 2, 1), disabled=True)
     # file = MultipleFileField(label="Documents justificatifs", required=True)
     # file2 = forms.FileField(label="Documents test", required=True)
-    
+
     @property
     def helper(self):
         helper = super().helper
@@ -80,6 +89,8 @@ class FormExample(CustomFormHelper, forms.Form):
                     css_class='columns'
                 ),
                 'textarea',
+                'textarea_limite',
+                'ckeditor_limite',
             ),
             HTML('<hr class="my-5">'),
             Fieldset(
