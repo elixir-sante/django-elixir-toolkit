@@ -221,6 +221,35 @@
             });
         }
         
+        // Trouver tous les formulaires parents des champs de filtrage
+        var $forms = $();
+        $filterInputs.each(function() {
+            var $form = $(this).closest('form');
+            if ($form.length && !$forms.is($form)) {
+                $forms = $forms.add($form);
+            }
+        });
+        
+        // Écouter l'événement reset sur chaque formulaire parent
+        // et déclencher un événement input/change sur chaque champ pour que le filtrage se réapplique
+        $forms.each(function() {
+            var $form = $(this);
+            $form.on('reset', function() {
+                // Utiliser setTimeout pour s'assurer que le reset est terminé
+                setTimeout(function() {
+                    // Déclencher un événement input sur chaque champ de filtrage
+                    $filterInputs.each(function() {
+                        var $input = $(this);
+                        if ($input.is('[type="checkbox"]')) {
+                            $input.trigger('change');
+                        } else {
+                            $input.trigger('input');
+                        }
+                    });
+                }, 0);
+            });
+        });
+        
         // Configurer chaque champ de filtre
         $filterInputs.each(function(index) {
             var $input = $(this);

@@ -17,11 +17,18 @@
 <div class="box">
     <h2 class="subtitle">Exemple 1: Filtrage simple sur toutes les colonnes</h2>
     
-    <div class="field has-addons mb-4">
-        <div class="control is-expanded">
-            <input type="text" id="search-all" class="input" placeholder="Rechercher dans toutes les colonnes...">
+    <form id="form-example1">
+        <div class="field has-addons mb-4">
+            <div class="control is-expanded">
+                <input type="text" id="search-all" class="input" placeholder="Rechercher dans toutes les colonnes...">
+            </div>
         </div>
-    </div>
+        <div class="control mb-4">
+            <button type="reset" class="button is-light">
+                Reset
+            </button>
+        </div>
+    </form>
 
     {% ui_table css_classes="is-striped is-fullwidth" orderable=True filterable=True filter_target="#search-all" %}
         <thead>
@@ -469,6 +476,8 @@
     <p>Combiner un select pour la région, 3 inputs texte (nom, type, ville) et des checkboxes pour des catégories supplémentaires.</p>
     
     <div class="mb-4">
+    <form>
+
         <div class="field has-addons mb-3">
             <div class="control">
                 <div class="select">
@@ -510,6 +519,13 @@
                 </div>
             </div>
         </div>
+        <div class="control mb-4">
+            <button type="reset" class="button is-light">
+                Reset
+            </button>
+        </div>
+    </form>
+
 
     {% ui_table css_classes="is-striped is-fullwidth" filterable=True filter_target="#ex9-region-select, #ex9-nom-input, #ex9-type-input, #ex9-ville-input, .filter-checkbox-ex9" %}
         <thead>
