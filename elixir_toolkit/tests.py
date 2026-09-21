@@ -335,6 +335,45 @@ class ToolkitTableTest(ToolkitBaseTest):
         self.assertIn('data-filter-id="my-custom-table"', rendered)
         self.assertIn('data-filter-columns="1"', rendered)
 
+    def test_ui_table_with_id_attribute(self):
+        """Vérifie que le ui_table avec id génère bien l'attribut id sur le tableau"""
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_table id="my-table-id" css_classes="is-striped" %}
+                <thead>
+                    <tr><th>Nom</th><th>Statut</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Test</td><td>OK</td></tr>
+                </tbody>
+            {% end_ui_table %}
+        """
+        rendered = self.render_template(template)
+        
+        # Vérifie que l'id est bien appliqué sur la balise table
+        self.assertIn('id="my-table-id"', rendered)
+
+    def test_ui_table_with_id_and_filter_id_separate(self):
+        """Vérifie que id et filter_id peuvent être différents"""
+        template = """
+            {% load elixir_toolkit_tags %}
+            {% ui_table id="table-id" css_classes="is-striped" filterable=True filter_id="filter-id" filter_columns="0,1" %}
+                <thead>
+                    <tr><th>Nom</th><th>Statut</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Test</td><td>OK</td></tr>
+                </tbody>
+            {% end_ui_table %}
+        """
+        rendered = self.render_template(template)
+        
+        # Vérifie que l'id est sur le tableau
+        self.assertIn('id="table-id"', rendered)
+        # Vérifie que filter_id reste indépendant
+        self.assertIn('data-filter-id="filter-id"', rendered)
+        self.assertIn('data-filter-columns="0,1"', rendered)
+
 
 class ToolkitStepperTest(ToolkitBaseTest):
     STEPS = ["Identification", "Question secrète", "Nouveau mot de passe"]
