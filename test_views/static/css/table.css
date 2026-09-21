@@ -21,6 +21,10 @@ tr.table-row-expandable.is-selected {
     background-color: var(--bulma-primary-light, #f5f5f5) !important;
 }
 
+.table-row-expandable.is-selected  td {
+    border-bottom-color: var(--bulma-table-cell-border-color) !important;
+}
+
 /* Ligne de détails : cellule sans padding qui prend toute la largeur */
 .table-row-details td {
     padding: 0;
