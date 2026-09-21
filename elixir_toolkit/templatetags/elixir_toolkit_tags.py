@@ -138,7 +138,7 @@ def ui_list(items, title_field="title", desc_field="description", extra_field=No
 
 
 class TableBlockNode(Node):
-    def __init__(self, css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, nodelist):
+    def __init__(self, css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, table_id, nodelist):
         self.css_classes = css_classes
         self.expandable = expandable
         self.orderable = orderable
@@ -146,6 +146,7 @@ class TableBlockNode(Node):
         self.filter_id = filter_id
         self.filter_columns = filter_columns
         self.filter_target = filter_target
+        self.table_id = table_id
         self.nodelist = nodelist
 
     def render(self, context):
@@ -156,6 +157,7 @@ class TableBlockNode(Node):
         resolved_filter_id = self.filter_id.resolve(context) if self.filter_id else ""
         resolved_filter_columns = self.filter_columns.resolve(context) if self.filter_columns else ""
         resolved_filter_target = self.filter_target.resolve(context) if self.filter_target else ""
+        resolved_table_id = self.table_id.resolve(context) if self.table_id else ""
         
         table_content = self.nodelist.render(context)
         t = template.loader.get_template('elixir_toolkit/components/table.html')
@@ -170,6 +172,8 @@ class TableBlockNode(Node):
             'filter_id': resolved_filter_id,
             'filter_columns': resolved_filter_columns,
             'filter_target': resolved_filter_target,
+            'table_id': resolved_table_id,
+            'attrs': '',
         })
         return t.render(ctx)
 
@@ -195,6 +199,12 @@ def ui_table(parser, token):
             <tbody>...</tbody>
         {% end_ui_table %}
         <input type="text" class="table-filter" data-filter-id="my-table">
+        
+        Avec identifiant pour le tableau:
+        {% ui_table id="my-table-id" css_classes="is-striped" %}
+            <thead>...</thead>
+            <tbody>...</tbody>
+        {% end_ui_table %}
     """
     bits = token.split_contents()[1:]
     css_classes = None
@@ -204,6 +214,7 @@ def ui_table(parser, token):
     filter_id = None
     filter_columns = None
     filter_target = None
+    table_id = None
     
     for bit in bits:
         if bit.startswith("css_classes="):
@@ -227,11 +238,14 @@ def ui_table(parser, token):
         elif bit.startswith("filter_target="):
             val = bit.split("=")[1]
             filter_target = parser.compile_filter(val)
+        elif bit.startswith("id="):
+            val = bit.split("=")[1]
+            table_id = parser.compile_filter(val)
 
     nodelist = parser.parse(('end_ui_table',))
     parser.delete_first_token()
 
-    return TableBlockNode(css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, nodelist)
+    return TableBlockNode(css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, table_id, nodelist)
 
 
 class THBlockNode(Node):
