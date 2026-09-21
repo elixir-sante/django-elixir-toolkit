@@ -84,7 +84,48 @@ class FormTestView(FormView):
                 'prix': 199.00,
                 'stock': 50,
                 'icon_item': 'code'
-            }
+            },
+            {
+                'nom': 'iPhone 15 Pro',
+                'sku': 'APP-IPH-2024',
+                'categorie': 'Hardware',
+                'prix': 1299.00,
+                'stock': 25,
+                'icon_item': 'mobile-alt'
+            },
+            {
+                'nom': 'Écran UltraHD 27"',
+                'sku': 'DELL-U27-4K',
+                'categorie': 'Hardware',
+                'prix': 649.00,
+                'stock': 8,
+                'icon_item': 'desktop'
+            },
+            {
+                'nom': 'Clavier mécanique RGB',
+                'sku': 'KB-RAZ-001',
+                'categorie': 'Hardware',
+                'prix': 149.99,
+                'stock': 30,
+                'icon_item': 'keyboard'
+            },
+            {
+                'nom': 'Souris gaming',
+                'sku': 'MS-LOG-002',
+                'categorie': 'Hardware',
+                'prix': 79.99,
+                'stock': 45,
+                'icon_item': 'mouse'
+            },
+            {
+                'nom': 'Casque audio Bluetooth',
+                'sku': 'AUD-SON-003',
+                'categorie': 'Hardware',
+                'prix': 179.99,
+                'stock': 15,
+                'icon_item': 'headphones'
+            },
+            
         ]
         
         return context
