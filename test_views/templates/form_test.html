@@ -63,13 +63,13 @@
     <h3 class="title is-4">Selectize simple</h3>
     
     <h3 class="title is-4">Avec option déjà sélectionnée</h3>
-    {% ui_select  name="filtre_status"  options="[('SCHE', 'Paiement échéance'), ('FREE', 'Montant libre')]" selected="SCHE" icon="fa-filter" placeholder="Filtrer par statut..." %}
+    {% ui_select  name="filtre_status"  options=mes_options_paiement selected="SCHE" icon="fa-filter" placeholder="Filtrer par statut..." %}
     
     <h3 class="title is-4">Sans présélection</h3>
-    {% ui_select name="payment_mode" options=mes_options_paiement selected=mode_par_defaut icon="fa-credit-card"  placeholder="Choisir le mode..." %}
+    {% ui_select name="payment_mode" options=mes_options_paiement icon="fa-credit-card" placeholder="Choisir le mode..." %}
     
     <h3 class="title is-4">Selectize multiple</h3>
-    {% ui_select name="payment_mode_multiple" multiple=True options=mes_options_paiement selected=mode_par_defaut icon="fa-credit-card"  placeholder="Choisir le mode..." %}
+    {% ui_select name="payment_mode_multiple" multiple=True options=mes_options_paiement selected=None icon="fa-credit-card"  placeholder="Choisir le mode..." %}
 </div>
 
 

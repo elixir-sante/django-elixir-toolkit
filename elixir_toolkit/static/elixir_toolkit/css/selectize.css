@@ -89,15 +89,9 @@
 
 .control .select .selectize-control .selectize-input input {
     height: 100% !important;
-    line-height: 2.5rem !important;
     margin: 0 !important;
     padding: 0 !important;
     vertical-align: middle !important;
-}
-
-.control .select .selectize-control .selectize-input input::placeholder {
-    color: #7a7a7a !important;
-    font-style: italic;
 }
 
 /* Gestion des icônes Bulma à gauche */
@@ -163,7 +157,6 @@
     line-height: normal !important;
     height: auto !important;
     margin: 0 !important;
-    padding: 4px 0 !important;
 }
 
 /* Centrage parfait de la croix de suppression */
