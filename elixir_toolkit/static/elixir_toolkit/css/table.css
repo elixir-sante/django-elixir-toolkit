@@ -1,11 +1,5 @@
 /* --- Tableaux expandables --- */
 
-/* Fix layout des colonnes quand on ouvre une ligne de détails */
-.table-container table {
-    table-layout: fixed;
-    width: 100%;
-}
-
 /* Boutons d'expansion : pas de soulignement sur le texte */
 .expand-toggle span:not(.icon) {
     text-decoration: none !important;
