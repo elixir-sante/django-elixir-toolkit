@@ -1,0 +1,7 @@
+/* Masque l'icône native "afficher le mot de passe" d'Edge/IE sur TOUS les champs password du site */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+}
