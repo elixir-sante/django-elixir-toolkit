@@ -1,4 +1,5 @@
 from django.views.generic import FormView, TemplateView
+from django.contrib import messages
 from test_views.forms import FormExample
 
 class FormTestView(FormView):
@@ -182,3 +183,11 @@ class TableFilterExampleView(TemplateView):
         ]
         
         return context
+
+
+class FormConfirmSubmitTestView(TemplateView):
+    template_name = "form_confirm_submit_test.html"
+    
+    def post(self, request, *args, **kwargs):
+        messages.success(request, "Formulaire soumis avec succès !")
+        return self.render_to_response(self.get_context_data())

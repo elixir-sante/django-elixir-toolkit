@@ -1,0 +1,46 @@
+/*
+ * Form Confirm Submit Modal - CSS
+ * Style pour la modale de confirmation de soumission de formulaire
+ */
+
+/* Assure que la modale est correctement positionnée */
+.modal.form-confirm-submit-modal {
+    z-index: 1000;
+}
+
+/* Style pour le contenu de la modale */
+.modal-card-body .form-confirm-content {
+    min-height: 60px;
+}
+
+/* Style pour les boutons dans le footer */
+.modal-card-foot .buttons {
+    gap: 10px;
+}
+
+/* Animation de loading sur le bouton */
+.modal-card-foot .button[data-action="submit"].is-loading {
+    cursor: wait;
+}
+
+/* Responsive : assure que la modale est bien visible sur mobile */
+@media screen and (max-width: 768px) {
+    .modal-card {
+        width: 90vw;
+        margin: 0 auto;
+    }
+    
+    .modal-card-foot {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-card-foot .buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .modal-card-foot .button {
+        width: 100%;
+    }
+}

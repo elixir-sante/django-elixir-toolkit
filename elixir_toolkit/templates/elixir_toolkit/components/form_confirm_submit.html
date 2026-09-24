@@ -1,0 +1,74 @@
+{% load elixir_toolkit_tags static %}
+
+{% comment %}
+Composant de confirmation de soumission de formulaire avec modale Bulma.
+
+Paramètres :
+- form_id (requis) : ID du formulaire à intercepter
+- content_id (optionnel) : ID de l'élément contenant le contenu de la modale
+- modal_title (optionnel) : Titre de la modale
+- submit_text (optionnel) : Texte du bouton Envoyer (défaut: "Envoyer")
+- cancel_text (optionnel) : Texte du bouton Retour (défaut: "Retour")
+- modal_size (optionnel) : Taille de la modale (is-small, is-medium, is-large)
+
+Utilisation :
+{% ui_form_confirm_submit form_id="my-form" content_id="my-modal-content" %}
+
+Le contenu de la modale doit être défini dans la page avec l'ID spécifié dans content_id.
+Exemple :
+<div id="my-modal-content" style="display: none;">
+    <p>Êtes-vous sûr de vouloir soumettre ?</p>
+</div>
+{% endcomment %}
+
+{% if not form_id %}
+{% comment %} Erreur : form_id est requis {% endcomment %}
+{% endif %}
+
+{% comment %} Définir les valeurs par défaut et les valeurs finales {% endcomment %}
+
+<div class="modal form-confirm-submit-modal" data-form-id="{{ form_id }}" data-modal-id="form-confirm-{{ form_id }}">
+    <div class="modal-background"></div>
+    <div class="modal-card {{ modal_size|default:'' }}">
+        <header class="modal-card-head">
+            <p class="modal-card-title">{{ modal_title_final }}</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            {% if content_id %}
+                <div class="form-confirm-content" id="form-confirm-content-{{ form_id }}"></div>
+            {% else %}
+                <p>Êtes-vous sûr de vouloir soumettre ce formulaire ?</p>
+            {% endif %}
+        </section>
+        <footer class="modal-card-foot is-justify-content-flex-end">
+            <div class="buttons">
+                {% ui_button text=cancel_text|default:"Retour" css_classes="is-outlined" action="cancel" %}
+                {% ui_button_primary text=submit_text|default:"Envoyer" css_classes="" action="submit" id=form_confirm_submit_id %}
+            </div>
+        </footer>
+    </div>
+</div>
+
+{% comment %} Script d'initialisation spécifique à cette instance {% endcomment %}
+<script>
+(function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        var modal = document.querySelector('.modal[data-form-id="{{ form_id }}"]');
+        var form = document.getElementById('{{ form_id }}');
+        
+        if (!modal || !form) {
+            return;
+        }
+        
+        {% if content_id %}
+        var contentSource = document.getElementById('{{ content_id }}');
+        var contentTarget = document.getElementById('form-confirm-content-{{ form_id }}');
+        
+        if (contentSource && contentTarget) {
+            contentTarget.innerHTML = contentSource.innerHTML;
+        }
+        {% endif %}
+    });
+})();
+</script>
