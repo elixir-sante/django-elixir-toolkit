@@ -746,7 +746,7 @@ class MyForm(forms.Form):
 
 ## Historique des Versions
 
-- **v0.25.8** : Ajout du composant de modale de confirmation de soumission de formulaire avec validation HTML5
+- **v0.26.0** : Ajout du composant de modale de confirmation de soumission de formulaire avec validation HTML5
 - **v0.18.0** : Ajout des icon dans le composant ui_tag
 - **v0.17.9** : Correction de la date dans le format de date
 - **v0.17.8** : Fix du bug Selectize avec HTMX beforeSwap

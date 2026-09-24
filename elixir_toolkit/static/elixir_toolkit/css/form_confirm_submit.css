@@ -28,6 +28,37 @@
     cursor: wait;
 }
 
+/* Styles pour la synthèse des champs du formulaire */
+.form-summary-container {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+}
+
+.form-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-summary-item {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.form-summary-label {
+    font-weight: 600;
+    color: #363636;
+    min-width: 150px;
+}
+
+.form-summary-value {
+    color: #4a4a4a;
+    word-break: break-word;
+}
+
 /* Responsive : assure que la modale est bien visible sur mobile */
 @media screen and (max-width: 768px) {
     .modal-card {
@@ -47,5 +78,14 @@
     
     .modal-card-foot .button {
         width: 100%;
+    }
+    
+    .form-summary-item {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .form-summary-label {
+        min-width: auto;
     }
 }

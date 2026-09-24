@@ -18,17 +18,18 @@
     </div>
 
     <div class="box">
-        <h2 class="title is-2">Formulaire avec validation et modale de confirmation</h2>
-        <p>Ce formulaire valide les champs avant d'afficher la modale. Essayez de soumettre avec des champs vides.</p>
+        <h2 class="title is-2">Formulaire avec validation, modale de confirmation ET synthèse des champs</h2>
+        <p>Ce formulaire valide les champs avant d'afficher la modale. La modale inclut une synthèse automatique des champs saisis. Essayez de soumettre avec des champs vides pour voir la validation.</p>
         
         {% comment %} Contenu de la modale (caché) {% endcomment %}
         <div id="confirmation-content-1" style="display: none;">
             <p>Êtes-vous sûr de vouloir soumettre ce formulaire ?</p>
+            <div class="form-summary-container"></div>
             <p class="has-text-danger">Cette action est irréversible.</p>
         </div>
         
         {% comment %} Formulaire de test avec champs obligatoires {% endcomment %}
-        <form id="test-form-1" method="post" action="#">
+        <form id="test-form-1" method="post" action="#" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="field">
                 <label class="label">Nom <span class="has-text-danger">*</span></label>
@@ -49,13 +50,31 @@
                 </div>
             </div>
             <div class="field">
+                <label class="label">Fichier</label>
+                <div class="control">
+                    <input class="input" type="file" name="fichier">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Fichiers multiples</label>
+                <div class="control">
+                    <input class="input" type="file" name="fichiers" multiple>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Date</label>
+                <div class="control">
+                    <input class="input" type="date" name="date">
+                </div>
+            </div>
+            <div class="field">
                 <div class="control">
                     <button type="button" class="button is-primary" data-form-confirm="test-form-1">Soumettre</button>
                 </div>
             </div>
         </form>
         
-        {% comment %} Composant de confirmation {% endcomment %}
+        {% comment %} Composant de confirmation avec synthèse automatique des champs {% endcomment %}
         {% ui_form_confirm_submit form_id="test-form-1" content_id="confirmation-content-1" modal_title="Confirmer la soumission" submit_text="Confirmer" cancel_text="Annuler" %}
     </div>
 
