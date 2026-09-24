@@ -12,7 +12,6 @@ from elixir_toolkit.validators import (
     MaxFilesValidator,
 )
 
-
 def is_rich_text_widget(widget):
     """Widget CKEditor : classe posée par CKEditor5Widget, évite d'importer django_ckeditor_5."""
     return "django_ckeditor_5" in widget.attrs.get("class", "").split()
@@ -26,6 +25,7 @@ def limit_length(field, max_length):
     field.max_length = max_length
     field.widget.attrs.pop("maxlength", None)
     field.widget.attrs.update(field.widget_attrs(field.widget))
+
 
 class SuperFormHelper(FormHelper):
     
@@ -91,6 +91,11 @@ class CustomFormHelper:
         self._helper = value
 
 
+class MultipleFileUploadInput(forms.FileInput):
+    """`FileInput` multiple, sans le bloc « Actuellement / Effacer » du Clearable."""
+    allow_multiple_selected = True
+
+
 class FileUpload(CrispyField):
     def __init__(self, *args, **kwargs):
         kwargs['template'] = "elixir_toolkit/components/fields/file_input.html"
@@ -99,8 +104,15 @@ class FileUpload(CrispyField):
     def render(self, form, context, template_pack=None, **kwargs):
         # On récupère le champ Django associé
         bound_field = form[self.fields[0]]
-        current_attrs = bound_field.field.widget.attrs
-        bound_field.field.widget = forms.FileInput(attrs=current_attrs)
+        current_widget = bound_field.field.widget
+        # Un `FileInput` simple refuse l'attribut `multiple` (ValueError depuis
+        # Django 4.2.1) : les champs multiples gardent un widget multiple.
+        widget_class = (
+            MultipleFileUploadInput
+            if current_widget.allow_multiple_selected
+            else forms.FileInput
+        )
+        bound_field.field.widget = widget_class(attrs=current_widget.attrs)
 
         return super().render(form, context, template_pack, **kwargs)
 
