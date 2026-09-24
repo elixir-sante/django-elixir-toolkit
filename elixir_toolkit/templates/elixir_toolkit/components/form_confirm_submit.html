@@ -31,7 +31,7 @@ Exemple :
     <div class="modal-background"></div>
     <div class="modal-card {{ modal_size|default:'' }}">
         <header class="modal-card-head">
-            <p class="modal-card-title">{{ modal_title_final }}</p>
+            <p class="modal-card-title">{{ modal_title|default:"Confirmation" }}</p>
             <button class="delete" aria-label="close"></button>
         </header>
         <section class="modal-card-body">

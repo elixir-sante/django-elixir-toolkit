@@ -3,6 +3,11 @@
  * Style pour la modale de confirmation de soumission de formulaire
  */
 
+.modal {
+    --bulma-modal-card-head-padding: 1.25rem;
+    --bulma-modal-card-body-padding: 1.25rem;
+}
+
 /* Assure que la modale est correctement positionnée */
 .modal.form-confirm-submit-modal {
     z-index: 1000;
