@@ -409,3 +409,42 @@ def ui_stepper(steps, current=None, completed=None, aria_label="Progression", cs
         'aria_label': aria_label,
         'css_classes': css_classes,
     }
+
+
+@register.inclusion_tag('elixir_toolkit/components/form_confirm_submit.html')
+def ui_form_confirm_submit(form_id, content_id=None, modal_title=None, submit_text=None, 
+                         cancel_text=None, modal_size=None, summary_container_class="form-summary-container"):
+    """
+    Composant de confirmation de soumission de formulaire avec modale Bulma.
+    
+    Usage :
+        {% ui_form_confirm_submit form_id="my-form" content_id="my-modal-content" %}
+    
+    Paramètres :
+        - form_id (requis) : ID du formulaire à intercepter
+        - content_id (optionnel) : ID de l'élément contenant le contenu de la modale
+        - modal_title (optionnel) : Titre de la modale (défaut: "Confirmer l'envoi")
+        - submit_text (optionnel) : Texte du bouton Envoyer (défaut: "Envoyer")
+        - cancel_text (optionnel) : Texte du bouton Retour (défaut: "Retour")
+        - modal_size (optionnel) : Taille de la modale (is-small, is-medium, is-large)
+        - summary_container_class (optionnel) : Classe CSS du conteneur pour la synthèse des champs (défaut: "form-summary-container")
+    
+    Le contenu de la modale doit être défini dans la page avec l'ID spécifié dans content_id :
+        <div id="my-modal-content" style="display: none;">
+            <p>Êtes-vous sûr de vouloir soumettre ?</p>
+            <div class="form-summary-container"></div>
+        </div>
+    
+    Si content_id est fourni et qu'une div avec la classe summary_container_class existe dans le contenu,
+    une synthèse des champs du formulaire sera automatiquement injectée.
+    """
+    return {
+        'form_id': form_id,
+        'form_confirm_submit_id': f"form-confirm-submit-btn-{form_id}",
+        'content_id': content_id,
+        'modal_title': modal_title,
+        'submit_text': submit_text,
+        'cancel_text': cancel_text,
+        'modal_size': modal_size,
+        'summary_container_class': summary_container_class,
+    }

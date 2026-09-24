@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from test_views.views import FormTestView, TableFilterExampleView
+from test_views.views import FormTestView, TableFilterExampleView, FormConfirmSubmitTestView
 
 
 urlpatterns = [
@@ -25,4 +25,5 @@ urlpatterns = [
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path("", FormTestView.as_view()),
     path('table-filter-example/', TableFilterExampleView.as_view(), name='table_filter_example'),
+    path('form-confirm-submit-test/', FormConfirmSubmitTestView.as_view(), name='form_confirm_submit_test'),
 ]

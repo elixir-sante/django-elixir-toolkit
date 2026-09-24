@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load elixir_toolkit_tags %}
+
+{% block body %}
+<div class="container">
+    <h1 class="title is-1">Test du composant Form Confirm Submit</h1>
+
+    {% if messages %}
+    <div class="notification is-success is-light mt-4">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="notification is-info is-light">
+        <p><strong>Fonctionnalité :</strong> Validation des champs obligatoire avant d'afficher la modale. Si un champ requis n'est pas rempli ou ne respecte pas les contraintes, la modale ne s'affichera pas, le navigateur affichera ses messages d'erreur natifs, et les champs invalides seront marqués avec la classe <code>is-danger</code> de Bulma.</p>
+    </div>
+
+    <div class="box">
+        <h2 class="title is-2">Formulaire avec validation, modale de confirmation ET synthèse des champs</h2>
+        <p>Ce formulaire valide les champs avant d'afficher la modale. La modale inclut une synthèse automatique des champs saisis. Essayez de soumettre avec des champs vides pour voir la validation.</p>
+        
+        {% comment %} Contenu de la modale (caché) {% endcomment %}
+        <div id="confirmation-content-1" style="display: none;">
+            <p>Êtes-vous sûr de vouloir soumettre ce formulaire ?</p>
+            <div class="form-summary-container"></div>
+            <p class="has-text-danger">Cette action est irréversible.</p>
+        </div>
+        
+        {% comment %} Formulaire de test avec champs obligatoires {% endcomment %}
+        <form id="test-form-1" method="post" action="#" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">Nom <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <input class="input" type="text" name="nom" placeholder="Votre nom" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Email <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <input class="input" type="email" name="email" placeholder="Votre email" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Message <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <textarea class="textarea" name="message" placeholder="Votre message" required></textarea>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Fichier</label>
+                <div class="control">
+                    <input class="input" type="file" name="fichier">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Fichiers multiples</label>
+                <div class="control">
+                    <input class="input" type="file" name="fichiers" multiple>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Date</label>
+                <div class="control">
+                    <input class="input" type="date" name="date">
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button type="button" class="button is-primary" data-form-confirm="test-form-1">Soumettre</button>
+                </div>
+            </div>
+        </form>
+        
+        {% comment %} Composant de confirmation avec synthèse automatique des champs {% endcomment %}
+        {% ui_form_confirm_submit form_id="test-form-1" content_id="confirmation-content-1" modal_title="Confirmer la soumission" submit_text="Confirmer" cancel_text="Annuler" %}
+    </div>
+
+    <div class="box">
+        <h2 class="title is-2">Formulaire avec validation et texte par défaut</h2>
+        <p>Ce formulaire utilise le texte par défaut de la modale et valide les champs.</p>
+        
+        {% comment %} Contenu de la modale (caché) {% endcomment %}
+        <div id="confirmation-content-2" style="display: none;">
+            <p>Voulez-vous vraiment envoyer ces données ?</p>
+        </div>
+        
+        <form id="test-form-2" method="post" action="#">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">Titre <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <input class="input" type="text" name="titre" placeholder="Titre" required minlength="3">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Message <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <textarea class="textarea" name="message" placeholder="Votre message" required minlength="10"></textarea>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button type="button" class="button is-primary" data-form-confirm="test-form-2">Envoyer</button>
+                </div>
+            </div>
+        </form>
+        
+        {% comment %} Composant de confirmation avec texte par défaut {% endcomment %}
+        {% ui_form_confirm_submit form_id="test-form-2" content_id="confirmation-content-2" %}
+    </div>
+
+    <div class="box">
+        <h2 class="title is-2">Formulaire sans contenu personnalisé</h2>
+        <p>Ce formulaire utilise le contenu par défaut de la modale. Testez la validation avec le champ requis.</p>
+        
+        <form id="test-form-3" method="post" action="#">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">Titre <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <input class="input" type="text" name="titre" placeholder="Titre" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button type="button" class="button is-primary" data-form-confirm="test-form-3">Soumettre</button>
+                </div>
+            </div>
+        </form>
+        
+        {% comment %} Composant de confirmation sans content_id {% endcomment %}
+        {% ui_form_confirm_submit form_id="test-form-3" modal_title="Attention" submit_text="Oui, soumettre" cancel_text="Non, revenir" %}
+    </div>
+
+    <div class="box">
+        <h2 class="title is-2">Formulaire avec modale de taille moyenne et validation complexe</h2>
+        <p>Ce formulaire a une modale de taille moyenne et des règles de validation plus complexes.</p>
+        
+        <div id="confirmation-content-4" style="display: none;">
+            <p>Vous êtes sur le point de soumettre des données importantes.</p>
+            <p>Veuillez confirmer que toutes les informations sont correctes avant de continuer.</p>
+            <ul>
+                <li>Vérifiez l'exactitude des données</li>
+                <li>Assurez-vous que tous les champs sont remplis</li>
+                <li>Confirmez que vous avez le droit de soumettre ce formulaire</li>
+            </ul>
+        </div>
+        
+        <form id="test-form-4" method="post" action="#">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">Description <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <textarea class="textarea" name="description" placeholder="Description détaillée (minimum 50 caractères)" required minlength="50"></textarea>
+                </div>
+                <p class="help is-danger">Minimum 50 caractères</p>
+            </div>
+            <div class="field">
+                <label class="label">Email <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <input class="input" type="email" name="email" placeholder="Votre email" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Âge <span class="has-text-danger">*</span></label>
+                <div class="control">
+                    <input class="input" type="number" name="age" placeholder="Votre âge" required min="18" max="120">
+                </div>
+                <p class="help">Doit être compris entre 18 et 120 ans</p>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button type="button" class="button is-primary" data-form-confirm="test-form-4">Soumettre</button>
+                </div>
+            </div>
+        </form>
+        
+        {% ui_form_confirm_submit form_id="test-form-4" content_id="confirmation-content-4" modal_title="Confirmation requise" modal_size="is-medium" submit_text="Je confirme" cancel_text="Retour" %}
+    </div>
+
+    <div class="box">
+        <h2 class="title is-2">Validation HTML5 native</h2>
+        <p>Tous les formulaires sur cette page utilisent la validation HTML5 native du navigateur.</p>
+        <p>Si un champ obligatoire (<code>required</code>) n'est pas rempli ou ne respecte pas les contraintes (<code>minlength</code>, <code>min</code>, <code>max</code>, etc.), la modale ne s'affichera pas, le navigateur affichera ses propres messages d'erreur, et les champs invalides seront marqués en rouge avec la classe Bulma <code>is-danger</code>.</p>
+        <p class="has-text-success">✓ Les fichiers JS/CSS ne sont chargés qu'une seule fois.</p>
+        <p class="has-text-info">ℹ️ Astuce : Essayez de soumettre un formulaire avec des champs vides pour voir la validation en action.</p>
+    </div>
+
+    <div class="box">
+        <h2 class="title is-2">Comment ça marche ?</h2>
+        <ol>
+            <li>Lorsque vous cliquez sur "Soumettre", le JavaScript vérifie d'abord la validité du formulaire avec <code>form.checkValidity()</code></li>
+            <li>Si le formulaire n'est pas valide, <code>form.reportValidity()</code> déclenche l'affichage des messages d'erreur natifs du navigateur</li>
+            <li>Les champs invalides sont marqués avec la classe <code>is-danger</code> de Bulma pour une mise en évidence visuelle</li>
+            <li>La modale ne s'ouvre que si le formulaire est valide</li>
+            <li>Lorsque vous cliquez sur "Envoyer" dans la modale, le formulaire est soumis avec <code>form.submit()</code></li>
+        </ol>
+    </div>
+</div>
+{% endblock %}
