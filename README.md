@@ -12,7 +12,7 @@ Copyright (C) 2026 Elixir Santé
 
 * **Production (version spécifique) :**
 ```bash
-pip install git+https://github.com/elixir-sante/django-elixir-toolkit.git@v0.17.9
+pip install git+https://github.com/elixir-sante/django-elixir-toolkit.git@v0.25.8
 ```
 
 * **Développement (dernières nouveautés) :**
@@ -52,7 +52,7 @@ Ce tag charge automatiquement :
 - Selectize CSS/JS (via CDN)
 - jQuery (via CDN)
 - Tablesorter JS (via CDN)
-- Tous les CSS/JS personnalisés du toolkit (dont le champ date, cf. [Champ Date](#champ-date), et la limite de caractères, cf. [Limite de caractères](#limite-de-caractères))
+- Tous les CSS/JS personnalisés du toolkit (dont le champ date, cf. [Champ Date](#champ-date), la limite de caractères, cf. [Limite de caractères](#limite-de-caractères), et la modale de confirmation, cf. [Modale de Confirmation de Soumission](#modale-de-confirmation-de-soumission))
 
 ---
 
@@ -68,6 +68,7 @@ elixir_toolkit/
 │       │   ├── button.html        # Boutons
 │       │   ├── chevron.html       # Icônes de direction
 │       │   ├── filter_bar.html     # Barre de filtres
+│       │   ├── form_confirm_submit.html # Modale de confirmation de soumission
 │       │   ├── list.html           # Liste d'éléments
 │       │   ├── select.html         # Sélecteur avec Selectize
 │       │   ├── stepper.html        # Parcours en plusieurs étapes
@@ -86,6 +87,8 @@ elixir_toolkit/
 │   │   ├── bulma-list.css
 │   │   ├── ckeditor.css
 │   │   ├── date-input.css
+│   │   ├── form_confirm_submit.css
+│   │   ├── input.css
 │   │   ├── selectize.css
 │   │   ├── spinner.css
 │   │   └── tabs.css
@@ -95,6 +98,7 @@ elixir_toolkit/
 │       ├── ckeditor-upload-adapter.js
 │       ├── date-input.js
 │       ├── fields-dependencies.js
+│       ├── form_confirm_submit.js
 │       ├── max-length.js
 │       └── tabs-scroll-hints.js
 ├── apps.py                      # Patch de forms.DateInput (champ date natif)
@@ -537,6 +541,85 @@ class MyForm(forms.Form):
 
 ---
 
+### Modale de Confirmation de Soumission
+
+Composant pour afficher une modale de confirmation avant la soumission d'un formulaire. Valide automatiquement les champs obligatoires (HTML5) avant d'ouvrir la modale.
+
+```html
+{% load elixir_toolkit_tags %}
+
+<!-- Contenu de la modale (optionnel, caché) -->
+<div id="my-modal-content" style="display: none;">
+    <p>Êtes-vous sûr de vouloir soumettre ce formulaire ?</p>
+    <p class="has-text-danger">Cette action est irréversible.</p>
+</div>
+
+<!-- Formulaire -->
+<form id="my-form" method="post" action="#">
+    {% csrf_token %}
+    <div class="field">
+        <label class="label">Nom</label>
+        <div class="control">
+            <input class="input" type="text" name="name" required>
+        </div>
+    </div>
+    
+    <!-- Bouton de soumission avec confirmation -->
+    <button type="button" class="button is-primary js-form-confirm" data-form-confirm="my-form">
+        Soumettre
+    </button>
+</form>
+
+<!-- Modale de confirmation -->
+{% ui_form_confirm_submit 
+    form_id="my-form" 
+    content_id="my-modal-content"
+    modal_title="Confirmation de soumission"
+    submit_text="Confirmer"
+    cancel_text="Annuler"
+    modal_size="is-medium"
+%}
+```
+
+**Fonctionnalités :**
+- Validation HTML5 native avant l'affichage de la modale
+- Mise en évidence des champs invalides avec la classe `is-danger` de Bulma
+- Personnalisation du titre, du contenu, et des textes des boutons
+- Taille de modale personnalisable (`is-small`, `is-medium`, `is-large`)
+- Design responsive (boutons empilés sur mobile)
+- Fermeture par : clic sur le fond, bouton Fermer (✕), touche Escape, bouton Annuler
+- État `is-loading` sur le bouton de soumission pendant l'envoi
+- API JavaScript exposée via `window.FormConfirmSubmit` pour une utilisation programmatique
+
+**Paramètres :**
+- `form_id` (requis) : ID du formulaire à intercepter
+- `content_id` (optionnel) : ID de l'élément contenant le contenu personnalisé de la modale
+- `modal_title` (optionnel) : Titre de la modale (défaut: "Confirmation")
+- `submit_text` (optionnel) : Texte du bouton de soumission (défaut: "Envoyer")
+- `cancel_text` (optionnel) : Texte du bouton d'annulation (défaut: "Retour")
+- `modal_size` (optionnel) : Taille de la modale (`is-small`, `is-medium`, `is-large`)
+
+**Intégration avec le bouton de soumission :**
+
+Le bouton de soumission du formulaire doit utiliser `type="button"` (et non `type="submit"`) avec soit :
+- La classe `js-form-confirm`
+- Ou l'attribut `data-form-confirm="ID_DU_FORMULAIRE"`
+
+**Utilisation programmatique (JavaScript) :**
+
+```javascript
+// Ouvrir la modale manuellement
+FormConfirmSubmit.openModal(document.querySelector('.modal[data-form-id="my-form"]'));
+
+// Fermer toutes les modales
+FormConfirmSubmit.closeAllModals();
+
+// Mettre en évidence les champs invalides
+FormConfirmSubmit.highlightInvalidFields(document.getElementById('my-form'));
+```
+
+---
+
 ### Helpers de Formulaire
 
 #### SuperFormHelper
@@ -663,6 +746,7 @@ class MyForm(forms.Form):
 
 ## Historique des Versions
 
+- **v0.25.8** : Ajout du composant de modale de confirmation de soumission de formulaire avec validation HTML5
 - **v0.18.0** : Ajout des icon dans le composant ui_tag
 - **v0.17.9** : Correction de la date dans le format de date
 - **v0.17.8** : Fix du bug Selectize avec HTMX beforeSwap
