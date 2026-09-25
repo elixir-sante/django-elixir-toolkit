@@ -1,5 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
-
+function initFieldDependencies() {
     const fields = document.querySelectorAll("[data-depends-on]");
     const map = {};
 
@@ -41,4 +40,11 @@ document.addEventListener("DOMContentLoaded", function () {
         controller.addEventListener("change", () => applyDependencies(controllerId));
         applyDependencies(controllerId);
     });
-});
+}
+
+// Initialisation au chargement de la page
+document.addEventListener("DOMContentLoaded", initFieldDependencies);
+
+// Réinitialisation après les événements HTMX
+document.addEventListener("htmx:afterSettle", initFieldDependencies);
+document.addEventListener("htmx:afterSwap", initFieldDependencies);
