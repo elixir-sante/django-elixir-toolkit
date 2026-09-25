@@ -55,7 +55,7 @@ Exemple :
 {% comment %} Script d'initialisation spécifique à cette instance {% endcomment %}
 <script>
 (function() {
-    document.addEventListener('DOMContentLoaded', function() {
+    function initModal() {
         var modal = document.querySelector('.modal[data-form-id="{{ form_id }}"]');
         var form = document.getElementById('{{ form_id }}');
         
@@ -73,6 +73,9 @@ Exemple :
             contentTarget.setAttribute('data-form-id', '{{ form_id }}');
         }
         {% endif %}
-    });
+    }
+    
+    document.addEventListener('DOMContentLoaded', initModal);
+    document.addEventListener('htmx:afterSwap', initModal);
 })();
 </script>
