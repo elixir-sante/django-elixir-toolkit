@@ -44,6 +44,60 @@
         });
     }
 
+    // Texte d'un libellé, sans le marqueur de champ obligatoire (« * »)
+    function labelText(labelEl) {
+        return labelEl ? labelEl.textContent.replace(/\s*\*\s*$/, '').trim() : '';
+    }
+
+    // Libellé du champ : celui du groupe pour une radio (« Civilité »), sinon
+    // label[for=id], à défaut le .label du .field Bulma parent
+    function fieldLabel(formElement, input) {
+        var fieldParent = input.closest('.field');
+        var groupLabel = fieldParent ? fieldParent.querySelector('.label') : null;
+
+        if (input.type === 'radio') {
+            return labelText(groupLabel);
+        }
+
+        var inputId = input.getAttribute('id');
+        var labelFor = inputId ? formElement.querySelector('label[for="' + inputId + '"]') : null;
+        return labelText(labelFor) || labelText(groupLabel);
+    }
+
+    // Valeur lisible du champ ; chaîne vide = champ ignoré dans la synthèse
+    function fieldValue(input) {
+        if (input.type === 'radio') {
+            // Seule l'option cochée est reprise, avec son libellé
+            if (!input.checked) { return ''; }
+            var optionLabel = input.id ? document.querySelector('label[for="' + input.id + '"]') : null;
+            return labelText(optionLabel) || input.value;
+        }
+
+        if (input.type === 'checkbox') {
+            // Case non cochée ignorée (ex. case cachée « -clear » des uploads)
+            return input.checked ? 'Oui' : '';
+        }
+
+        if (input.type === 'file') {
+            // Tous les fichiers sélectionnés, un seul ou plusieurs
+            return Array.from(input.files || []).map(function(f) { return f.name; }).join(', ');
+        }
+
+        if (input.tagName === 'SELECT') {
+            // Libellé des options choisies plutôt que leur valeur technique
+            return Array.from(input.selectedOptions || [])
+                .filter(function(option) { return option.value !== ''; })
+                .map(function(option) { return option.textContent.trim(); })
+                .join(', ');
+        }
+
+        if (input.type === 'date' && input.value) {
+            return new Date(input.value).toLocaleDateString('fr');
+        }
+
+        return input.value.trim();
+    }
+
     // Génère la synthèse des champs du formulaire en HTML (divs)
     function generateFormSummary(formElement, containerClass) {
         var inputs = formElement.querySelectorAll('input[name]:not([type="hidden"]), textarea[name], select[name]');
@@ -79,73 +133,32 @@
         
         inputs.forEach(function(input) {
             var name = input.getAttribute('name');
-            var value = input.value;
-            
-            // Pour les champs file, récupérer le(s) nom(s) du/des fichier(s)
-            if (input.type === 'file') {
-                if (input.files && input.files.length > 0) {
-                    if (input.multiple) {
-                        // Fichiers multiples : joindre tous les noms
-                        value = Array.from(input.files).map(function(f) { return f.name; }).join(', ');
-                    } else {
-                        // Fichier unique
-                        value = input.files[0].name;
-                    }
-                } else {
-                    value = '';
-                }
-            }
-            
-            // Pour les champs date, formater avec toLocaleDateString
-            if (input.type === 'date' && value) {
-                value = new Date(value).toLocaleDateString("fr");
-            }
-            
-            // Ignorer les champs vides
+            var value = fieldValue(input);
+
+            // Ignorer les champs vides (dont radios / cases non cochées)
             if (!name || value === '') {
                 return;
             }
-            
-            // Trouver le label associé
-            var labelText = name;
-            
-            // 1. Chercher label avec for=id
-            var inputId = input.getAttribute('id');
-            if (inputId) {
-                var labelFor = formElement.querySelector('label[for="' + inputId + '"]');
-                if (labelFor) {
-                    labelText = labelFor.textContent.trim();
-                }
-            }
-            
-            // 2. Chercher dans la structure Bulma : parent .field > .label
-            if (labelText === name) {
-                var fieldParent = input.closest('.field');
-                if (fieldParent) {
-                    var labelEl = fieldParent.querySelector('.label');
-                    if (labelEl) {
-                        labelText = labelEl.textContent.trim();
-                    }
-                }
-            }
-            
+
+            var label = fieldLabel(formElement, input) || name;
+
             // Créer un item de synthèse
             var item = document.createElement('div');
             item.className = 'form-summary-item';
-            
+
             var labelSpan = document.createElement('span');
             labelSpan.className = 'form-summary-label';
-            labelSpan.textContent = labelText;
-            
+            labelSpan.textContent = label;
+
             var valueSpan = document.createElement('span');
             valueSpan.className = 'form-summary-value';
             valueSpan.textContent = value;
-            
+
             item.appendChild(labelSpan);
             item.appendChild(valueSpan);
             summaryList.appendChild(item);
         });
-        
+
         summaryContainer.appendChild(summaryList);
     }
 
