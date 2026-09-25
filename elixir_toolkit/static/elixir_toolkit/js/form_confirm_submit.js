@@ -242,7 +242,14 @@
                 if (submitButton) {
                     submitButton.classList.add('is-loading');
                 }
-                form.submit();
+                // Support both HTMX and traditional forms
+                if (window.htmx && Array.from(form.attributes).some(attr => attr.name.startsWith('hx-'))) {
+                    console.log("HTMX forced form submission");
+                    htmx.trigger(form, 'submit');
+                } else {
+                    console.log("standard HTML form submission");
+                    form.submit();
+                }
             });
         }
     }
