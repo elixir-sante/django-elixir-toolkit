@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.26.6"
+version = "0.27.0"
 description = "fix : confirm submit modal for checkbox and 0 files"
 readme = "README.md"
 requires-python = ">=3.14"
