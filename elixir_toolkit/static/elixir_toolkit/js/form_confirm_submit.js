@@ -2,6 +2,17 @@
  * Form Confirm Submit - JavaScript
  * Gère les modales de confirmation de soumission de formulaire
  * Utilise des boutons type="button" pour éviter le blocage par la validation HTML5 native
+ *
+ * Extension de la synthèse depuis un projet : après avoir listé les champs,
+ * l'événement `form-confirm:summary` est émis sur le formulaire. Un projet
+ * peut l'écouter pour compléter la synthèse (champs sans `name`, données
+ * construites en JS…) sans modifier ce fichier :
+ *
+ *     form.addEventListener('form-confirm:summary', function (event) {
+ *         event.detail.addItem('Libellé', 'Valeur');
+ *     });
+ *
+ * detail : { form, container, list, addItem(label, value) }
  */
 
 (function() {
@@ -49,7 +60,7 @@
         return labelEl ? labelEl.textContent.replace(/\s*\*\s*$/, '').trim() : '';
     }
 
-    // Libellé du champ : celui du groupe pour une radio (« Civilité »), sinon
+    // Libellé du champ : celui du groupe pour une radio (pas celui de l'option), sinon
     // label[for=id], à défaut le .label du .field Bulma parent
     function fieldLabel(formElement, input) {
         var fieldParent = input.closest('.field');
@@ -98,6 +109,24 @@
         return input.value.trim();
     }
 
+    // Ligne « libellé / valeur » de la synthèse
+    function createSummaryItem(label, value) {
+        var item = document.createElement('div');
+        item.className = 'form-summary-item';
+
+        var labelSpan = document.createElement('span');
+        labelSpan.className = 'form-summary-label';
+        labelSpan.textContent = label;
+
+        var valueSpan = document.createElement('span');
+        valueSpan.className = 'form-summary-value';
+        valueSpan.textContent = value;
+
+        item.appendChild(labelSpan);
+        item.appendChild(valueSpan);
+        return item;
+    }
+
     // Génère la synthèse des champs du formulaire en HTML (divs)
     function generateFormSummary(formElement, containerClass) {
         var inputs = formElement.querySelectorAll('input[name]:not([type="hidden"]), textarea[name], select[name]');
@@ -140,26 +169,26 @@
                 return;
             }
 
-            var label = fieldLabel(formElement, input) || name;
-
-            // Créer un item de synthèse
-            var item = document.createElement('div');
-            item.className = 'form-summary-item';
-
-            var labelSpan = document.createElement('span');
-            labelSpan.className = 'form-summary-label';
-            labelSpan.textContent = label;
-
-            var valueSpan = document.createElement('span');
-            valueSpan.className = 'form-summary-value';
-            valueSpan.textContent = value;
-
-            item.appendChild(labelSpan);
-            item.appendChild(valueSpan);
-            summaryList.appendChild(item);
+            summaryList.appendChild(
+                createSummaryItem(fieldLabel(formElement, input) || name, value)
+            );
         });
 
         summaryContainer.appendChild(summaryList);
+
+        // Point d'extension : le projet complète la synthèse s'il le souhaite
+        formElement.dispatchEvent(new CustomEvent('form-confirm:summary', {
+            bubbles: true,
+            detail: {
+                form: formElement,
+                container: summaryContainer,
+                list: summaryList,
+                addItem: function(label, value) {
+                    if (value === undefined || value === null || value === '') { return; }
+                    summaryList.appendChild(createSummaryItem(label, value));
+                }
+            }
+        }));
     }
 
     // Initialise une seule modale de confirmation
