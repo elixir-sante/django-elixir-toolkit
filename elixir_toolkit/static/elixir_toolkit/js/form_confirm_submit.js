@@ -247,37 +247,61 @@
         }
     }
 
-    // Initialiser au chargement de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        // Trouver toutes les modales de confirmation
+    // Initialise les modales de confirmation pour les nouveaux éléments
+    function initFormConfirmSubmitModals() {
         var modals = document.querySelectorAll('.modal.form-confirm-submit-modal');
         
         modals.forEach(function(modal) {
-            initModal(modal);
+            // Vérifier si déjà initialisé via un attribut data
+            if (!modal.hasAttribute('data-initialized')) {
+                modal.setAttribute('data-initialized', 'true');
+                initModal(modal);
+            }
         });
 
         // Fermer les modales avec les éléments standards Bulma
         (document.querySelectorAll('.modal-background, .modal-card-head .delete') || []).forEach(function($close) {
-            var $target = $close.closest('.modal');
-            $close.addEventListener('click', function() {
-                closeModal($target);
-            });
-        });
-
-        // Fermer avec la touche Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeAllModals();
+            if (!$close.hasAttribute('data-close-initialized')) {
+                $close.setAttribute('data-close-initialized', 'true');
+                var $target = $close.closest('.modal');
+                $close.addEventListener('click', function() {
+                    closeModal($target);
+                });
             }
         });
 
         // Fermer avec les boutons Annuler (action="cancel")
         (document.querySelectorAll('.button[action="cancel"]') || []).forEach(function($cancel) {
-            var $target = $cancel.closest('.modal');
-            $cancel.addEventListener('click', function() {
-                closeModal($target);
-            });
+            if (!$cancel.hasAttribute('data-cancel-initialized')) {
+                $cancel.setAttribute('data-cancel-initialized', 'true');
+                var $target = $cancel.closest('.modal');
+                $cancel.addEventListener('click', function() {
+                    closeModal($target);
+                });
+            }
         });
+    }
+
+    // Initialiser au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        initFormConfirmSubmitModals();
+
+        // Fermer avec la touche Escape (un seul écouteur global)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAllModals();
+            }
+        });
+    });
+
+    // Initialiser après HTMX after swap
+    document.addEventListener('htmx:afterSwap', function() {
+        initFormConfirmSubmitModals();
+    });
+
+    // Initialiser après HTMX after settle
+    document.addEventListener('htmx:afterSettle', function() {
+        initFormConfirmSubmitModals();
     });
 
     // Exposer pour les tests ou extensions
