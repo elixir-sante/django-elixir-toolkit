@@ -14,17 +14,17 @@ from django.utils.deconstruct import deconstructible
 # Basé sur le registre SWIFT IBAN (https://www.swift.com/standards/data-standards/iban)
 IBAN_COUNTRY_SPEC = {
     # France et territoires français
-    'FR': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),
-    'GF': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Guyane française
-    'GP': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Guadeloupe
-    'MQ': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Martinique
-    'RE': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # La Réunion
-    'YT': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Mayotte
-    'MC': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Monaco
-    'PM': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Saint-Pierre-et-Miquelon
-    'WF': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Wallis-et-Futuna
-    'PF': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Polynésie française
-    'NC': (23, r'^[0-9]{10}[0-9A-Z]{11}$'),  # Nouvelle-Calédonie
+    'FR': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),
+    'GF': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Guyane française
+    'GP': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Guadeloupe
+    'MQ': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Martinique
+    'RE': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # La Réunion
+    'YT': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Mayotte
+    'MC': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Monaco
+    'PM': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Saint-Pierre-et-Miquelon
+    'WF': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Wallis-et-Futuna
+    'PF': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Polynésie française
+    'NC': (27, r'^[0-9]{10}[0-9A-Z]{11}[0-9]{2}$'),  # Nouvelle-Calédonie
     # Belgique
     'BE': (16, r'^[0-9]{12}$'),
     # Allemagne
@@ -37,13 +37,13 @@ IBAN_COUNTRY_SPEC = {
     # Espagne
     'ES': (24, r'^[0-9]{20}$'),
     # Italie
-    'IT': (27, r'^[A-Z][0-9]{10}[A-Z0-9]{16}$'),
+    'IT': (27, r'^[A-Z][0-9]{10}[A-Z0-9]{12}$'),
     # Pays-Bas
-    'NL': (18, r'^[A-Z]{4}[0-9]{14}$'),
+    'NL': (18, r'^[A-Z]{4}[0-9]{10}$'),
     # Luxembourg
-    'LU': (20, r'^[0-9]{3}[A-Z0-9]{17}$'),
+    'LU': (20, r'^[0-9]{3}[A-Z0-9]{13}$'),
     # Suède
-    'SE': (24, r'^[0-9]{21}$'),
+    'SE': (24, r'^[0-9]{20}$'),
     # Norvège
     'NO': (15, r'^[0-9]{11}$'),
     # Danemark
@@ -86,12 +86,12 @@ IBAN_COUNTRY_SPEC = {
     'MT': (31, r'^[A-Z]{4}[0-9]{5}[A-Z0-9]{18}$'),
     # Islande
     'IS': (26, r'^[0-9]{22}$'),
-    # Israël
+    # Israël/Palestine
     'IL': (23, r'^[0-9]{19}$'),
     # Turquie
     'TR': (26, r'^[0-9]{5}[A-Z0-9]{17}$'),
     # Russie
-    'RU': (23, r'^[0-9][0-9A-Z]{22}$'),
+    'RU': (33, r'^[0-9]{14}[A-Z0-9]{15}$'),
     # Ukraine
     'UA': (29, r'^[0-9]{6}[A-Z0-9]{19}$'),
     # Maroc
@@ -121,7 +121,7 @@ IBAN_COUNTRY_SPEC = {
     # Australie (utilisation pseudo-IBAN)
     'AU': (31, r'^[0-9]{27}$'),
     # Brésil (utilisation pseudo-IBAN)
-    'BR': (29, r'^[0-9]{8}[0-9A-Z]{20}$'),
+    'BR': (29, r'^[0-9]{23}[A-Z][A-Z0-9]$'),
 }
 
 
