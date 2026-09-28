@@ -93,7 +93,7 @@ def toolkit_assets(version="1.0.0"):
     }
 
 @register.inclusion_tag('elixir_toolkit/components/button.html')
-def ui_button(text, css_classes="", icon=None, icon_right=False, href=None, **kwargs):
+def ui_button(text=None, css_classes="", icon=None, icon_right=False, href=None, **kwargs):
     # Nettoyage des clés (data_id -> data-id)
     html_attrs = {k.replace('_', '-'): v for k, v in kwargs.items()}
     
