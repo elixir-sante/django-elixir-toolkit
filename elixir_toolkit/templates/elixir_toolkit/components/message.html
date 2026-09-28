@@ -7,9 +7,11 @@
   </div>
   {% endif %}
   <div class="message-body">
-    {# L'échappement HTML de content est géré côté Python dans ui_message_base :
+    {% comment %}
+    L'échappement HTML de content est géré côté Python dans ui_message_base :
        is_safe=False (défaut) → escape(), is_safe=True → mark_safe(). Ne pas
-       ajouter de filtre |safe ici. #}
+       ajouter de filtre |safe ici.
+    {% endcomment %}
     {{ content }}
   </div>
 </article>
