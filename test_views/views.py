@@ -191,3 +191,7 @@ class FormConfirmSubmitTestView(TemplateView):
     def post(self, request, *args, **kwargs):
         messages.success(request, "Formulaire soumis avec succès !")
         return self.render_to_response(self.get_context_data())
+
+
+class MessageTestView(TemplateView):
+    template_name = "message_test.html"

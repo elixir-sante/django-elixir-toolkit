@@ -1,0 +1,15 @@
+{% load elixir_toolkit_tags %}
+
+<article class="message {{ color_class }} {{ css_classes }}" {{ attrs }}>
+  {% if title %}
+  <div class="message-header">
+    {{ title }}
+  </div>
+  {% endif %}
+  <div class="message-body">
+    {# L'échappement HTML de content est géré côté Python dans ui_message_base :
+       is_safe=False (défaut) → escape(), is_safe=True → mark_safe(). Ne pas
+       ajouter de filtre |safe ici. #}
+    {{ content }}
+  </div>
+</article>
