@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load elixir_toolkit_tags %}
+
+{% block body %}
+<div class="container">
+    <h1 class="title is-1">Test des composants Message</h1>
+    
+    <div class="box">
+        <h2 class="title is-2">Sommaire</h2>
+        <ul>
+            <li><a href="#messages-sans-titre">Messages sans titre</a></li>
+            <li><a href="#messages-avec-titre">Messages avec titre</a></li>
+            <li><a href="#messages-avec-contenu-html">Messages avec contenu HTML</a></li>
+            <li><a href="#messages-avec-classes-supplementaires">Messages avec classes CSS supplémentaires</a></li>
+            <li><a href="#messages-avec-attributs-html">Messages avec attributs HTML</a></li>
+            <li><a href="#messages-mode-securise">Messages en mode sécurisé (is_safe=False)</a></li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2 id="messages-sans-titre" class="title is-3">Messages sans titre</h2>
+        
+        <h3 class="title is-4">Couleur Primary (défaut)</h3>
+        {% ui_message content="Ceci est un message avec la couleur primary par défaut." %}
+        
+        <h3 class="title is-4">Couleur Info</h3>
+        {% ui_message_info content="Ceci est un message avec la couleur info." %}
+        
+        <h3 class="title is-4">Couleur Success</h3>
+        {% ui_message_success content="Ceci est un message avec la couleur success." %}
+        
+        <h3 class="title is-4">Couleur Warning</h3>
+        {% ui_message_warning content="Ceci est un message avec la couleur warning." %}
+        
+        <h3 class="title is-4">Couleur Danger</h3>
+        {% ui_message_danger content="Ceci est un message avec la couleur danger." %}
+    </div>
+
+    <div class="box">
+        <h2 id="messages-avec-titre" class="title is-3">Messages avec titre</h2>
+        
+        {% ui_message title="Information importante" content="Ceci est un message avec un titre et la couleur primary." %}
+        
+        {% ui_message_info title="À savoir" content="Ceci est un message info avec un titre." %}
+        
+        {% ui_message_success title="Succès !" content="L'opération a été effectuée avec succès." %}
+        
+        {% ui_message_warning title="Attention" content="Cette action est irréversible." %}
+        
+        {% ui_message_danger title="Erreur" content="Une erreur est survenue. Veuillez réessayer." %}
+    </div>
+
+    <div class="box">
+        <h2 id="messages-avec-contenu-html" class="title is-3">Messages avec contenu HTML</h2>
+        <p class="mb-4">Par défaut, <code>is_safe=False</code>, donc le contenu HTML est échappé. Pour afficher du HTML, utilisez <code>is_safe=True</code>.</p>
+        
+        {% ui_message content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. <strong>Pellentesque risus mi</strong>, tempus quis placerat ut, porta nec nulla. Vestibulum rhoncus ac ex sit amet fringilla. Nullam gravida purus diam, et dictum <a>felis venenatis</a> efficitur." is_safe=True %}
+        
+        {% ui_message_info content="Message avec <em>italique</em>, <strong>gras</strong>, et un <a href='#'>lien</a>." is_safe=True %}
+        
+        {% ui_message_success content="<ul><li>Élément 1</li><li>Élément 2</li><li>Élément 3</li></ul>" is_safe=True %}
+    </div>
+
+    <div class="box">
+        <h2 id="messages-avec-classes-supplementaires" class="title is-3">Messages avec classes CSS supplémentaires</h2>
+        
+        {% ui_message content="Message avec marge en bas." css_classes="mb-4" %}
+        
+        {% ui_message content="Message avec marge en haut." css_classes="mt-4" %}
+        
+        {% ui_message content="Message avec padding." css_classes="p-4" %}
+        
+        {% ui_message content="Message avec plusieurs classes." css_classes="mb-4 mt-2 p-3" %}
+        
+        {% ui_message content="Message avec classe personnalisée." css_classes="autre_css" %}
+    </div>
+
+    <div class="box">
+        <h2 id="messages-avec-attributs-html" class="title is-3">Messages avec attributs HTML</h2>
+        
+        {% ui_message content="Message avec ID personnalisé." id="mon-message-1" %}
+        
+        {% ui_message content="Message avec data-attribute." data_id="123" data_type="info" %}
+        
+        {% ui_message content="Message avec plusieurs attributs." id="msg-2" data_test="value" aria_label="Description" %}
+    </div>
+
+    <div class="box">
+        <h2 id="messages-mode-securise" class="title is-3">Messages avec contenu HTML (is_safe=True)</h2>
+        <p class="mb-4">Par défaut (<code>is_safe=False</code>), le contenu HTML est échappé. Utilisez <code>is_safe=True</code> pour rendre du HTML de confiance.</p>
+        
+        {% ui_message content="<strong>Ce texte devrait être en gras</strong> mais il ne le sera pas (mode sécurisé par défaut)." %}
+        
+        {% ui_message_info content="<em>Italiques</em> qui ne seront pas rendus (mode sécurisé par défaut)." %}
+        
+        {% ui_message_danger content="<script>alert('XSS')</script> Ce script ne sera pas exécuté (mode sécurisé par défaut)." %}
+        
+        <h3 class="title is-4 mt-4">Comparaison côte à côte</h3>
+        <div class="columns">
+            <div class="column">
+                <p class="mb-2"><strong>Avec is_safe=True :</strong></p>
+                {% ui_message content="<strong>Gras</strong> et <em>italique</em>" is_safe=True %}
+            </div>
+            <div class="column">
+                <p class="mb-2"><strong>Avec is_safe=False (défaut) :</strong></p>
+                {% ui_message content="<strong>Gras</strong> et <em>italique</em>" %}
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h2 class="title is-3">Utilisation avancée</h2>
+        
+        <h3 class="title is-4">Combinaison de toutes les options</h3>
+        {% ui_message_danger 
+            title="Alerte critique !"
+            content="<strong>Attention :</strong> Une erreur <em>grave</em> est survenue. <a href='#'>Cliquez ici</a> pour plus d'informations."
+            css_classes="mb-4"
+            id="critical-alert"
+            data_severity="high"
+            is_safe=True
+        %}
+    </div>
+
+    <div class="mt-6">
+        <a href="{% url 'table_filter_example' %}" class="button is-primary">
+            <span class="icon">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span>Retour à la page principale</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -70,6 +70,7 @@ elixir_toolkit/
 │       │   ├── filter_bar.html     # Barre de filtres
 │       │   ├── form_confirm_submit.html # Modale de confirmation de soumission
 │       │   ├── list.html           # Liste d'éléments
+│       │   ├── message.html        # Message
 │       │   ├── select.html         # Sélecteur avec Selectize
 │       │   ├── stepper.html        # Parcours en plusieurs étapes
 │       │   ├── table.html          # Tableau
@@ -341,6 +342,56 @@ elixir_toolkit/
 **Paramètres :**
 - `direction` : `down`, `right`, `up`, `left`
 - `size` : Taille
+
+---
+
+### Message
+
+Composant Bulma pour afficher des messages stylisés, avec support des couleurs, titres, et contenu HTML.
+
+#### Message simple
+```html
+{% ui_message content="Ceci est un message simple." %}
+```
+
+#### Message avec couleur
+```html
+{% ui_message content="Message d'erreur." color="danger" %}
+{% ui_message_info content="Information importante." %}
+{% ui_message_success content="Opération réussie !" %}
+{% ui_message_warning content="Attention !" %}
+```
+
+#### Message avec titre
+```html
+{% ui_message title="Avertissement" content="Cette action est irréversible." color="warning" %}
+```
+
+#### Message avec contenu HTML
+```html
+{% ui_message content="<strong>Texte en gras</strong> et <em>italique</em>." is_safe=True %}
+```
+
+#### Message sécurisé (comportement par défaut)
+Par défaut (`is_safe=False`), le contenu est échappé : les balises HTML sont affichées comme texte et ne sont jamais interprétées. C'est le comportement recommandé pour tout contenu provenant de l'utilisateur.
+```html
+{% ui_message content="<script>alert('XSS')</script>" %}
+```
+
+**Paramètres :**
+- `content` (requis) : Contenu du message
+- `color` : Couleur Bulma (`primary`, `info`, `success`, `warning`, `danger`) - défaut: `primary`
+- `title` : Titre du message (affiché dans le header, toujours échappé)
+- `css_classes` : Classes CSS supplémentaires
+- `is_safe` : Si `True`, le contenu est rendu tel quel sans échappement (HTML de confiance uniquement) - défaut: `False`
+- Autres attributs HTML via kwargs (`id`, `data-*`, etc.)
+
+**Variantes rapides :**
+- `{% ui_message_primary %}`
+- `{% ui_message_info %}`
+- `{% ui_message_success %}`
+- `{% ui_message_warning %}`
+- `{% ui_message_danger %}`
 
 ---
 
