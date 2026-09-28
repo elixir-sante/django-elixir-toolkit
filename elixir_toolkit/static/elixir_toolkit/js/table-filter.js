@@ -356,14 +356,38 @@
     }
 
     /**
+     * Sélectionne les lignes filtrables du tbody en excluant les lignes de détails
+     * (lignes expandables) et les lignes enfants tablesorter, dont la visibilité
+     * relève exclusivement du toggle utilisateur (table.js).
+     */
+    function getFilterableRows($table) {
+        return $table.find('tbody tr').not('tr.table-row-details, tr.tablesorter-child-row');
+    }
+
+    /**
+     * Masque la ligne de détails liée à une ligne principale filtrée.
+     * Ne fait jamais l'inverse : le filtre ne réaffiche jamais une ligne de détails,
+     * son état (dépliée/repliée) relève uniquement du toggle utilisateur.
+     */
+    function hideDetailsRow(row) {
+        var targetId = row.getAttribute('data-target');
+        if (!targetId) return;
+        var detailsRow = document.getElementById(targetId);
+        if (detailsRow) {
+            detailsRow.style.display = 'none';
+        }
+    }
+
+    /**
      * Filtre les lignes du tableau (version simple avec un seul filtre)
      */
     function filterTable($table, filterValue, columns) {
-        var $rows = $table.find('tbody tr');
+        var $rows = getFilterableRows($table);
         var searchTerm = normalizeString(filterValue);
 
         if (searchTerm === '') {
-            // Si le filtre est vide, afficher toutes les lignes
+            // Si le filtre est vide, afficher toutes les lignes principales
+            // (les lignes de détails conservent leur propre état)
             $rows.show();
             return;
         }
@@ -409,6 +433,9 @@
             }
 
             $row.toggle(isVisible);
+            if (!isVisible) {
+                hideDetailsRow(this);
+            }
         });
     }
 
@@ -419,7 +446,7 @@
      * - Si toutes les cases d'un groupe sont cochées, le filtre pour ce groupe est désactivé
      */
     function filterTableMulti($table, filterConfig, columns, checkboxGroupValues) {
-        var $rows = $table.find('tbody tr');
+        var $rows = getFilterableRows($table);
         
         // Séparer les filtres en deux catégories : checkboxes (groupes) et autres (y compris checkboxes uniques)
         var otherFilters = {};
@@ -462,7 +489,8 @@
         }
         
         if (allEmpty && !hasActiveCheckboxFilters) {
-            // Si tous les filtres sont vides, afficher toutes les lignes
+            // Si tous les filtres sont vides, afficher toutes les lignes principales
+            // (les lignes de détails conservent leur propre état)
             $rows.show();
             return;
         }
@@ -534,6 +562,7 @@
             // Si les filtres précédents ont déjà exclu la ligne, pas besoin de vérifier les checkboxes
             if (!isVisible) {
                 $row.toggle(false);
+                hideDetailsRow(this);
                 return;
             }
             
@@ -622,6 +651,9 @@
             }
 
             $row.toggle(isVisible);
+            if (!isVisible) {
+                hideDetailsRow(this);
+            }
         });
     }
 
