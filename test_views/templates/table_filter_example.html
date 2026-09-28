@@ -797,6 +797,78 @@
     </p>
 </div>
 
+<div class="box">
+    <h2 class="subtitle">Exemple 12: Lignes expandables + filtres (input texte et sélectize)</h2>
+    <p>Tableau avec lignes de détails expandables combiné à un filtre texte (colonne Produit) et un filtre
+    sélectize (colonne Catégorie). Les lignes de détails restent masquées au chargement et lors du filtrage ;
+    seule une ligne de détails dont la ligne parente est filtrée est masquée (pas de ligne orpheline).</p>
+
+    <div class="field has-addons mb-4">
+        <div class="control is-expanded">
+            <input type="text" id="ex12-nom-input" name="ex12_nom" class="input" placeholder="Filtrer par produit..." data-filter-column="0">
+        </div>
+        <div class="control is-expanded">
+            {% ui_select name="ex12_categorie" options="[('Hardware', 'Hardware'), ('Software', 'Software'), ('Accessoire', 'Accessoire')]" placeholder="Toutes les catégories" icon="fa-filter" %}
+        </div>
+    </div>
+
+    {% ui_table css_classes="is-striped is-fullwidth" expandable=True filterable=True filter_columns="1" filter_target="#ex12-nom-input, #id_ex12_categorie" %}
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in donnees_inventaire %}
+            <tr class="table-row-expandable" data-target="ex12-details-{{ forloop.counter }}">
+                <td>
+                    <span class="icon">
+                        <i class="fas fa-{{ item.icon_item }}"></i>
+                    </span>
+                    <strong>{{ item.nom }}</strong>
+                    <div class="is-size-7 has-text-grey">{{ item.sku }}</div>
+                </td>
+                <td>{% ui_tag text=item.categorie color="primary" %}</td>
+                <td class="has-text-weight-bold">{{ item.prix|floatformat:2 }} €</td>
+                <td>{{ item.stock }} unités</td>
+                <td>
+                    <button type="button" class="button is-small is-text expand-toggle" data-target="ex12-details-{{ forloop.counter }}">
+                        <span class="icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                        <span>Détails</span>
+                    </button>
+                </td>
+            </tr>
+            <tr class="table-row-details" id="ex12-details-{{ forloop.counter }}" style="display: none;">
+                <td colspan="5">
+                    <div class="content p-4">
+                        <h4>Détails du produit : {{ item.nom }}</h4>
+                        <p><strong>SKU :</strong> {{ item.sku }}</p>
+                        <p><strong>Catégorie :</strong> {{ item.categorie }}</p>
+                        <p><strong>Prix :</strong> {{ item.prix|floatformat:2 }} €</p>
+                        <p><strong>Stock :</strong> {{ item.stock }} unités</p>
+                        <p><strong>Description :</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    {% end_ui_table %}
+
+    <p class="help mt-2">
+        <strong>Exemples :</strong>
+        <code>Produit: "Mac"</code> → Seuls les produits Mac s'affichent (détails toujours repliés),
+        <code>Catégorie: "Hardware"</code> → Seuls les produits matériels s'affichent,
+        <code>Produit: "Mac" + Catégorie: "Hardware"</code> → Logique ET entre les deux filtres.
+        Le bouton <code>Détails</code> déplie la ligne au premier clic, y compris après un filtrage.
+    </p>
+</div>
+
 <a href="/" class="button is-primary mt-4">Retour à la page principale</a>
 
 <!-- Exemple 10: Filtres date personnalisés -->

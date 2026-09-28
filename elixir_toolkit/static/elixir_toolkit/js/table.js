@@ -5,7 +5,8 @@ function setupTableExpandables() {
         const detailsRow = document.getElementById(targetId);
         if (!detailsRow) return;
 
-        const isHidden = detailsRow.style.display === 'none' || detailsRow.style.display === '';
+        const isHidden = !detailsRow.classList.contains('is-expanded');
+        detailsRow.classList.toggle('is-expanded', isHidden);
         detailsRow.style.display = isHidden ? 'table-row' : 'none';
 
         if (iconElement) {
