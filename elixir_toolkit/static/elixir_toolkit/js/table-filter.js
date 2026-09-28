@@ -365,17 +365,84 @@
     }
 
     /**
-     * Masque la ligne de détails liée à une ligne principale filtrée.
+     * Retrouve la ligne principale d'une ligne de détails :
+     * 1. ligne portant data-target égal à l'ID de la ligne de détails
+     * 2. ligne contenant un bouton d'expansion (.expand-toggle ou .toggle-row-btn)
+     *    portant ce data-target
+     * 3. à défaut, la ligne principale précédente dans le DOM
+     */
+    function findMainRow($mainRows, detailsRow) {
+        var detailsId = detailsRow.id;
+        if (detailsId) {
+            var $main = $mainRows.filter('[data-target="' + detailsId + '"]');
+            if (!$main.length) {
+                $main = $mainRows.has('.expand-toggle[data-target="' + detailsId + '"], .toggle-row-btn[data-target="' + detailsId + '"]');
+            }
+            if ($main.length) {
+                return $main.first();
+            }
+        }
+        var prev = detailsRow.previousElementSibling;
+        while (prev && (prev.classList.contains('table-row-details') || prev.classList.contains('tablesorter-child-row'))) {
+            prev = prev.previousElementSibling;
+        }
+        return prev ? $(prev) : $();
+    }
+
+    /**
+     * Après le filtrage des lignes principales, masque les lignes de détails
+     * dont la ligne principale est masquée (ligne orpheline).
      * Ne fait jamais l'inverse : le filtre ne réaffiche jamais une ligne de détails,
      * son état (dépliée/repliée) relève uniquement du toggle utilisateur.
      */
-    function hideDetailsRow(row) {
-        var targetId = row.getAttribute('data-target');
-        if (!targetId) return;
-        var detailsRow = document.getElementById(targetId);
-        if (detailsRow) {
-            detailsRow.style.display = 'none';
+    function syncDetailsRows($table) {
+        var $mainRows = getFilterableRows($table);
+        $table.find('tbody tr.table-row-details').each(function() {
+            var $main = findMainRow($mainRows, this);
+            if ($main.length && !$main.is(':visible')) {
+                collapseDetailsRow($main, this);
+            }
+        });
+    }
+
+    /**
+     * Replie une ligne de détails orpheline. Si elle avait été dépliée par
+     * l'utilisateur, réinitialise son état d'expansion (classe is-expanded,
+     * icône, libellé du bouton, ligne sélectionnée) pour rester cohérent avec
+     * l'état replié : le prochain clic la déplie de nouveau.
+     */
+    function collapseDetailsRow($main, detailsRow) {
+        detailsRow.style.display = 'none';
+
+        if (!detailsRow.classList.contains('is-expanded')) {
+            return;
         }
+        detailsRow.classList.remove('is-expanded');
+
+        var $btns = $main.find('.expand-toggle, .toggle-row-btn');
+        if (detailsRow.id) {
+            $btns = $btns.filter('[data-target="' + detailsRow.id + '"]');
+        }
+        $btns.each(function() {
+            var icon = this.querySelector('.fa-chevron-down, .fa-chevron-up, .fa-chevron-right');
+            if (icon) {
+                if (this.classList.contains('toggle-row-btn')) {
+                    icon.classList.add('fa-chevron-right');
+                    icon.classList.remove('fa-chevron-down');
+                } else {
+                    icon.classList.add('fa-chevron-down');
+                    icon.classList.remove('fa-chevron-up');
+                }
+            }
+            if (this.classList.contains('expand-toggle')) {
+                var textSpan = this.querySelector('span:not(.icon)');
+                if (textSpan) {
+                    textSpan.textContent = 'Détails';
+                }
+            }
+        });
+
+        $main.removeClass('is-selected');
     }
 
     /**
@@ -433,10 +500,8 @@
             }
 
             $row.toggle(isVisible);
-            if (!isVisible) {
-                hideDetailsRow(this);
-            }
         });
+        syncDetailsRows($table);
     }
 
     /**
@@ -562,7 +627,6 @@
             // Si les filtres précédents ont déjà exclu la ligne, pas besoin de vérifier les checkboxes
             if (!isVisible) {
                 $row.toggle(false);
-                hideDetailsRow(this);
                 return;
             }
             
@@ -651,10 +715,8 @@
             }
 
             $row.toggle(isVisible);
-            if (!isVisible) {
-                hideDetailsRow(this);
-            }
         });
+        syncDetailsRows($table);
     }
 
     /**
