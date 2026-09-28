@@ -59,7 +59,9 @@
             // Lecture dynamique des limites définies par le Validator Django via les data-* attributes
             const MAX_SIZE = parseInt(fileInput.dataset.maxSize) || (5 * 1024 * 1024);
             const MAX_TOTAL_SIZE = parseInt(fileInput.dataset.maxTotalSize) || (5 * 1024 * 1024);
-            const MAX_FILES = parseInt(fileInput.dataset.maxFiles) || 100;
+            // Sans l'attribut `multiple` (posé par Django), un seul fichier : le nouveau remplace l'ancien
+            const IS_MULTIPLE = fileInput.multiple;
+            const MAX_FILES = IS_MULTIPLE ? (parseInt(fileInput.dataset.maxFiles) || 100) : 1;
             let ALLOWED_EXTENSIONS = [];
             try {
                 ALLOWED_EXTENSIONS = JSON.parse(fileInput.dataset.allowedExtensions || '[]');
@@ -115,6 +117,9 @@
                 if (errorDisplay) errorDisplay.textContent = '';
                 if (clearCheckbox) clearCheckbox.checked = false;
 
+                const previousFiles = allFiles;
+                if (!IS_MULTIPLE) allFiles = new DataTransfer();
+
                 let currentTotalSize = Array.from(allFiles.files).reduce((sum, f) => sum + f.size, 0);
                 let currentCount = allFiles.files.length;
                 let rejectionReason = "";
@@ -152,6 +157,9 @@
                 if (rejectionReason) {
                     if (errorDisplay) errorDisplay.textContent = rejectionReason;
                 }
+
+                // Mode simple : fichier refusé ou sélection annulée → on garde le précédent
+                if (!IS_MULTIPLE && !allFiles.files.length) allFiles = previousFiles;
 
                 this.files = allFiles.files;
                 updateFileList();

@@ -4,6 +4,7 @@ from crispy_forms.layout import Field as CrispyField
 from crispy_forms.layout import HTML
 from crispy_forms.helper import FormHelper
 from django import forms
+from django.core.exceptions import ValidationError
 
 from elixir_toolkit.validators import (
     MaxFileSizeValidator,
@@ -96,6 +97,21 @@ class MultipleFileUploadInput(forms.FileInput):
     allow_multiple_selected = True
 
 
+class SingleFileInput(forms.FileInput):
+    """`FileInput` qui renvoie la liste si plusieurs fichiers sont envoyés,
+    au lieu de garder silencieusement le dernier (cf. `ToolkitFileField.clean`)."""
+
+    def value_from_datadict(self, data, files, name):
+        uploaded = files.getlist(name) if hasattr(files, "getlist") else []
+        if len(uploaded) > 1:
+            return uploaded
+        return super().value_from_datadict(data, files, name)
+
+
+class SingleClearableFileInput(SingleFileInput, forms.ClearableFileInput):
+    """Variante « clearable » de `SingleFileInput`."""
+
+
 class FileUpload(CrispyField):
     def __init__(self, *args, **kwargs):
         kwargs['template'] = "elixir_toolkit/components/fields/file_input.html"
@@ -110,7 +126,7 @@ class FileUpload(CrispyField):
         widget_class = (
             MultipleFileUploadInput
             if current_widget.allow_multiple_selected
-            else forms.FileInput
+            else SingleFileInput
         )
         bound_field.field.widget = widget_class(attrs=current_widget.attrs)
 
@@ -135,6 +151,20 @@ class ToolkitFileField(forms.FileField):
             AllowedExtensionsValidator(self.allowed_extensions),
         ])
 
+        # Widget mono-fichier dès l'instanciation : au POST, le formulaire est
+        # recréé sans passer par `FileUpload.render`, et un widget standard
+        # garderait silencieusement le dernier fichier au lieu de lever l'erreur.
+        widget = kwargs.get('widget') or self.widget
+        if isinstance(widget, type):
+            widget = widget()
+        if not widget.allow_multiple_selected:
+            single_class = (
+                SingleClearableFileInput
+                if isinstance(widget, forms.ClearableFileInput)
+                else SingleFileInput
+            )
+            kwargs['widget'] = single_class(attrs=widget.attrs)
+
         super().__init__(*args, **kwargs)
 
     def widget_attrs(self, widget):
@@ -142,8 +172,14 @@ class ToolkitFileField(forms.FileField):
         attrs.update({
             'data-max-size': self.max_size,
             'data-allowed-extensions': json.dumps(self.allowed_extensions),
+            'data-max-files': 1,
         })
         return attrs
+
+    def clean(self, data, initial=None):
+        if isinstance(data, (list, tuple)):
+            raise ValidationError("Vous ne pouvez joindre qu'un seul fichier.", code='too_many_files')
+        return super().clean(data, initial)
 
 
 class MultipleFileInput(forms.ClearableFileInput):
