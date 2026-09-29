@@ -356,14 +356,105 @@
     }
 
     /**
+     * Sélectionne les lignes filtrables du tbody en excluant les lignes de détails
+     * (lignes expandables) et les lignes enfants tablesorter, dont la visibilité
+     * relève exclusivement du toggle utilisateur (table.js).
+     */
+    function getFilterableRows($table) {
+        return $table.find('tbody tr').not('tr.table-row-details, tr.tablesorter-child-row');
+    }
+
+    /**
+     * Retrouve la ligne principale d'une ligne de détails :
+     * 1. ligne portant data-target égal à l'ID de la ligne de détails
+     * 2. ligne contenant un bouton d'expansion (.expand-toggle ou .toggle-row-btn)
+     *    portant ce data-target
+     * 3. à défaut, la ligne principale précédente dans le DOM
+     */
+    function findMainRow($mainRows, detailsRow) {
+        var detailsId = detailsRow.id;
+        if (detailsId) {
+            var $main = $mainRows.filter('[data-target="' + detailsId + '"]');
+            if (!$main.length) {
+                $main = $mainRows.has('.expand-toggle[data-target="' + detailsId + '"], .toggle-row-btn[data-target="' + detailsId + '"]');
+            }
+            if ($main.length) {
+                return $main.first();
+            }
+        }
+        var prev = detailsRow.previousElementSibling;
+        while (prev && (prev.classList.contains('table-row-details') || prev.classList.contains('tablesorter-child-row'))) {
+            prev = prev.previousElementSibling;
+        }
+        return prev ? $(prev) : $();
+    }
+
+    /**
+     * Après le filtrage des lignes principales, masque les lignes de détails
+     * dont la ligne principale est masquée (ligne orpheline).
+     * Ne fait jamais l'inverse : le filtre ne réaffiche jamais une ligne de détails,
+     * son état (dépliée/repliée) relève uniquement du toggle utilisateur.
+     */
+    function syncDetailsRows($table) {
+        var $mainRows = getFilterableRows($table);
+        $table.find('tbody tr.table-row-details').each(function() {
+            var $main = findMainRow($mainRows, this);
+            if ($main.length && !$main.is(':visible')) {
+                collapseDetailsRow($main, this);
+            }
+        });
+    }
+
+    /**
+     * Replie une ligne de détails orpheline. Si elle avait été dépliée par
+     * l'utilisateur, réinitialise son état d'expansion (classe is-expanded,
+     * icône, libellé du bouton, ligne sélectionnée) pour rester cohérent avec
+     * l'état replié : le prochain clic la déplie de nouveau.
+     */
+    function collapseDetailsRow($main, detailsRow) {
+        detailsRow.style.display = 'none';
+
+        if (!detailsRow.classList.contains('is-expanded')) {
+            return;
+        }
+        detailsRow.classList.remove('is-expanded');
+
+        var $btns = $main.find('.expand-toggle, .toggle-row-btn');
+        if (detailsRow.id) {
+            $btns = $btns.filter('[data-target="' + detailsRow.id + '"]');
+        }
+        $btns.each(function() {
+            var icon = this.querySelector('.fa-chevron-down, .fa-chevron-up, .fa-chevron-right');
+            if (icon) {
+                if (this.classList.contains('toggle-row-btn')) {
+                    icon.classList.add('fa-chevron-right');
+                    icon.classList.remove('fa-chevron-down');
+                } else {
+                    icon.classList.add('fa-chevron-down');
+                    icon.classList.remove('fa-chevron-up');
+                }
+            }
+            if (this.classList.contains('expand-toggle')) {
+                var textSpan = this.querySelector('span:not(.icon)');
+                if (textSpan) {
+                    textSpan.textContent = 'Détails';
+                }
+            }
+        });
+
+        $main.removeClass('is-selected');
+    }
+
+    /**
      * Filtre les lignes du tableau (version simple avec un seul filtre)
      */
     function filterTable($table, filterValue, columns) {
-        var $rows = $table.find('tbody tr');
+        var $rows = getFilterableRows($table);
         var searchTerm = normalizeString(filterValue);
 
         if (searchTerm === '') {
-            // Si le filtre est vide, afficher toutes les lignes
+            // Si le filtre est vide, afficher toutes les lignes principales
+            // (les lignes de détails conservent leur propre état)
             $rows.show();
             return;
         }
@@ -410,6 +501,7 @@
 
             $row.toggle(isVisible);
         });
+        syncDetailsRows($table);
     }
 
     /**
@@ -419,7 +511,7 @@
      * - Si toutes les cases d'un groupe sont cochées, le filtre pour ce groupe est désactivé
      */
     function filterTableMulti($table, filterConfig, columns, checkboxGroupValues) {
-        var $rows = $table.find('tbody tr');
+        var $rows = getFilterableRows($table);
         
         // Séparer les filtres en deux catégories : checkboxes (groupes) et autres (y compris checkboxes uniques)
         var otherFilters = {};
@@ -462,7 +554,8 @@
         }
         
         if (allEmpty && !hasActiveCheckboxFilters) {
-            // Si tous les filtres sont vides, afficher toutes les lignes
+            // Si tous les filtres sont vides, afficher toutes les lignes principales
+            // (les lignes de détails conservent leur propre état)
             $rows.show();
             return;
         }
@@ -623,6 +716,7 @@
 
             $row.toggle(isVisible);
         });
+        syncDetailsRows($table);
     }
 
     /**
