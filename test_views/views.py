@@ -1,3 +1,6 @@
+import datetime
+import random
+
 from django.views.generic import FormView, TemplateView
 from django.contrib import messages
 from test_views.forms import FormExample
@@ -182,6 +185,60 @@ class TableFilterExampleView(TemplateView):
             }
         ]
         
+        return context
+
+
+class TableStressTestView(TemplateView):
+    """
+    Test de charge du composant ui_table : 1000 lignes, 6 colonnes,
+    6 filtres combinés (logique ET) pour mesurer la résistance du JS
+    (table-filter.js) et du tri sur un grand volume de lignes.
+    """
+    template_name = "table_stress_test.html"
+    nb_lignes = 1000
+
+    services = ['Cardiologie', 'Pneumologie', 'Neurologie', 'Radiologie', 'Urgences', 'Chirurgie']
+    statuts = ['Validé', 'En attente', 'Refusé', 'En cours']
+    statut_couleurs = {'Validé': 'success', 'En attente': 'warning', 'Refusé': 'danger', 'En cours': 'info'}
+    prenoms = ['Jean', 'Marie', 'Pierre', 'Sophie', 'Luc', 'Emma', 'Hugo', 'Léa', 'Paul', 'Camille']
+    noms = ['Dupont', 'Martin', 'Bernard', 'Durand', 'Petit', 'Richard', 'Moreau', 'Garcia', 'Roux', 'Fontaine']
+    motifs = ['Consultation de suivi', 'Bilan annuel', 'Première consultation', 'Contrôle post-opératoire', 'Urgence']
+    notes = [
+        'Aucun particularité signalée. Prochain rendez-vous conseillé dans 6 mois.',
+        'Examens complémentaires demandés, résultats attendus sous 15 jours.',
+        'Traitement en cours bien toléré, pas d effets indésirables rapportés.',
+        'Patient orienté vers un spécialiste du service pour avis complémentaire.',
+        'Dossier incomplet, pièces justificatives à fournir avant validation.',
+    ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Génération déterministe : même jeu de données à chaque chargement
+        rng = random.Random(42)
+        date_debut = datetime.date(2024, 1, 1)
+
+        lignes = []
+        for i in range(1, self.nb_lignes + 1):
+            statut = rng.choice(self.statuts)
+            lignes.append({
+                'reference': f'REF-{i:05d}',
+                'patient': f'{rng.choice(self.prenoms)} {rng.choice(self.noms)}',
+                'service': rng.choice(self.services),
+                'statut': statut,
+                'statut_couleur': self.statut_couleurs[statut],
+                'date': (date_debut + datetime.timedelta(days=rng.randint(0, 729))).strftime('%d/%m/%Y'),
+                'montant': round(rng.uniform(10, 500), 2),
+                'praticien': f'Dr {rng.choice(self.noms)}',
+                'motif': rng.choice(self.motifs),
+                'duree': rng.choice([15, 20, 30, 45, 60]),
+                'notes': rng.choice(self.notes),
+            })
+
+        context['lignes_table'] = lignes
+        context['nb_lignes'] = self.nb_lignes
+        context['services'] = self.services
+        context['statuts'] = self.statuts
         return context
 
 

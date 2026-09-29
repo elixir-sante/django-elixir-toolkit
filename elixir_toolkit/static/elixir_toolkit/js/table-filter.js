@@ -11,6 +11,12 @@
     'use strict';
 
     /**
+     * Délai (ms) de debounce de l'événement input : sur un grand tableau,
+     * le filtrage complet n'est relancé qu'après une courte pause de saisie.
+     */
+    var FILTER_DEBOUNCE_MS = 90;
+
+    /**
      * Normalise une chaîne en supprimant les accents et en mettant en minuscules
      */
     function normalizeString(str) {
@@ -19,6 +25,76 @@
             .normalize('NFD')  // Décompose les caractères accentués
             .replace(/[\u0300-\u036f]/g, '')  // Supprime les diacritiques
             .toLowerCase();
+    }
+
+    /**
+     * Cache des textes normalisés par ligne, construit paresseusement.
+     * La normalisation NFD (gestion des accents) est le coût dominant du
+     * filtrage : elle n'est payée qu'une seule fois par cellule au lieu
+     * d'une fois par frappe clavier. WeakMap : les entrées suivent le cycle
+     * de vie des éléments DOM (pas de fuite mémoire, HTMX inclus).
+     */
+    var rowTextCache = new WeakMap();
+
+    function getRowTextCache(row) {
+        var cache = rowTextCache.get(row);
+        if (!cache) {
+            cache = { cells: {}, search: undefined };
+            rowTextCache.set(row, cache);
+        }
+        return cache;
+    }
+
+    /**
+     * Texte normalisé d'une cellule (index dans row.cells)
+     */
+    function getNormalizedCellText(row, cache, colIndex) {
+        if (!(colIndex in cache.cells)) {
+            var cell = row.cells[colIndex];
+            cache.cells[colIndex] = normalizeString(cell ? cell.textContent : '');
+        }
+        return cache.cells[colIndex];
+    }
+
+    /**
+     * Texte normalisé de l'attribut data-search de la ligne ('' si absent)
+     */
+    function getNormalizedSearchText(row, cache) {
+        if (cache.search === undefined) {
+            cache.search = normalizeString(row.getAttribute('data-search'));
+        }
+        return cache.search;
+    }
+
+    /**
+     * Teste si un terme (déjà normalisé) correspond à une ligne :
+     * data-search d'abord, puis les cellules visées (colonne spécifique,
+     * toutes les cellules, ou les colonnes de filter_columns).
+     */
+    function rowMatchesTerm(row, cache, term, targetColumn, columns) {
+        var searchText = getNormalizedSearchText(row, cache);
+        if (searchText && searchText.indexOf(term) !== -1) {
+            return true;
+        }
+        if (targetColumn !== null) {
+            return getNormalizedCellText(row, cache, targetColumn).indexOf(term) !== -1;
+        }
+        if (columns === null) {
+            for (var i = 0; i < row.cells.length; i++) {
+                if (getNormalizedCellText(row, cache, i).indexOf(term) !== -1) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        for (var j = 0; j < columns.length; j++) {
+            var colIndex = columns[j];
+            if (colIndex >= 0 && colIndex < row.cells.length &&
+                getNormalizedCellText(row, cache, colIndex).indexOf(term) !== -1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Initialisation automatique au chargement
@@ -160,21 +236,37 @@
     function setupTableFilter($container, $filterInput, columnsAttr) {
         var columns = parseColumns(columnsAttr);
         var $table = $container.find('table');
+
+        // Timer de debounce pour l'événement input
+        var debounceTimer = null;
+
+        // Invalider le cache de normalisation : le contenu du tableau a pu
+        // être rafraîchi (HTMX) depuis la dernière initialisation.
+        $table.find('tbody tr').each(function() {
+            rowTextCache.delete(this);
+        });
         
-        // Gestion de l'événement input (pour la saisie en temps réel)
+        // Gestion de l'événement input (saisie en temps réel, débouncée :
+        // un caractère tapé ne déclenche pas un passage complet du tableau)
         $filterInput.on('input', function() {
-            filterTable($table, $(this).val(), columns);
+            var value = this.value;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                filterTable($table, value, columns);
+            }, FILTER_DEBOUNCE_MS);
         });
 
-        // Gestion de l'événement change (pour les selects, etc.)
+        // Gestion de l'événement change (pour les selects, etc.) : immédiat
         $filterInput.on('change', function() {
+            clearTimeout(debounceTimer);
             filterTable($table, $(this).val(), columns);
         });
 
-        // Gestion de l'événement keyup (pour la touche Escape, etc.)
+        // Gestion de l'événement keyup (pour la touche Escape, etc.) : immédiat
         $filterInput.on('keyup', function(e) {
             if (e.key === 'Escape') {
                 $(this).val('');
+                clearTimeout(debounceTimer);
                 filterTable($table, '', columns);
             }
         });
@@ -190,6 +282,15 @@
     function setupMultiTableFilter($container, $filterInputs, columnsAttr) {
         var columns = parseColumns(columnsAttr);
         var $table = $container.find('table');
+
+        // Timer de debounce partagé entre tous les champs de ce tableau
+        var filterDebounceTimer = null;
+
+        // Invalider le cache de normalisation : le contenu du tableau a pu
+        // être rafraîchi (HTMX) depuis la dernière initialisation.
+        $table.find('tbody tr').each(function() {
+            rowTextCache.delete(this);
+        });
         
         // Stocker les valeurs des filtres avec leur colonne associée
         var filterConfig = {};
@@ -308,26 +409,32 @@
                     filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
                 });
             } else {
-                // Gestion de l'événement input
+                // Gestion de l'événement input (débouncée : une courte pause
+                // de saisie évite un passage complet du tableau par caractère)
                 $input.on('input', function() {
                     var name = $(this).data('filter-name');
                     filterConfig[name].value = $(this).val();
-                    filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
+                    clearTimeout(filterDebounceTimer);
+                    filterDebounceTimer = setTimeout(function() {
+                        filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
+                    }, FILTER_DEBOUNCE_MS);
                 });
 
-                // Gestion de l'événement change
+                // Gestion de l'événement change (selects, etc.) : immédiat
                 $input.on('change', function() {
                     var name = $(this).data('filter-name');
                     filterConfig[name].value = $(this).val();
+                    clearTimeout(filterDebounceTimer);
                     filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
                 });
 
-                // Gestion de l'événement keyup (pour Escape)
+                // Gestion de l'événement keyup (pour Escape) : immédiat
                 $input.on('keyup', function(e) {
                     if (e.key === 'Escape') {
                         var name = $(this).data('filter-name');
                         $(this).val('');
                         filterConfig[name].value = '';
+                        clearTimeout(filterDebounceTimer);
                         filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
                     }
                 });
@@ -397,8 +504,28 @@
      */
     function syncDetailsRows($table) {
         var $mainRows = getFilterableRows($table);
+
+        // Index des lignes principales par data-target, construit en O(n).
+        // Sans cet index, retrouver la ligne principale de chaque ligne de détails
+        // via findMainRow coute O(n) (scan attributaire de toutes les lignes),
+        // soit O(n²) au total — rédhibitoire sur un grand tableau resynchronisé
+        // à chaque frappe clavier.
+        var mainByTarget = {};
+        $mainRows.each(function() {
+            var target = this.getAttribute('data-target');
+            if (!target) {
+                var btn = this.querySelector('.expand-toggle[data-target], .toggle-row-btn[data-target]');
+                if (btn) {
+                    target = btn.getAttribute('data-target');
+                }
+            }
+            if (target && !mainByTarget[target]) {
+                mainByTarget[target] = this;
+            }
+        });
+
         $table.find('tbody tr.table-row-details').each(function() {
-            var $main = findMainRow($mainRows, this);
+            var $main = mainByTarget[this.id] ? $(mainByTarget[this.id]) : findMainRow($mainRows, this);
             if ($main.length && !$main.is(':visible')) {
                 collapseDetailsRow($main, this);
             }
@@ -459,48 +586,15 @@
             return;
         }
 
-        $rows.each(function() {
-            var $row = $(this);
-            var $cells = $row.find('td');
-            var isVisible = false;
+        var rowEls = [];
+        $rows.each(function() { rowEls.push(this); });
 
-            // Vérifier d'abord l'attribut data-search sur la ligne
-            var rowSearchData = $row.attr('data-search');
-            if (rowSearchData) {
-                var rowSearchText = normalizeString(rowSearchData);
-                if (rowSearchText.includes(searchTerm)) {
-                    isVisible = true;
-                }
-            }
-
-            // Si pas encore visible, vérifier les cellules
-            if (!isVisible) {
-                // Si columns n'est pas spécifié, vérifier toutes les cellules
-                if (columns === null) {
-                    $cells.each(function() {
-                        var cellText = normalizeString($(this).text());
-                        if (cellText.includes(searchTerm)) {
-                            isVisible = true;
-                            return false; // Sortir de la boucle each
-                        }
-                    });
-                } else {
-                    // Vérifier uniquement les colonnes spécifiées
-                    for (var i = 0; i < columns.length; i++) {
-                        var colIndex = columns[i];
-                        if (colIndex >= 0 && colIndex < $cells.length) {
-                            var cellText = normalizeString($cells.eq(colIndex).text());
-                            if (cellText.includes(searchTerm)) {
-                                isVisible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            $row.toggle(isVisible);
-        });
+        for (var r = 0; r < rowEls.length; r++) {
+            var row = rowEls[r];
+            var cache = getRowTextCache(row);
+            var isVisible = rowMatchesTerm(row, cache, searchTerm, null, columns);
+            row.style.display = isVisible ? '' : 'none';
+        }
         syncDetailsRows($table);
     }
 
@@ -560,162 +654,65 @@
             return;
         }
 
-        $rows.each(function() {
-            var $row = $(this);
-            var $cells = $row.find('td');
+        // Pré-normalisation des termes de recherche : une seule fois par
+        // frappe, et non une fois par ligne comme précédemment.
+        var activeTerms = [];
+        for (var termName in otherFilters) {
+            var termConfig = otherFilters[termName];
+            activeTerms.push({
+                term: normalizeString(termConfig.value),
+                column: termConfig.column
+            });
+        }
+
+        var rowEls = [];
+        $rows.each(function() { rowEls.push(this); });
+
+        for (var r = 0; r < rowEls.length; r++) {
+            var row = rowEls[r];
+            var cache = getRowTextCache(row);
             var isVisible = true; // On part de visible
 
-            // Vérifier les filtres autres que checkboxes (logique ET)
-            for (var filterName in otherFilters) {
-                var config = otherFilters[filterName];
-                var filterValue = config.value;
-                var searchTerm = normalizeString(filterValue);
-                var filterMatched = false;
-                var targetColumn = config.column; // La colonne spécifique pour ce filtre
-                
-                // Vérifier d'abord l'attribut data-search sur la ligne
-                var rowSearchData = $row.attr('data-search');
-                if (rowSearchData) {
-                    var rowSearchText = normalizeString(rowSearchData);
-                    if (rowSearchText.includes(searchTerm)) {
-                        filterMatched = true;
-                    }
-                }
-
-                // Si pas encore matched, vérifier les cellules
-                if (!filterMatched) {
-                    // Si une colonne spécifique est définie pour ce filtre
-                    if (targetColumn !== null) {
-                        // Vérifier uniquement cette colonne spécifique
-                        if (targetColumn >= 0 && targetColumn < $cells.length) {
-                            var cellText = normalizeString($cells.eq(targetColumn).text());
-                            if (cellText.includes(searchTerm)) {
-                                filterMatched = true;
-                            }
-                        }
-                    } else if (columns === null) {
-                        // Vérifier toutes les cellules
-                        $cells.each(function() {
-                            var cellText = normalizeString($(this).text());
-                            if (cellText.includes(searchTerm)) {
-                                filterMatched = true;
-                                return false; // Sortir de la boucle each
-                            }
-                        });
-                    } else {
-                        // Vérifier uniquement les colonnes spécifiées dans filter_columns
-                        for (var i = 0; i < columns.length; i++) {
-                            var colIndex = columns[i];
-                            if (colIndex >= 0 && colIndex < $cells.length) {
-                                var cellText = normalizeString($cells.eq(colIndex).text());
-                                if (cellText.includes(searchTerm)) {
-                                    filterMatched = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Si ce filtre ne match pas, la ligne n'est pas visible
-                if (!filterMatched) {
+            // Filtres texte/select (logique ET entre eux)
+            for (var t = 0; t < activeTerms.length; t++) {
+                if (!rowMatchesTerm(row, cache, activeTerms[t].term, activeTerms[t].column, columns)) {
                     isVisible = false;
-                    break; // Sortir de la boucle des filtres
+                    break;
                 }
             }
-            
-            // Si les filtres précédents ont déjà exclu la ligne, pas besoin de vérifier les checkboxes
-            if (!isVisible) {
-                $row.toggle(false);
-                return;
-            }
-            
-            // Vérifier les filtres checkbox (logique OU entre les checkboxes du même groupe)
-            // Chaque groupe de checkboxes est un filtre OU, mais combiné avec ET aux autres filtres
-            if (checkboxGroupValues && Object.keys(checkboxGroupValues).length > 0) {
-                for (var filterName in checkboxGroupValues) {
-                    var groupData = checkboxGroupValues[filterName];
-                    
-                    // Si toutes les cases sont cochées, on ignore ce groupe
-                    if (groupData.checkedValues.length === groupData.allValues.length) {
+
+            // Filtres checkboxes : OU au sein d'un groupe, ET entre les groupes.
+            // Un groupe dont toutes les cases sont cochées est ignoré, de même
+            // qu'un groupe dont aucune ne l'est (pas de filtre actif).
+            if (isVisible && checkboxGroupValues && Object.keys(checkboxGroupValues).length > 0) {
+                for (var groupName in checkboxGroupValues) {
+                    var groupData = checkboxGroupValues[groupName];
+
+                    if (groupData.checkedValues.length === groupData.allValues.length ||
+                        groupData.checkedValues.length === 0) {
                         continue;
                     }
-                    
-                    // Si aucune case n'est cochée, on ignore ce groupe (pas de filtre actif)
-                    if (groupData.checkedValues.length === 0) {
-                        continue;
-                    }
-                    
-                    // Sinon, vérifier si au moins une valeur cochée match
+
+                    var groupConfig = filterConfig[groupName];
+                    var groupColumn = groupConfig ? groupConfig.column : null;
                     var groupMatched = false;
-                    var config = filterConfig[filterName];
-                    var targetColumn = config ? config.column : null;
-                    
-                    // Vérifier chaque valeur cochée
+
                     for (var j = 0; j < groupData.checkedValues.length; j++) {
-                        var searchTerm = groupData.checkedValues[j];
-                        var valueMatched = false;
-                        
-                        // Vérifier d'abord l'attribut data-search sur la ligne
-                        var rowSearchData = $row.attr('data-search');
-                        if (rowSearchData) {
-                            var rowSearchText = normalizeString(rowSearchData);
-                            if (rowSearchText.includes(searchTerm)) {
-                                valueMatched = true;
-                            }
-                        }
-                        
-                        // Si pas encore matched, vérifier les cellules
-                        if (!valueMatched) {
-                            if (targetColumn !== null) {
-                                // Vérifier uniquement la colonne spécifique pour ce filtre checkbox
-                                if (targetColumn >= 0 && targetColumn < $cells.length) {
-                                    var cellText = normalizeString($cells.eq(targetColumn).text());
-                                    if (cellText.includes(searchTerm)) {
-                                        valueMatched = true;
-                                    }
-                                }
-                            } else if (columns === null) {
-                                // Vérifier toutes les cellules
-                                $cells.each(function() {
-                                    var cellText = normalizeString($(this).text());
-                                    if (cellText.includes(searchTerm)) {
-                                        valueMatched = true;
-                                        return false; // Sortir de la boucle each
-                                    }
-                                });
-                            } else {
-                                // Vérifier uniquement les colonnes spécifiées dans filter_columns
-                                for (var i = 0; i < columns.length; i++) {
-                                    var colIndex = columns[i];
-                                    if (colIndex >= 0 && colIndex < $cells.length) {
-                                        var cellText = normalizeString($cells.eq(colIndex).text());
-                                        if (cellText.includes(searchTerm)) {
-                                            valueMatched = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Si au moins une valeur cochée match, le groupe est validé (logique OU)
-                        if (valueMatched) {
+                        if (rowMatchesTerm(row, cache, groupData.checkedValues[j], groupColumn, columns)) {
                             groupMatched = true;
-                            break; // Sortir de la boucle des valeurs cochées
+                            break;
                         }
                     }
-                    
-                    // Si aucune valeur cochée ne match, la ligne n'est pas visible
+
                     if (!groupMatched) {
                         isVisible = false;
-                        break; // Sortir de la boucle des groupes de checkboxes
+                        break;
                     }
                 }
             }
 
-            $row.toggle(isVisible);
-        });
+            row.style.display = isVisible ? '' : 'none';
+        }
         syncDetailsRows($table);
     }
 
