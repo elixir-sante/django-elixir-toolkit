@@ -1,4 +1,6 @@
 <div class="column is-6 ui-field {{ css_classes }}">
-    <p class="ui-field-label">{{ label }}</p>
-    <p class="ui-field-value">{{ value|default:"" }}</p>
+    <p class="ui-field-label has-text-weight-normal">{{ label }}</p>
+    <p class="ui-field-value has-text-weight-normal">
+        {% if not value %}{{ empty }}{% elif href %}<a href="{{ href }}">{{ value }}</a>{% else %}{{ value }}{% endif %}
+    </p>
 </div>
