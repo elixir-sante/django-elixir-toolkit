@@ -523,7 +523,7 @@ def ui_form_confirm_submit(form_id, content_id=None, modal_title=None, submit_te
     }
 
 
-@register.inclusion_tag('elixir_toolkit/components/field.html')
+@register.inclusion_tag('elixir_toolkit/components/fields/field.html')
 def ui_field(label, value=None, empty="", href=None, css_classes=""):
     """
     Couple libellé / valeur en lecture seule, dans une colonne Bulma.
