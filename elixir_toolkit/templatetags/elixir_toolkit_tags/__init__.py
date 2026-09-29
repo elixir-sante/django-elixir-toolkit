@@ -521,3 +521,20 @@ def ui_form_confirm_submit(form_id, content_id=None, modal_title=None, submit_te
         'modal_size': modal_size,
         'summary_container_class': summary_container_class,
     }
+
+
+@register.inclusion_tag('elixir_toolkit/components/field.html')
+def ui_field(label, value=None, css_classes=""):
+    """
+    Couple libellé / valeur en lecture seule, dans une colonne Bulma.
+    Usage:
+        <div class="columns is-multiline">
+            {% ui_field label="Type de contrat" value=contract.type %}
+            {% ui_field label="Nom du contrat" value=contract.name css_classes="is-12" %}
+        </div>
+    """
+    return {
+        'label': label,
+        'value': value,
+        'css_classes': css_classes,
+    }
