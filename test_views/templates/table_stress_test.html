@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load elixir_toolkit_tags %}
+
+{% block body %}
+<style>
+    :root {
+        color-scheme: light;
+    }
+    html, body {
+        background-color: white !important;
+        color: #363636 !important;
+    }
+</style>
+<div style="min-height: 100vh;">
+<h1 class="title">Test de charge : tableau de {{ nb_lignes }} lignes</h1>
+<p class="subtitle is-size-6">
+    6 colonnes, 6 filtres combinés (logique ET) sur le composant <code>ui_table</code>.
+    Objectif : mesurer la résistance du JS (filtrage temps réel + tri) sur un grand volume de lignes.
+    Les données sont générées de façon déterministe (seed 42).
+</p>
+
+<div class="box">
+    <h2 class="subtitle">Filtres</h2>
+    <form id="form-stress-filters">
+        <div class="columns is-multiline">
+            <div class="column is-2">
+                <label class="label is-size-7" for="f-reference">Référence</label>
+                <div class="control">
+                    <input type="text" id="f-reference" name="filt_reference" class="input is-small" placeholder="Ex : REF-0042" data-filter-column="0">
+                </div>
+            </div>
+            <div class="column is-2">
+                <label class="label is-size-7" for="f-patient">Patient</label>
+                <div class="control">
+                    <input type="text" id="f-patient" name="filt_patient" class="input is-small" placeholder="Ex : Dupont" data-filter-column="1">
+                </div>
+            </div>
+            <div class="column is-2">
+                <label class="label is-size-7" for="f-service">Service</label>
+                <div class="control">
+                    <div class="select is-fullwidth is-small">
+                        <select id="f-service" name="filt_service" data-filter-column="2">
+                            <option value="">Tous les services</option>
+                            {% for service in services %}
+                            <option value="{{ service }}">{{ service }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <label class="label is-size-7" for="f-statut">Statut</label>
+                <div class="control">
+                    <div class="select is-fullwidth is-small">
+                        <select id="f-statut" name="filt_statut" data-filter-column="3">
+                            <option value="">Tous les statuts</option>
+                            {% for statut in statuts %}
+                            <option value="{{ statut }}">{{ statut }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <label class="label is-size-7" for="f-date">Date</label>
+                <div class="control">
+                    <input type="text" id="f-date" name="filt_date" class="input is-small" placeholder="Ex : 03/2024" data-filter-column="4">
+                </div>
+            </div>
+            <div class="column is-2">
+                <label class="label is-size-7" for="f-montant">Montant</label>
+                <div class="control">
+                    <input type="text" id="f-montant" name="filt_montant" class="input is-small" placeholder="Ex : 123,45" data-filter-column="5">
+                </div>
+            </div>
+        </div>
+        <div class="control mt-4">
+            <button type="reset" class="button is-light">Réinitialiser les filtres</button>
+        </div>
+    </form>
+    <p class="help">
+        Chaque filtre cible sa colonne via <code>data-filter-column</code> (index 0 à 5), ils se combinent en logique ET.
+        Échap vide le champ actif. Le bouton Reset réaffiche les {{ nb_lignes }} lignes.
+        Chaque ligne est expandable (classe <code>table-row-expandable</code>) : un clic sur la ligne ou sur le bouton
+        « Détails » déplie sa ligne <code>table-row-details</code>, qui suit la ligne principale lors du tri
+        (classe <code>tablesorter-childRow</code>) et est automatiquement masquée quand le filtrage cache sa ligne principale.
+    </p>
+</div>
+
+<div class="box">
+    {% ui_table css_classes="is-striped" orderable=True filterable=True filter_target="#f-reference, #f-patient, #f-service, #f-statut, #f-date, #f-montant" %}
+        <thead>
+            <tr>
+                <th>Référence</th>
+                <th>Patient</th>
+                <th>Service</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Montant</th>
+                {% ui_th orderable=False %}Actions{% end_ui_th %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for ligne in lignes_table %}
+            <tr class="table-row-expandable" data-target="details-{{ ligne.reference }}">
+                <td class="has-text-weight-semibold">{{ ligne.reference }}</td>
+                <td>{{ ligne.patient }}</td>
+                <td>{{ ligne.service }}</td>
+                <td>{% ui_tag text=ligne.statut color=ligne.statut_couleur %}</td>
+                <td>{{ ligne.date }}</td>
+                <td class="has-text-weight-bold">{{ ligne.montant|floatformat:2 }} €</td>
+                <td>
+                    <button class="button is-small is-text expand-toggle" type="button" data-target="details-{{ ligne.reference }}">
+                        <span class="icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                        <span>Détails</span>
+                    </button>
+                </td>
+            </tr>
+            <tr class="table-row-details tablesorter-childRow" id="details-{{ ligne.reference }}" style="display: none;">
+                <td colspan="7">
+                    <div class="content p-4">
+                        <p>
+                            <strong>Praticien :</strong> {{ ligne.praticien }} ·
+                            <strong>Motif :</strong> {{ ligne.motif }} ·
+                            <strong>Durée :</strong> {{ ligne.duree }} min
+                        </p>
+                        <p class="mb-0"><strong>Notes :</strong> {{ ligne.notes }}</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    {% end_ui_table %}
+</div>
+</div>
+{% endblock body %}
