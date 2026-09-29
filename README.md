@@ -56,6 +56,37 @@ Ce tag charge automatiquement :
 
 ---
 
+## Skill pour agents de dev
+
+Un skill permettant aux agents de développement (Claude Code, Mistral Vibe, ...) d'utiliser correctement la librairie est fourni dans [`skills/elixir-toolkit/`](skills/elixir-toolkit/).
+
+Le skill est au format standard multi-agents : un fichier `SKILL.md` (règles d'utilisation, correspondance besoin → composant, pièges courants) et des références détaillées dans `references/` (tags de template, formulaires, vues et mixins).
+
+### Installation dans un projet
+
+Copiez le dossier du skill dans le répertoire des skills de votre agent, à la racine du projet utilisant la librairie :
+
+* **Claude Code** :
+```bash
+mkdir -p .claude/skills
+cp -r skills/elixir-toolkit .claude/skills/
+```
+
+* **Mistral Vibe** : même principe, copier le dossier dans le répertoire des skills de l'agent pour le projet.
+
+### Installation globale (toutes les sessions)
+
+Pour que le skill soit disponible dans tous vos projets, copiez-le dans le répertoire personnel de votre agent (ex. `~/.claude/skills/` pour Claude Code) :
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r skills/elixir-toolkit ~/.claude/skills/
+```
+
+Le skill est documenté pour la version courante du toolkit : pensez à le mettre à jour après une évolution de l'API (nouveaux composants, changements de paramètres).
+
+---
+
 ## Structure du Projet
 
 ```
