@@ -11,6 +11,101 @@ COLOR_CHOICES = (
     ('red', 'Red'), ('green', 'Green'), ('blue', 'Blue')
 )
 
+TYPE_ACTE_CHOICES = (
+    ('Consultation', 'Consultation'),
+    ('Pharmacie', 'Pharmacie'),
+    ('Hospitalisation', 'Hospitalisation'),
+    ('Optique', 'Optique'),
+    ('Dentaire', 'Dentaire'),
+    ('Analyses', 'Analyses'),
+)
+
+VILLE_CHOICES = (
+    ('Paris', 'Paris'),
+    ('Lyon', 'Lyon'),
+    ('Marseille', 'Marseille'),
+    ('Toulouse', 'Toulouse'),
+    ('Bordeaux', 'Bordeaux'),
+    ('Nantes', 'Nantes'),
+    ('Lille', 'Lille'),
+    ('Strasbourg', 'Strasbourg'),
+)
+
+STATUT_CHOICES = (
+    ('Payé', 'Payé'),
+    ('En attente', 'En attente'),
+    ('Refusé', 'Refusé'),
+)
+
+# Classe commune à tous les champs du filtre, ciblée par filter_target du ui_table
+LARGE_TABLE_FILTER_CLASS = 'large-table-filter'
+
+
+class TableFilterLargeForm(CustomFormHelper, forms.Form):
+    """Filtres client du tableau « Table Filter Large ».
+
+    Chaque widget porte data-filter-column (index de la colonne filtrée) et la classe
+    LARGE_TABLE_FILTER_CLASS ; le filtrage est fait côté client par table-filter.js.
+    """
+    recherche    = forms.CharField(
+                    label="Bénéficiaire ou référence",
+                    required=False,
+                    widget=forms.TextInput(attrs={
+                        'class': LARGE_TABLE_FILTER_CLASS,
+                        'data-filter-column': 0,
+                        'placeholder': "Ex: Dupont, REF-00042",
+                    }),
+                )
+    type_acte    = forms.ChoiceField(
+                    label="Type d'acte",
+                    required=False,
+                    choices=(('', "Tous les types"),) + TYPE_ACTE_CHOICES,
+                    widget=forms.Select(attrs={'class': LARGE_TABLE_FILTER_CLASS, 'data-filter-column': 1}),
+                )
+    ville        = forms.ChoiceField(
+                    label="Ville",
+                    required=False,
+                    choices=(('', "Toutes les villes"),) + VILLE_CHOICES,
+                    widget=forms.Select(attrs={'class': LARGE_TABLE_FILTER_CLASS, 'data-filter-column': 2}),
+                )
+    statuts      = forms.MultipleChoiceField(
+                    label="Statut",
+                    required=False,
+                    choices=STATUT_CHOICES,
+                    initial=[value for value, _ in STATUT_CHOICES],
+                    widget=forms.CheckboxSelectMultiple(attrs={'class': LARGE_TABLE_FILTER_CLASS, 'data-filter-column': 3}),
+                )
+    # Case unique : sa valeur est recherchée dans l'attribut data-search des lignes
+    tiers_payant = forms.BooleanField(
+                    label="Tiers payant uniquement",
+                    required=False,
+                    widget=forms.CheckboxInput(attrs={'class': LARGE_TABLE_FILTER_CLASS, 'value': 'tiers-payant'}),
+                )
+
+    @property
+    def helper(self):
+        helper = super().helper
+        helper.template_pack = 'bulma'
+        helper.layout = Layout(
+            Div(
+                Div(Field('recherche'), css_class='column is-4'),
+                Div(Field('type_acte'), css_class='column is-4'),
+                Div(Field('ville'), css_class='column is-4'),
+                css_class='columns'
+            ),
+            Div(
+                Div('statuts', css_class='column is-6'),
+                Div('tiers_payant', css_class='column is-6'),
+                css_class='columns'
+            ),
+            HTML("""
+                <div class="field"><div class="control">
+                    <button type="reset" class="button is-light">Réinitialiser</button>
+                </div></div>
+            """)
+        )
+        return helper
+
 class FormExample(CustomFormHelper, forms.Form):
     text            = forms.CharField(label="Nom complet")
     text_with_icon  = forms.CharField(label="Nom complet et icone")

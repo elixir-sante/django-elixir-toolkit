@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load elixir_toolkit_tags %}
+{% load crispy_forms_tags %}
+
+{% block body %}
+<div class="container">
+    <h1 class="title is-1">Table Filter Large</h1>
+
+    <div class="box">
+        <h2 class="subtitle">{{ lignes|length }} lignes expandables + filtres (formulaire Django)</h2>
+        <p class="mb-4">
+            Le formulaire de filtres est un <code>forms.Form</code> Django (<code>TableFilterLargeForm</code>) rendu par crispy.
+            Chaque champ porte <code>data-filter-column</code> et une classe commune ciblée par <code>filter_target</code> :
+            le filtrage est entièrement géré côté client par <code>ui_table</code>.
+        </p>
+
+        <form id="table-filter-large-form">
+            {% crispy form %}
+        </form>
+    </div>
+
+    <div class="box">
+        {% ui_table id="table-filter-large" css_classes="is-striped is-narrow" expandable=True filterable=True filter_target=filter_target %}
+            <thead>
+                <tr>
+                    <th>Bénéficiaire</th>
+                    <th>Type d'acte</th>
+                    <th>Ville</th>
+                    <th>Statut</th>
+                    <th>Montant</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ligne in lignes %}
+                <tr class="table-row-expandable" data-target="large-details-{{ ligne.id }}"{% if ligne.tiers_payant %} data-search="tiers-payant"{% endif %}>
+                    <td>
+                        <strong>{{ ligne.beneficiaire }}</strong>
+                        <div class="is-size-7 has-text-grey">{{ ligne.reference }}</div>
+                    </td>
+                    <td>{{ ligne.type_acte }}</td>
+                    <td>{{ ligne.ville }}</td>
+                    <td>{% ui_tag text=ligne.statut color=ligne.couleur_statut %}</td>
+                    <td class="has-text-weight-bold">{{ ligne.montant|floatformat:2 }} €</td>
+                    <td>
+                        <button type="button" class="button is-small is-white expand-toggle" data-target="large-details-{{ ligne.id }}" title="Afficher/masquer les détails">
+                            <span class="icon">
+                                <i class="fas fa-chevron-down"></i>
+                            </span>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="table-row-details" id="large-details-{{ ligne.id }}" style="display: none;">
+                    <td colspan="6">
+                        <div class="content p-4">
+                            <h4>{{ ligne.reference }} — {{ ligne.type_acte }}</h4>
+                            <p><strong>Bénéficiaire :</strong> {{ ligne.beneficiaire }} ({{ ligne.ville }})</p>
+                            <p><strong>Praticien :</strong> {{ ligne.praticien }}</p>
+                            <p><strong>Date de l'acte :</strong> {{ ligne.date_acte|date:"d/m/Y" }}</p>
+                            <p><strong>Montant engagé :</strong> {{ ligne.montant|floatformat:2 }} € — taux de prise en charge {{ ligne.taux }} %</p>
+                            <p><strong>Montant remboursé :</strong> {{ ligne.rembourse|floatformat:2 }} €</p>
+                            <p><strong>Tiers payant :</strong> {{ ligne.tiers_payant|yesno:"Oui,Non" }}</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        {% end_ui_table %}
+    </div>
+
+    <a href="/" class="button is-primary mt-4 mb-6">Retour à la page principale</a>
+</div>
+{% endblock %}

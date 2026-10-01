@@ -356,37 +356,142 @@
     }
 
     /**
+     * Cache des textes normalisés, par élément (cellule ou ligne pour data-search).
+     * Le texte brut est conservé pour invalider l'entrée si le contenu change
+     * (mise à jour JS, swap HTMX) : seule la normalisation est mise en cache.
+     */
+    var normalizedCache = new WeakMap();
+
+    function cachedNormalize(element, raw) {
+        var entry = normalizedCache.get(element);
+        if (!entry || entry.raw !== raw) {
+            entry = { raw: raw, normalized: normalizeString(raw) };
+            normalizedCache.set(element, entry);
+        }
+        return entry.normalized;
+    }
+
+    function getRowSearchText(row) {
+        var raw = row.getAttribute('data-search');
+        return raw ? cachedNormalize(row, raw) : '';
+    }
+
+    function getCellText(cell) {
+        return cachedNormalize(cell, cell.textContent);
+    }
+
+    /**
+     * Indique si une ligne correspond à un terme normalisé :
+     * data-search d'abord, puis la colonne ciblée par le filtre (targetColumn),
+     * sinon les colonnes de filter_columns, sinon toutes les cellules.
+     */
+    function rowMatches(row, searchTerm, targetColumn, columns) {
+        if (getRowSearchText(row).includes(searchTerm)) {
+            return true;
+        }
+
+        var cells = row.getElementsByTagName('td');
+        if (targetColumn !== null) {
+            return targetColumn >= 0 && targetColumn < cells.length && getCellText(cells[targetColumn]).includes(searchTerm);
+        }
+        if (columns === null) {
+            for (var i = 0; i < cells.length; i++) {
+                if (getCellText(cells[i]).includes(searchTerm)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        for (var j = 0; j < columns.length; j++) {
+            var colIndex = columns[j];
+            if (colIndex >= 0 && colIndex < cells.length && getCellText(cells[colIndex]).includes(searchTerm)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Affiche/masque une ligne via son style inline, sans lecture de layout
+     * (contrairement à $.toggle / :visible qui forcent un reflow à chaque ligne).
+     * N'écrit que si l'état change, pour limiter les invalidations de style.
+     */
+    function setRowVisible(row, visible) {
+        var display = visible ? '' : 'none';
+        if (row.style.display !== display) {
+            row.style.display = display;
+        }
+    }
+
+    function isRowHidden(row) {
+        return row.style.display === 'none';
+    }
+
+    /**
      * Sélectionne les lignes filtrables du tbody en excluant les lignes de détails
      * (lignes expandables) et les lignes enfants tablesorter, dont la visibilité
      * relève exclusivement du toggle utilisateur (table.js).
      */
     function getFilterableRows($table) {
-        return $table.find('tbody tr').not('tr.table-row-details, tr.tablesorter-child-row');
+        var rows = [];
+        $table.each(function() {
+            var trs = this.querySelectorAll('tbody tr');
+            for (var i = 0; i < trs.length; i++) {
+                var classList = trs[i].classList;
+                if (!classList.contains('table-row-details') && !classList.contains('tablesorter-child-row')) {
+                    rows.push(trs[i]);
+                }
+            }
+        });
+        return rows;
+    }
+
+    /**
+     * Indexe les lignes principales par data-target, en une passe :
+     * - byRow : ligne portant data-target
+     * - byButton : ligne contenant un bouton d'expansion (.expand-toggle ou
+     *   .toggle-row-btn) portant ce data-target
+     * La première ligne rencontrée l'emporte, comme le faisait .first().
+     */
+    function indexMainRows(mainRows) {
+        var byRow = {};
+        var byButton = {};
+        for (var i = 0; i < mainRows.length; i++) {
+            var row = mainRows[i];
+            var target = row.getAttribute('data-target');
+            if (target && !(target in byRow)) {
+                byRow[target] = row;
+            }
+            var buttons = row.querySelectorAll('.expand-toggle[data-target], .toggle-row-btn[data-target]');
+            for (var j = 0; j < buttons.length; j++) {
+                var buttonTarget = buttons[j].getAttribute('data-target');
+                if (!(buttonTarget in byButton)) {
+                    byButton[buttonTarget] = row;
+                }
+            }
+        }
+        return { byRow: byRow, byButton: byButton };
     }
 
     /**
      * Retrouve la ligne principale d'une ligne de détails :
      * 1. ligne portant data-target égal à l'ID de la ligne de détails
-     * 2. ligne contenant un bouton d'expansion (.expand-toggle ou .toggle-row-btn)
-     *    portant ce data-target
+     * 2. ligne contenant un bouton d'expansion portant ce data-target
      * 3. à défaut, la ligne principale précédente dans le DOM
      */
-    function findMainRow($mainRows, detailsRow) {
+    function findMainRow(index, detailsRow) {
         var detailsId = detailsRow.id;
         if (detailsId) {
-            var $main = $mainRows.filter('[data-target="' + detailsId + '"]');
-            if (!$main.length) {
-                $main = $mainRows.has('.expand-toggle[data-target="' + detailsId + '"], .toggle-row-btn[data-target="' + detailsId + '"]');
-            }
-            if ($main.length) {
-                return $main.first();
+            var main = index.byRow[detailsId] || index.byButton[detailsId];
+            if (main) {
+                return main;
             }
         }
         var prev = detailsRow.previousElementSibling;
         while (prev && (prev.classList.contains('table-row-details') || prev.classList.contains('tablesorter-child-row'))) {
             prev = prev.previousElementSibling;
         }
-        return prev ? $(prev) : $();
+        return prev;
     }
 
     /**
@@ -395,14 +500,25 @@
      * Ne fait jamais l'inverse : le filtre ne réaffiche jamais une ligne de détails,
      * son état (dépliée/repliée) relève uniquement du toggle utilisateur.
      */
-    function syncDetailsRows($table) {
-        var $mainRows = getFilterableRows($table);
-        $table.find('tbody tr.table-row-details').each(function() {
-            var $main = findMainRow($mainRows, this);
-            if ($main.length && !$main.is(':visible')) {
-                collapseDetailsRow($main, this);
+    function syncDetailsRows($table, mainRows) {
+        var detailsRows = [];
+        $table.each(function() {
+            var rows = this.querySelectorAll('tbody tr.table-row-details');
+            for (var i = 0; i < rows.length; i++) {
+                detailsRows.push(rows[i]);
             }
         });
+        if (!detailsRows.length) {
+            return;
+        }
+
+        var index = indexMainRows(mainRows);
+        for (var i = 0; i < detailsRows.length; i++) {
+            var main = findMainRow(index, detailsRows[i]);
+            if (main && isRowHidden(main)) {
+                collapseDetailsRow(main, detailsRows[i]);
+            }
+        }
     }
 
     /**
@@ -411,15 +527,15 @@
      * icône, libellé du bouton, ligne sélectionnée) pour rester cohérent avec
      * l'état replié : le prochain clic la déplie de nouveau.
      */
-    function collapseDetailsRow($main, detailsRow) {
-        detailsRow.style.display = 'none';
+    function collapseDetailsRow(mainRow, detailsRow) {
+        setRowVisible(detailsRow, false);
 
         if (!detailsRow.classList.contains('is-expanded')) {
             return;
         }
         detailsRow.classList.remove('is-expanded');
 
-        var $btns = $main.find('.expand-toggle, .toggle-row-btn');
+        var $btns = $(mainRow).find('.expand-toggle, .toggle-row-btn');
         if (detailsRow.id) {
             $btns = $btns.filter('[data-target="' + detailsRow.id + '"]');
         }
@@ -442,66 +558,35 @@
             }
         });
 
-        $main.removeClass('is-selected');
+        mainRow.classList.remove('is-selected');
+    }
+
+    /**
+     * Affiche toutes les lignes principales
+     * (les lignes de détails conservent leur propre état)
+     */
+    function showAllRows(rows) {
+        for (var i = 0; i < rows.length; i++) {
+            setRowVisible(rows[i], true);
+        }
     }
 
     /**
      * Filtre les lignes du tableau (version simple avec un seul filtre)
      */
     function filterTable($table, filterValue, columns) {
-        var $rows = getFilterableRows($table);
+        var rows = getFilterableRows($table);
         var searchTerm = normalizeString(filterValue);
 
         if (searchTerm === '') {
-            // Si le filtre est vide, afficher toutes les lignes principales
-            // (les lignes de détails conservent leur propre état)
-            $rows.show();
+            showAllRows(rows);
             return;
         }
 
-        $rows.each(function() {
-            var $row = $(this);
-            var $cells = $row.find('td');
-            var isVisible = false;
-
-            // Vérifier d'abord l'attribut data-search sur la ligne
-            var rowSearchData = $row.attr('data-search');
-            if (rowSearchData) {
-                var rowSearchText = normalizeString(rowSearchData);
-                if (rowSearchText.includes(searchTerm)) {
-                    isVisible = true;
-                }
-            }
-
-            // Si pas encore visible, vérifier les cellules
-            if (!isVisible) {
-                // Si columns n'est pas spécifié, vérifier toutes les cellules
-                if (columns === null) {
-                    $cells.each(function() {
-                        var cellText = normalizeString($(this).text());
-                        if (cellText.includes(searchTerm)) {
-                            isVisible = true;
-                            return false; // Sortir de la boucle each
-                        }
-                    });
-                } else {
-                    // Vérifier uniquement les colonnes spécifiées
-                    for (var i = 0; i < columns.length; i++) {
-                        var colIndex = columns[i];
-                        if (colIndex >= 0 && colIndex < $cells.length) {
-                            var cellText = normalizeString($cells.eq(colIndex).text());
-                            if (cellText.includes(searchTerm)) {
-                                isVisible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            $row.toggle(isVisible);
-        });
-        syncDetailsRows($table);
+        for (var i = 0; i < rows.length; i++) {
+            setRowVisible(rows[i], rowMatches(rows[i], searchTerm, null, columns));
+        }
+        syncDetailsRows($table, rows);
     }
 
     /**
@@ -511,212 +596,59 @@
      * - Si toutes les cases d'un groupe sont cochées, le filtre pour ce groupe est désactivé
      */
     function filterTableMulti($table, filterConfig, columns, checkboxGroupValues) {
-        var $rows = getFilterableRows($table);
-        
-        // Séparer les filtres en deux catégories : checkboxes (groupes) et autres (y compris checkboxes uniques)
-        var otherFilters = {};
-        var checkboxGroupFilters = {};
-        
+        var rows = getFilterableRows($table);
+
+        // Filtres actifs hors groupes de checkboxes (textes, selects, checkboxes uniques),
+        // termes normalisés une seule fois pour tout le tableau
+        var activeFilters = [];
         for (var key in filterConfig) {
             var config = filterConfig[key];
-            
-            // Les checkboxes uniques sont traitées comme des filtres classiques
-            if (config.isSingleCheckbox) {
-                if (config.value && config.value.trim() !== '') {
-                    otherFilters[key] = config;
-                }
-            }
-            // Les checkboxes de groupe sont traitées séparément
-            else if (config.isCheckbox && !config.isSingleCheckbox) {
-                checkboxGroupFilters[key] = config;
-            }
-            // Les autres types de filtres (text, select, etc.)
-            else if (!config.isCheckbox && config.value && config.value.trim() !== '') {
-                otherFilters[key] = config;
+            var isFilterValue = config.isSingleCheckbox || !config.isCheckbox;
+            if (isFilterValue && config.value && config.value.trim() !== '') {
+                activeFilters.push({ term: normalizeString(config.value), column: config.column });
             }
         }
-        
-        // Vérifier si tous les filtres sont vides
-        var allEmpty = Object.keys(otherFilters).length === 0;
-        
-        // Vérifier si au moins un groupe de checkboxes a des cases cochées
-        var hasActiveCheckboxFilters = false;
-        if (checkboxGroupValues && Object.keys(checkboxGroupValues).length > 0) {
-            for (var key in checkboxGroupValues) {
-                if (checkboxGroupValues[key] && checkboxGroupValues[key].checkedValues.length > 0) {
-                    // Vérifier si toutes les cases sont cochées
-                    if (checkboxGroupValues[key].checkedValues.length !== checkboxGroupValues[key].allValues.length) {
-                        hasActiveCheckboxFilters = true;
-                        break;
-                    }
-                }
+
+        // Groupes de checkboxes actifs : ni toutes cochées, ni aucune cochée
+        var activeGroups = [];
+        for (var name in checkboxGroupValues || {}) {
+            var groupData = checkboxGroupValues[name];
+            var checkedCount = groupData.checkedValues.length;
+            if (checkedCount > 0 && checkedCount !== groupData.allValues.length) {
+                activeGroups.push({
+                    terms: groupData.checkedValues,
+                    column: filterConfig[name] ? filterConfig[name].column : null
+                });
             }
         }
-        
-        if (allEmpty && !hasActiveCheckboxFilters) {
-            // Si tous les filtres sont vides, afficher toutes les lignes principales
-            // (les lignes de détails conservent leur propre état)
-            $rows.show();
+
+        if (!activeFilters.length && !activeGroups.length) {
+            showAllRows(rows);
             return;
         }
 
-        $rows.each(function() {
-            var $row = $(this);
-            var $cells = $row.find('td');
-            var isVisible = true; // On part de visible
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var isVisible = true;
 
-            // Vérifier les filtres autres que checkboxes (logique ET)
-            for (var filterName in otherFilters) {
-                var config = otherFilters[filterName];
-                var filterValue = config.value;
-                var searchTerm = normalizeString(filterValue);
-                var filterMatched = false;
-                var targetColumn = config.column; // La colonne spécifique pour ce filtre
-                
-                // Vérifier d'abord l'attribut data-search sur la ligne
-                var rowSearchData = $row.attr('data-search');
-                if (rowSearchData) {
-                    var rowSearchText = normalizeString(rowSearchData);
-                    if (rowSearchText.includes(searchTerm)) {
-                        filterMatched = true;
-                    }
-                }
-
-                // Si pas encore matched, vérifier les cellules
-                if (!filterMatched) {
-                    // Si une colonne spécifique est définie pour ce filtre
-                    if (targetColumn !== null) {
-                        // Vérifier uniquement cette colonne spécifique
-                        if (targetColumn >= 0 && targetColumn < $cells.length) {
-                            var cellText = normalizeString($cells.eq(targetColumn).text());
-                            if (cellText.includes(searchTerm)) {
-                                filterMatched = true;
-                            }
-                        }
-                    } else if (columns === null) {
-                        // Vérifier toutes les cellules
-                        $cells.each(function() {
-                            var cellText = normalizeString($(this).text());
-                            if (cellText.includes(searchTerm)) {
-                                filterMatched = true;
-                                return false; // Sortir de la boucle each
-                            }
-                        });
-                    } else {
-                        // Vérifier uniquement les colonnes spécifiées dans filter_columns
-                        for (var i = 0; i < columns.length; i++) {
-                            var colIndex = columns[i];
-                            if (colIndex >= 0 && colIndex < $cells.length) {
-                                var cellText = normalizeString($cells.eq(colIndex).text());
-                                if (cellText.includes(searchTerm)) {
-                                    filterMatched = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Si ce filtre ne match pas, la ligne n'est pas visible
-                if (!filterMatched) {
-                    isVisible = false;
-                    break; // Sortir de la boucle des filtres
-                }
-            }
-            
-            // Si les filtres précédents ont déjà exclu la ligne, pas besoin de vérifier les checkboxes
-            if (!isVisible) {
-                $row.toggle(false);
-                return;
-            }
-            
-            // Vérifier les filtres checkbox (logique OU entre les checkboxes du même groupe)
-            // Chaque groupe de checkboxes est un filtre OU, mais combiné avec ET aux autres filtres
-            if (checkboxGroupValues && Object.keys(checkboxGroupValues).length > 0) {
-                for (var filterName in checkboxGroupValues) {
-                    var groupData = checkboxGroupValues[filterName];
-                    
-                    // Si toutes les cases sont cochées, on ignore ce groupe
-                    if (groupData.checkedValues.length === groupData.allValues.length) {
-                        continue;
-                    }
-                    
-                    // Si aucune case n'est cochée, on ignore ce groupe (pas de filtre actif)
-                    if (groupData.checkedValues.length === 0) {
-                        continue;
-                    }
-                    
-                    // Sinon, vérifier si au moins une valeur cochée match
-                    var groupMatched = false;
-                    var config = filterConfig[filterName];
-                    var targetColumn = config ? config.column : null;
-                    
-                    // Vérifier chaque valeur cochée
-                    for (var j = 0; j < groupData.checkedValues.length; j++) {
-                        var searchTerm = groupData.checkedValues[j];
-                        var valueMatched = false;
-                        
-                        // Vérifier d'abord l'attribut data-search sur la ligne
-                        var rowSearchData = $row.attr('data-search');
-                        if (rowSearchData) {
-                            var rowSearchText = normalizeString(rowSearchData);
-                            if (rowSearchText.includes(searchTerm)) {
-                                valueMatched = true;
-                            }
-                        }
-                        
-                        // Si pas encore matched, vérifier les cellules
-                        if (!valueMatched) {
-                            if (targetColumn !== null) {
-                                // Vérifier uniquement la colonne spécifique pour ce filtre checkbox
-                                if (targetColumn >= 0 && targetColumn < $cells.length) {
-                                    var cellText = normalizeString($cells.eq(targetColumn).text());
-                                    if (cellText.includes(searchTerm)) {
-                                        valueMatched = true;
-                                    }
-                                }
-                            } else if (columns === null) {
-                                // Vérifier toutes les cellules
-                                $cells.each(function() {
-                                    var cellText = normalizeString($(this).text());
-                                    if (cellText.includes(searchTerm)) {
-                                        valueMatched = true;
-                                        return false; // Sortir de la boucle each
-                                    }
-                                });
-                            } else {
-                                // Vérifier uniquement les colonnes spécifiées dans filter_columns
-                                for (var i = 0; i < columns.length; i++) {
-                                    var colIndex = columns[i];
-                                    if (colIndex >= 0 && colIndex < $cells.length) {
-                                        var cellText = normalizeString($cells.eq(colIndex).text());
-                                        if (cellText.includes(searchTerm)) {
-                                            valueMatched = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Si au moins une valeur cochée match, le groupe est validé (logique OU)
-                        if (valueMatched) {
-                            groupMatched = true;
-                            break; // Sortir de la boucle des valeurs cochées
-                        }
-                    }
-                    
-                    // Si aucune valeur cochée ne match, la ligne n'est pas visible
-                    if (!groupMatched) {
-                        isVisible = false;
-                        break; // Sortir de la boucle des groupes de checkboxes
-                    }
-                }
+            // Logique ET entre les filtres
+            for (var f = 0; f < activeFilters.length && isVisible; f++) {
+                isVisible = rowMatches(row, activeFilters[f].term, activeFilters[f].column, columns);
             }
 
-            $row.toggle(isVisible);
-        });
-        syncDetailsRows($table);
+            // Logique OU dans chaque groupe de checkboxes, ET entre les groupes
+            for (var g = 0; g < activeGroups.length && isVisible; g++) {
+                var group = activeGroups[g];
+                var groupMatched = false;
+                for (var t = 0; t < group.terms.length && !groupMatched; t++) {
+                    groupMatched = rowMatches(row, group.terms[t], group.column, columns);
+                }
+                isVisible = groupMatched;
+            }
+
+            setRowVisible(row, isVisible);
+        }
+        syncDetailsRows($table, rows);
     }
 
     /**
