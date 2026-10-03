@@ -1,0 +1,2 @@
+refnames: $Format:%D$
+git hash: $Format:%H$

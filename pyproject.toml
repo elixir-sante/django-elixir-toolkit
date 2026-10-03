@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-elixir-toolkit"
-version = "0.28.6"
+dynamic = ["version"]
 description = ""
 readme = "README.md"
 requires-python = ">=3.14"
@@ -19,3 +19,7 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 include = ["elixir_toolkit*"] # On n'inclut que le dossier du toolkit
+
+[tool.setuptools_scm]
+# La version est dérivée du tag git le plus proche (ex. v0.28.7)
+fallback_version = "0.0.0"

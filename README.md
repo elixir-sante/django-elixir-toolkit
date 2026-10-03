@@ -838,6 +838,32 @@ class MyForm(forms.Form):
 
 ---
 
+## Publication d'une version (Release)
+
+La version du paquet n'est **pas** gérée à la main dans `pyproject.toml` : elle est dérivée du **tag git** par [setuptools-scm](https://github.com/pypa/setuptools-scm) au moment du build. Le tag est donc l'unique source de vérité de la version.
+
+Pour publier une nouvelle version :
+
+1. Merger vos changements sur `main` (la CI doit passer)
+2. Récupérer `main` à jour et poser un tag sur le commit de merge :
+
+```bash
+git checkout main && git pull
+git tag v0.28.7
+git push origin v0.28.7
+```
+
+Le push du tag (`v*`) déclenche automatiquement le workflow `.github/workflows/django.yml` :
+- le job `test` exécute les tests Django ;
+- le job `publish-release` construit le paquet (wheel/sdist versionné depuis le tag, ex. `0.28.7`) et crée la GitHub Release avec les artifacts et les notes générées.
+
+**À respecter :**
+- Ne jamais éditer `version` dans `pyproject.toml` (la section `[project]` utilise `dynamic = ["version"]`)
+- Numérotation [SemVer](https://semver.org/lang/fr/) : `vMAJOR.MINOR.PATCH` (ex. `v0.29.0` pour une nouvelle fonctionnalité, `v0.28.7` pour un correctif)
+- Ne pas merger de nouveau commit entre le tag et la publication ; sinon le paquet serait versionné `0.28.7.devN+...`
+
+---
+
 ## Contribution
 
 Pour contribuer au projet :
