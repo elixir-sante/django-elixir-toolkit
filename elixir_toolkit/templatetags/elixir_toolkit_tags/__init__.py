@@ -521,3 +521,25 @@ def ui_form_confirm_submit(form_id, content_id=None, modal_title=None, submit_te
         'modal_size': modal_size,
         'summary_container_class': summary_container_class,
     }
+
+
+@register.inclusion_tag('elixir_toolkit/components/fields/field.html')
+def ui_field(label, value=None, empty="", href=None, css_classes=""):
+    """
+    Couple libellé / valeur en lecture seule, dans une colonne Bulma.
+    Usage:
+        <div class="columns is-multiline">
+            {% ui_field label="Code NAF" value=entreprise.naf empty="Non renseigné" %}
+            {% ui_field label="Email" value=contact.email href="mailto:"|add:contact.email %}
+        </div>
+
+    - empty : texte affiché quand la valeur est vide
+    - href : transforme la valeur en lien (ignoré si la valeur est vide)
+    """
+    return {
+        'label': label,
+        'value': value,
+        'empty': empty,
+        'href': href,
+        'css_classes': css_classes,
+    }

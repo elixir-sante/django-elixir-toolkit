@@ -1,6 +1,12 @@
+import random
+from datetime import date, timedelta
+
 from django.views.generic import FormView, TemplateView
 from django.contrib import messages
-from test_views.forms import FormExample
+from test_views.forms import (
+    FormExample, TableFilterLargeForm, LARGE_TABLE_FILTER_CLASS,
+    TYPE_ACTE_CHOICES, VILLE_CHOICES, STATUT_CHOICES,
+)
 
 class FormTestView(FormView):
     template_name = "form_test.html"
@@ -182,6 +188,51 @@ class TableFilterExampleView(TemplateView):
             }
         ]
         
+        return context
+
+
+class TableFilterLargeView(TemplateView):
+    template_name = "table_filter_large.html"
+    nb_lignes = 2000
+
+    def get_lignes(self):
+        # Graine fixe : mêmes données à chaque chargement
+        rng = random.Random(42)
+        prenoms = ['Jean', 'Marie', 'Pierre', 'Sophie', 'Luc', 'Camille', 'Nicolas', 'Julie', 'Thomas', 'Emma', 'Hugo', 'Léa']
+        noms = ['Dupont', 'Martin', 'Bernard', 'Petit', 'Durand', 'Leroy', 'Moreau', 'Simon', 'Laurent', 'Lefèvre', 'Michel', 'Garcia']
+        types_acte = [value for value, _ in TYPE_ACTE_CHOICES]
+        villes = [value for value, _ in VILLE_CHOICES]
+        statuts = [value for value, _ in STATUT_CHOICES]
+        couleurs_statut = {'Payé': 'success', 'En attente': 'warning', 'Refusé': 'danger'}
+        debut = date(2024, 1, 1)
+
+        lignes = []
+        for i in range(1, self.nb_lignes + 1):
+            statut = rng.choice(statuts)
+            montant = round(rng.uniform(5, 1500), 2)
+            taux = rng.choice([60, 70, 80, 100])
+            lignes.append({
+                'id': i,
+                'reference': f"REF-{i:05d}",
+                'beneficiaire': f"{rng.choice(prenoms)} {rng.choice(noms)}",
+                'type_acte': rng.choice(types_acte),
+                'ville': rng.choice(villes),
+                'statut': statut,
+                'couleur_statut': couleurs_statut[statut],
+                'montant': montant,
+                'taux': taux,
+                'rembourse': round(montant * taux / 100, 2) if statut == 'Payé' else 0,
+                'date_acte': debut + timedelta(days=rng.randint(0, 600)),
+                'tiers_payant': rng.random() < 0.3,
+                'praticien': f"Dr {rng.choice(noms)}",
+            })
+        return lignes
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = TableFilterLargeForm()
+        context['filter_target'] = f".{LARGE_TABLE_FILTER_CLASS}"
+        context['lignes'] = self.get_lignes()
         return context
 
 
