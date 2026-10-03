@@ -582,6 +582,17 @@ class MyForm(forms.Form):
 **Paramètres de `ToolkitFileField` :**
 - `max_size` : Taille maximale par fichier (défaut: 5 Mo)
 - `allowed_extensions` : Extensions autorisées (défaut: `['pdf', 'png', 'jpg', 'jpeg']`)
+- `help_text` : Si non renseigné, un help_text est généré automatiquement à partir des
+  paramètres d'appel du champ :
+  - `ToolkitFileField` : « {taille max} maximum. Formats acceptés : {extensions}. »
+    ex. « 5 Mo maximum. Formats acceptés : PDF, PNG, JPG, JPEG. »
+  - `MultipleFileField` : « {nb fichiers} fichiers maximum. {taille max} maximum par fichier
+    ({taille totale} au total). Formats acceptés : {extensions}. »
+    ex. « 5 fichiers maximum. 5 Mo maximum par fichier (5 Mo au total). Formats acceptés : PDF, PNG, JPG, JPEG. »
+
+  Le texte suit donc les valeurs réellement passées (`max_size`, `allowed_extensions`,
+  `max_files`, `max_total_size`) et se met à jour si elles changent. Passer `help_text`
+  explicitement écrase totalement le texte généré.
 
 ---
 

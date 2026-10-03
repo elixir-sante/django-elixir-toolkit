@@ -7,7 +7,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django_ckeditor_5.fields import CKEditor5Field
 
-from elixir_toolkit.forms import limit_length
+from elixir_toolkit.forms import limit_length, MultipleFileField, ToolkitFileField
 
 class ToolkitBaseTest(TestCase):
     """Classe de base pour partager la logique de rendu des templates."""
@@ -597,3 +597,51 @@ class ToolkitMaxLengthTest(ToolkitBaseTest):
             rendered.index('elixir_toolkit/js/ckeditor-load-external-plugins.js'),
             rendered.index('elixir_toolkit/js/max-length.js'),
         )
+
+
+class ToolkitFileUploadHelpTextTest(ToolkitBaseTest):
+    """help_text généré automatiquement à partir des propriétés du champ,
+    écrasé totalement si `help_text` est transmis explicitement."""
+
+    def test_toolkit_file_field_default_help_text(self):
+        field = ToolkitFileField()
+
+        self.assertEqual(
+            field.help_text,
+            "5 Mo maximum. Formats acceptés : PDF, PNG, JPG, JPEG."
+        )
+
+    def test_multiple_file_field_default_help_text(self):
+        field = MultipleFileField()
+
+        self.assertEqual(
+            field.help_text,
+            "5 fichiers maximum. 5 Mo maximum par fichier (5 Mo au total). "
+            "Formats acceptés : PDF, PNG, JPG, JPEG."
+        )
+
+    def test_help_text_reflects_custom_properties(self):
+        field = MultipleFileField(
+            max_size=2 * 1024 * 1024,
+            max_total_size=10 * 1024 * 1024,
+            allowed_extensions=['pdf'],
+            max_files=3,
+        )
+
+        self.assertEqual(
+            field.help_text,
+            "3 fichiers maximum. 2 Mo maximum par fichier (10 Mo au total). "
+            "Formats acceptés : PDF."
+        )
+
+    def test_help_text_formats_sub_megabyte_sizes(self):
+        field = ToolkitFileField(max_size=512 * 1024)
+
+        self.assertIn("512 Ko maximum", field.help_text)
+
+    def test_explicit_help_text_overrides_generated(self):
+        single = ToolkitFileField(help_text="Mon texte personnalisé")
+        multiple = MultipleFileField(help_text="Autre texte")
+
+        self.assertEqual(single.help_text, "Mon texte personnalisé")
+        self.assertEqual(multiple.help_text, "Autre texte")

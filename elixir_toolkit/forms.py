@@ -18,6 +18,39 @@ def is_rich_text_widget(widget):
     return "django_ckeditor_5" in widget.attrs.get("class", "").split()
 
 
+def format_file_size(size):
+    """Formate une taille en octets pour l'affichage (Mo / Ko / octets)."""
+    if size >= 1024 * 1024:
+        value = size / (1024 * 1024)
+        return f"{int(value)} Mo" if value.is_integer() else f"{value:.1f}".replace(".", ",") + " Mo"
+    if size >= 1024:
+        value = size / 1024
+        return f"{int(value)} Ko" if value.is_integer() else f"{value:.1f}".replace(".", ",") + " Ko"
+    return f"{size} octet" if size == 1 else f"{size} octets"
+
+
+def generate_file_help_text(max_size, allowed_extensions, max_files=None, max_total_size=None):
+    """Construit le help_text par défaut des champs d'upload à partir de
+    leurs propriétés : nombre de fichiers, taille maximale et formats acceptés.
+
+    Écrasé totalement si `help_text` est passé au champ.
+    """
+    parts = []
+    if max_files is not None:
+        parts.append(f"{max_files} fichier{'s' if max_files > 1 else ''} maximum")
+    if max_total_size is not None:
+        parts.append(
+            f"{format_file_size(max_size)} maximum par fichier "
+            f"({format_file_size(max_total_size)} au total)"
+        )
+    else:
+        parts.append(f"{format_file_size(max_size)} maximum")
+    extensions = ", ".join(ext.upper() for ext in allowed_extensions)
+    parts.append(f"formats acceptés : {extensions}")
+    sentence = ". ".join(part[:1].upper() + part[1:] for part in parts)
+    return sentence + "."
+
+
 def limit_length(field, max_length):
     """Change après coup le `max_length` d'un `forms.CharField` (limite dynamique).
 
@@ -144,6 +177,12 @@ class ToolkitFileField(forms.FileField):
         self.max_size = max_size
         self.allowed_extensions = allowed_extensions or ['pdf', 'png', 'jpg', 'jpeg']
 
+        # help_text par défaut déduit des limites, écrasé si transmis explicitement
+        kwargs.setdefault('help_text', generate_file_help_text(
+            self.max_size,
+            self.allowed_extensions,
+        ))
+
         # Injection des validateurs unitaires pour fichier unique
         kwargs.setdefault('validators', [])
         kwargs['validators'].extend([
@@ -200,6 +239,14 @@ class MultipleFileField(forms.FileField):
         self.max_total_size = max_total_size
         self.allowed_extensions = allowed_extensions or ['pdf', 'png', 'jpg', 'jpeg']
         self.max_files = max_files
+
+        # help_text par défaut déduit des limites, écrasé si transmis explicitement
+        kwargs.setdefault('help_text', generate_file_help_text(
+            self.max_size,
+            self.allowed_extensions,
+            max_files=self.max_files,
+            max_total_size=self.max_total_size,
+        ))
 
         # Validateurs appliqués fichier par fichier, dans le clean() splitté
         kwargs.setdefault('validators', [])

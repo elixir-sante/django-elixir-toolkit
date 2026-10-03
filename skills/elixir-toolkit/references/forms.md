@@ -135,6 +135,16 @@ Points importants :
 - `MultipleFileField` ajoute en plus `MaxTotalSizeValidator` et `MaxFilesValidator`.
 - Les attributs `data-max-size`, `data-allowed-extensions`, `data-max-files` posés sur le
   widget alimentent la validation côté navigateur.
+- **`help_text` généré automatiquement** à partir des paramètres d'appel du champ
+  (`max_size`, `allowed_extensions`, et pour `MultipleFileField` `max_files` /
+  `max_total_size`) :
+  - `ToolkitFileField` : « 5 Mo maximum. Formats acceptés : PDF, PNG, JPG, JPEG. »
+  - `MultipleFileField` : « 5 fichiers maximum. 5 Mo maximum par fichier (5 Mo au total).
+    Formats acceptés : PDF, PNG, JPG, JPEG. »
+
+  Le texte reflète les valeurs réellement passées. Le passer explicitement l'écrase
+  totalement — ne l'écrire à la main que pour un texte métier spécifique, pas pour
+  reformuler les limites.
 
 ---
 

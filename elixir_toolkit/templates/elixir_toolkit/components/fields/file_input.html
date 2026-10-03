@@ -15,13 +15,14 @@
             </label>
         </div>
     </div>
+    {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
 
     <div style="display: none;">
         <input type="checkbox" name="{{ field.name }}-clear" id="{{ field.id_for_label }}-clear_id">
     </div>
 
     <div id="list-{{ field.id_for_label }}" class="mt-2 tags"></div>
-    <p class="help file-size has-text-grey" id="size-{{ field.id_for_label }}"></p>
+    <p class="help file-size" id="size-{{ field.id_for_label }}"></p>
     
     <!-- Zone dédiée aux erreurs dynamiques JS -->
     <p class="help is-danger file-error-help mt-1" id="error-{{ field.id_for_label }}"></p>
@@ -31,7 +32,6 @@
             <p class="help is-danger"><strong>{{ error }}</strong></p>
         {% endfor %}
     {% endif %}
-    {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
 </div>
 
 <script>
@@ -98,7 +98,7 @@
 
                 if (fileNameLabel) fileNameLabel.textContent = `${allFiles.files.length} fichier(s)`;
                 if (fileSizeContainer) {
-                    fileSizeContainer.textContent = `Taille totale : ${(totalSize / (1024 * 1024)).toFixed(2)} Mo / ${(MAX_TOTAL_SIZE / (1024 * 1024)).toFixed(0)} Mo max`;
+                    fileSizeContainer.textContent = `Taille totale : ${(totalSize / (1024 * 1024)).toFixed(2)} Mo sur ${(MAX_TOTAL_SIZE / (1024 * 1024)).toFixed(0)} Mo maximum.`;
                 }
             }
 
