@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load elixir_toolkit_tags %}
+{% load crispy_forms_tags %}
+
+{% block body %}
+<div class="container">
+    <h1 class="title is-1">Test des erreurs de validation</h1>
+
+    {% if messages %}
+    <div class="notification is-success is-light mt-4">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="box">
+        <h2 class="title is-2">Sommaire</h2>
+        <ul>
+            <li><a href="#erreurs-globales">Erreurs globales (non_field_errors)</a></li>
+            <li><a href="#formulaire">Formulaire avec erreurs sur tous les champs</a></li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2 id="erreurs-globales" class="title is-3">Erreurs globales (non_field_errors)</h2>
+        <p>
+            Les erreurs ajoutées via <code>form.add_error(None, ...)</code> sont rendues
+            automatiquement par <code>{{ "{% crispy form %}" }}</code>
+            dans un <code>article.message.is-danger</code> placé au-dessus du formulaire
+            (cf. ci-dessous). Le formulaire de démo en produit deux.
+        </p>
+    </div>
+
+    <div class="box">
+        <h2 id="formulaire" class="title is-3">Formulaire avec erreurs sur tous les champs</h2>
+        <p class="mb-4">
+            Le formulaire est chargé avec des données volontairement invalides : chaque type de
+            champ échoue (champ requis, format email/URL/date, min/max, longueur maximale) et les
+            erreurs globales s'affichent en haut du formulaire. Soumettez-le pour tester la
+            validation réelle côté serveur.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% crispy form %}
+        </form>
+    </div>
+
+    <div class="mt-6">
+        <a href="/" class="button is-primary">
+            <span class="icon">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span>Retour à la page principale</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

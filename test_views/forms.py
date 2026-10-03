@@ -269,3 +269,104 @@ class FormExample(CustomFormHelper, forms.Form):
             """),
         )
         return helper
+
+
+class FormErrorsExample(CustomFormHelper, forms.Form):
+    """Démonstration de l'UI des erreurs de validation.
+
+    Avec les données de démonstration (cf. FormErrorsTestView.DEMO_DATA),
+    chaque champ échoue avec un type d'erreur différent (requis, format,
+    min/max, longueur) et `clean` ajoute des erreurs globales.
+    """
+
+    text = forms.CharField(label="Nom complet", min_length=3)
+    email = forms.EmailField(label="Adresse email")
+    number = forms.IntegerField(label="Âge", min_value=0, max_value=120)
+    url = forms.URLField(label="Site web")
+    password = forms.CharField(
+        label="Mot de passe",
+        min_length=12,
+        widget=forms.PasswordInput(attrs={"placeholder": "********"}),
+    )
+    select = forms.ChoiceField(label="Couleur unique", choices=COLOR_CHOICES)
+    multi_select = forms.MultipleChoiceField(
+        label="Couleurs multiples", choices=COLOR_CHOICES
+    )
+    date_effet = forms.DateField(label="Date d'effet")
+    textarea = forms.CharField(label="Message", max_length=100, widget=forms.Textarea())
+    checkbox = forms.BooleanField(label="J'accepte les conditions")
+    checkboxes = forms.MultipleChoiceField(
+        label="Options à cocher", choices=COLOR_CHOICES, widget=forms.CheckboxSelectMultiple()
+    )
+    radios = forms.ChoiceField(
+        label="Choix exclusif", choices=COLOR_CHOICES, widget=forms.RadioSelect()
+    )
+    fichier = ToolkitFileField(label="Pièce jointe", allowed_extensions=["pdf"])
+
+    def __init__(self, *args, show_global_errors=True, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.show_global_errors = show_global_errors
+
+    def clean(self):
+        super().clean()
+        if self.show_global_errors and self.errors:
+            self.add_error(
+                None,
+                "Le formulaire comporte des erreurs de validation : "
+                "merci de corriger les champs signalés en rouge.",
+            )
+            self.add_error(
+                None,
+                "Erreur globale non rattachée à un champ : "
+                "les données saisies sont incohérentes entre elles.",
+            )
+
+    @property
+    def helper(self):
+        helper = super().helper
+        helper.template_pack = "bulma"
+        helper.layout = Layout(
+            Fieldset(
+                "👤 Informations personnelles",
+                Div(
+                    Div(Field("text", placeholder="Ex: Jean Dupont"), css_class="column is-6"),
+                    Div(Field("email", placeholder="jean@email.com"), css_class="column is-6"),
+                    css_class="columns",
+                ),
+                Div(
+                    Div(PasswordWithIconField("password"), css_class="column is-6"),
+                    Div(Field("number"), css_class="column is-6"),
+                    css_class="columns",
+                ),
+                Div(
+                    Div(Field("url"), css_class="column is-6"),
+                    Div("date_effet", css_class="column is-6"),
+                    css_class="columns",
+                ),
+            ),
+            HTML('<hr class="my-5">'),
+            Fieldset(
+                "🎨 Préférences et pièces jointes",
+                Div(
+                    Div(ToolkitSelectField("select", icon="fa-palette"), css_class="column is-6"),
+                    Div("multi_select", css_class="column is-6"),
+                    css_class="columns",
+                ),
+                "textarea",
+                Div(
+                    Div("checkboxes", css_class="column is-6"),
+                    Div("radios", css_class="column is-6"),
+                    css_class="columns",
+                ),
+                Div("checkbox", FileUpload("fichier")),
+            ),
+            HTML("""
+                <div class="field mt-5"><div class="control">
+                    <button type="submit" class="button is-primary is-fullwidth">
+                        <span class="icon"><i class="fas fa-paper-plane"></i></span>
+                        <span>Soumettre le formulaire</span>
+                    </button>
+                </div></div>
+            """),
+        )
+        return helper

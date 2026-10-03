@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from test_views.views import FormTestView, TableFilterExampleView, TableFilterLargeView, FormConfirmSubmitTestView, MessageTestView
+from test_views.views import FormTestView, TableFilterExampleView, TableFilterLargeView, FormConfirmSubmitTestView, MessageTestView, FormErrorsTestView
 
 
 urlpatterns = [
@@ -27,5 +27,6 @@ urlpatterns = [
     path('table-filter-example/', TableFilterExampleView.as_view(), name='table_filter_example'),
     path('table-filter-large/', TableFilterLargeView.as_view(), name='table_filter_large'),
     path('form-confirm-submit-test/', FormConfirmSubmitTestView.as_view(), name='form_confirm_submit_test'),
+    path('form-errors-test/', FormErrorsTestView.as_view(), name='form_errors_test'),
     path('message-test/', MessageTestView.as_view(), name='message_test'),
 ]
