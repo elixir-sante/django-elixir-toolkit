@@ -55,7 +55,9 @@ par CDN (défaut : `1.0.0`).
    pas le `FormHelper` de crispy-forms nu.
 4. **Champs spécifiques du toolkit** (détails dans `references/forms.md`) :
    - fichier : `ToolkitFileField` (unique) ou `MultipleFileField`, rendus via `FileUpload()`
-     dans le `Layout` crispy — le rendu custom casse le comportement du champ.
+     dans le `Layout` crispy — le rendu custom casse le comportement du champ. Le `help_text`
+     des limites (taille, formats, nombre de fichiers) est généré automatiquement à partir
+     des paramètres d'appel ; ne pas le réécrire à la main (détails dans `references/forms.md`).
    - select stylé (Selectize) dans un formulaire crispy : `ToolkitSelectField('champ', icon=...)`.
    - mot de passe : `PasswordWithIconField`.
 5. **Sécurité.** `ui_message` échappe le contenu par défaut. Ne passer `is_safe=True` que

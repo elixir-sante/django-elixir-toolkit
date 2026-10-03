@@ -662,7 +662,7 @@
 <div class="box">
     <h2 id="formulaire" class="title is-3">Formulaire</h2>
     
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% crispy form %}
     <input type="submit" value="Envoyer">
