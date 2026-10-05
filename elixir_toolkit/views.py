@@ -10,7 +10,7 @@ class AsyncFormView(FormView):
 
     async def get(self, request, *args, **kwargs):
         return self.render_to_response(self.get_context_data())
-    
+
     async def post(self, request, *args, **kwargs):
         self.context = self.get_context_data()
         form = self.get_form()
@@ -20,8 +20,7 @@ class AsyncFormView(FormView):
             return await self.form_invalid(form)
 
     async def form_invalid(self, form):
-        context = await self.get_context_data(form=form)
-        return self.render_to_response(context)
+        return self.render_to_response(self.get_context_data(form=form))
 
     async def put(self, *args, **kwargs):
-        return self.post(*args, **kwargs)
+        return await self.post(*args, **kwargs)
