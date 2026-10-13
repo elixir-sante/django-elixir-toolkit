@@ -1,9 +1,3 @@
 .button.is-primary:not(.is-outlined) {
     background-color: var(--bulma-primary) !important; 
 }
-
-.button.is-primary.is-outlined {
-    background-color: var(--secondary-color, var(--bulma-primary));
-    border-color: transparent;
-    color: #fff;
-}
