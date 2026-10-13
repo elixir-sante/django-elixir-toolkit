@@ -117,6 +117,94 @@ def ui_message_danger(content, title=None, css_classes="", is_safe=False, **kwar
     )
 
 
+class MessageBlockNode(Node):
+    """Rend un message Bulma dont le corps est le contenu entre les tags.
+
+    Contrairement aux tags inline (ui_message...), le contenu est du template
+    rendu par le moteur : HTML littéral préservé, variables auto-échappées.
+    """
+
+    def __init__(self, color, default_color, title, css_classes, kwargs, nodelist):
+        self.color = color
+        self.default_color = default_color
+        self.title = title
+        self.css_classes = css_classes
+        self.kwargs = kwargs
+        self.nodelist = nodelist
+
+    def render(self, context):
+        color = self.color.resolve(context) if self.color else self.default_color
+        title = self.title.resolve(context) if self.title else None
+        resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
+        html_attrs = {k: v.resolve(context) for k, v in self.kwargs.items()}
+
+        t = template.loader.get_template("elixir_toolkit/components/message.html")
+        ctx = context.flatten()
+        ctx.update(
+            {
+                "content": self.nodelist.render(context),
+                "color_class": f"is-{color}" if color else "is-primary",
+                "title": escape(title) if title is not None else None,
+                "css_classes": resolved_classes,
+                "attrs": flatatt(html_attrs),
+            }
+        )
+        return t.render(ctx)
+
+
+def _register_message_block_tag(tag_name, default_color):
+    """Enregistre une paire de tags de block ``tag_name`` / ``end_tag_name``.
+
+    Usage :
+        {% ui_message_block title="Information" css_classes="mb-4" id="mon-message" %}
+            Du <strong>HTML</strong> libre, variables comprises : {{ variable }}
+        {% end_ui_message_block %}
+    """
+
+    @register.tag(name=tag_name)
+    def message_block(parser, token):
+        bits = token.split_contents()[1:]
+        title = None
+        css_classes = None
+        color = None
+        kwargs = {}
+
+        for bit in bits:
+            key, sep, value = bit.partition("=")
+            if not sep:
+                raise template.TemplateSyntaxError(
+                    f"{tag_name} attend des arguments clé=\"valeur\", reçu : {bit}"
+                )
+            if key in ("content", "is_safe"):
+                raise template.TemplateSyntaxError(
+                    f"{tag_name} n'accepte pas '{key}' : le contenu est le bloc "
+                    f"entre les tags. Utilisez le tag inline ui_message pour un contenu en argument."
+                )
+            compiled = parser.compile_filter(value)
+            if key == "title":
+                title = compiled
+            elif key == "css_classes":
+                css_classes = compiled
+            elif key == "color":
+                color = compiled
+            else:
+                kwargs[key.replace("_", "-")] = compiled
+
+        nodelist = parser.parse((f"end_{tag_name}",))
+        parser.delete_first_token()
+
+        return MessageBlockNode(
+            color, default_color, title, css_classes, kwargs, nodelist
+        )
+
+
+_register_message_block_tag("ui_message_block", "primary")
+_register_message_block_tag("ui_message_info_block", "info")
+_register_message_block_tag("ui_message_success_block", "success")
+_register_message_block_tag("ui_message_warning_block", "warning")
+_register_message_block_tag("ui_message_danger_block", "danger")
+
+
 @register.filter(name="split")
 def split(value):
     if value:

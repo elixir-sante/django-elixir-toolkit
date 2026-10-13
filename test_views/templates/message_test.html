@@ -14,6 +14,7 @@
             <li><a href="#messages-avec-classes-supplementaires">Messages avec classes CSS supplémentaires</a></li>
             <li><a href="#messages-avec-attributs-html">Messages avec attributs HTML</a></li>
             <li><a href="#messages-mode-securise">Messages en mode sécurisé (is_safe=False)</a></li>
+            <li><a href="#messages-mode-block">Messages en Node Block</a></li>
         </ul>
     </div>
 
@@ -120,6 +121,30 @@
             data_severity="high"
             is_safe=True
         %}
+    </div>
+
+    <div class="box">
+        <h2 id="messages-mode-block" class="title is-3">Messages en Node Block</h2>
+        <p class="mb-4">Le contenu est placé entre les tags : HTML et variables de template rendus naturellement (pas besoin de <code>is_safe</code>).</p>
+
+        <h3 class="title is-4">Bloc simple</h3>
+        {% ui_message_block %}
+            Du contenu libre avec <strong>du gras</strong> et <a href="#">un lien</a>.
+        {% end_ui_message_block %}
+
+        <h3 class="title is-4 mt-4">Bloc avec titre, couleur et attributs</h3>
+        {% ui_message_warning_block title="Attention" css_classes="mb-4" id="bloc-message" data_scope="demo" %}
+            <p>Ce message contient du HTML structuré :</p>
+            <ul>
+                <li>Élément 1</li>
+                <li>Élément 2</li>
+            </ul>
+        {% end_ui_message_warning_block %}
+
+        <h3 class="title is-4 mt-4">Bloc avec variables de contexte</h3>
+        {% ui_message_info_block title="Variables du contexte" %}
+            Texte dynamique : {{ request.user.username|default:"anonyme" }}.
+        {% end_ui_message_info_block %}
     </div>
 
     <div class="mt-6">

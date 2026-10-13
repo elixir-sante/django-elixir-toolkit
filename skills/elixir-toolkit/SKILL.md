@@ -62,6 +62,8 @@ par CDN (défaut : `1.0.0`).
    - mot de passe : `PasswordWithIconField`.
 5. **Sécurité.** `ui_message` échappe le contenu par défaut. Ne passer `is_safe=True` que
    pour du HTML statique de confiance — jamais pour du contenu saisie par l'utilisateur.
+   La forme block (`ui_message_block`...) rend le contenu via le moteur de template :
+   les variables y sont auto-échappées, sans `is_safe`.
 6. **Ne pas réimplémenter le JS du toolkit.** Les comportements s'activent par attributs
    `data-*` (`data-max-size`, `data-depends-on`, `data-form-confirm`, `data-search`, ...) ou par
    classes CSS (`js-form-confirm`, `toggle-row-btn`, `table-filter`). Lire
@@ -79,7 +81,7 @@ par CDN (défaut : `1.0.0`).
 | Tableau (tri, filtrage, expandable) | `{% ui_table %}` + `{% ui_th %}` / `{% ui_td %}` |
 | Badge / statut | `{% ui_tag %}` |
 | Chevron / flèche | `{% ui_chevron %}` |
-| Message / alerte | `{% ui_message %}` (+ variantes `_info`, `_success`, `_warning`, `_danger`) |
+| Message / alerte | `{% ui_message %}` (+ variantes `_info`, `_success`, `_warning`, `_danger`) ; forme block `{% ui_message_block %}...{% end_ui_message_block %}` (+ variantes `_info_block`, etc.) pour du contenu riche |
 | Parcours en étapes | `{% ui_stepper %}` |
 | Indicateurs de défilement d'onglets | `{% ui_tabs_scroll_hints %}` |
 | Modale de confirmation de soumission | `{% ui_form_confirm_submit %}` |

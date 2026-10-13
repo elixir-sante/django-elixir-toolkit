@@ -409,7 +409,21 @@ Par défaut (`is_safe=False`), le contenu est échappé : les balises HTML sont 
 {% ui_message content="<script>alert('XSS')</script>" %}
 ```
 
-**Paramètres :**
+#### Message en Node Block
+Pour un contenu riche, utilisez la forme block : le contenu est le template entre les tags (HTML et variables de contexte rendus naturellement, pas besoin de `is_safe`). Les tags inline restent inchangés.
+```html
+{% ui_message_block title="Attention" css_classes="mb-4" id="mon-message" %}
+    <p>Contenu libre avec <strong>du gras</strong> et {{ variable }}.</p>
+{% end_ui_message_block %}
+
+{% ui_message_info_block %}Information.{% end_ui_message_info_block %}
+```
+
+**Paramètres (forme block) :** `title`, `color` (tag `ui_message_block` uniquement), `css_classes`, et tout attribut HTML via kwargs (`id`, `data-*`, etc.). Les arguments `content` et `is_safe` sont refusés avec une erreur de syntaxe.
+
+**Variantes block :** `{% ui_message_block %}` (accepte `color=`), `{% ui_message_info_block %}`, `{% ui_message_success_block %}`, `{% ui_message_warning_block %}`, `{% ui_message_danger_block %}` — chacune avec son tag de fermeture `{% end_... %}` correspondant.
+
+**Paramètres (forme inline) :**
 - `content` (requis) : Contenu du message
 - `color` : Couleur Bulma (`primary`, `info`, `success`, `warning`, `danger`) - défaut: `primary`
 - `title` : Titre du message (affiché dans le header, toujours échappé)
