@@ -9,16 +9,18 @@ from django.template.base import Node
 register = template.Library()
 
 
-@register.inclusion_tag('elixir_toolkit/components/message.html')
-def ui_message_base(content, color="primary", title=None, css_classes="", is_safe=False, **kwargs):
+@register.inclusion_tag("elixir_toolkit/components/message.html")
+def ui_message_base(
+    content, color="primary", title=None, css_classes="", is_safe=False, **kwargs
+):
     """
     Composant Message Bulma.
-    
+
     Usage :
         {% ui_message content="Mon message ici" color="primary" %}
         {% ui_message content="Mon message avec titre" title="Titre" color="info" %}
         {% ui_message content="Mon message" color="success" css_classes="mb-4" %}
-    
+
     Paramètres :
         - content (requis) : Contenu HTML du message
         - color (optionnel) : Couleur du message (primary, info, success, warning, danger) - défaut: primary
@@ -28,7 +30,7 @@ def ui_message_base(content, color="primary", title=None, css_classes="", is_saf
         - **kwargs : Attributs HTML supplémentaires (ex: data-id, id, etc.)
     """
     color_class = f"is-{color}" if color else "is-primary"
-    html_attrs = {k.replace('_', '-'): v for k, v in kwargs.items()}
+    html_attrs = {k.replace("_", "-"): v for k, v in kwargs.items()}
 
     # Django marque les littéraux passés aux tags de template comme "safe"
     # (mark_safe dans django.template.base.Variable) : un simple
@@ -42,85 +44,211 @@ def ui_message_base(content, color="primary", title=None, css_classes="", is_saf
     title = escape(title) if title is not None else None
 
     return {
-        'content': content,
-        'color_class': color_class,
-        'title': title,
-        'css_classes': css_classes,
-        'attrs': flatatt(html_attrs),
+        "content": content,
+        "color_class": color_class,
+        "title": title,
+        "css_classes": css_classes,
+        "attrs": flatatt(html_attrs),
     }
 
 
-@register.inclusion_tag('elixir_toolkit/components/message.html')
+@register.inclusion_tag("elixir_toolkit/components/message.html")
 def ui_message(content, title=None, css_classes="", is_safe=False, **kwargs):
     """Message avec couleur primary."""
-    return ui_message_base(content, color="primary", title=title, css_classes=css_classes, is_safe=is_safe, **kwargs)
+    return ui_message_base(
+        content,
+        color="primary",
+        title=title,
+        css_classes=css_classes,
+        is_safe=is_safe,
+        **kwargs,
+    )
 
 
-@register.inclusion_tag('elixir_toolkit/components/message.html')
+@register.inclusion_tag("elixir_toolkit/components/message.html")
 def ui_message_info(content, title=None, css_classes="", is_safe=False, **kwargs):
     """Message avec couleur info (cyan)."""
-    return ui_message_base(content, color="info", title=title, css_classes=css_classes, is_safe=is_safe, **kwargs)
+    return ui_message_base(
+        content,
+        color="info",
+        title=title,
+        css_classes=css_classes,
+        is_safe=is_safe,
+        **kwargs,
+    )
 
 
-@register.inclusion_tag('elixir_toolkit/components/message.html')
+@register.inclusion_tag("elixir_toolkit/components/message.html")
 def ui_message_success(content, title=None, css_classes="", is_safe=False, **kwargs):
     """Message avec couleur success (vert)."""
-    return ui_message_base(content, color="success", title=title, css_classes=css_classes, is_safe=is_safe, **kwargs)
+    return ui_message_base(
+        content,
+        color="success",
+        title=title,
+        css_classes=css_classes,
+        is_safe=is_safe,
+        **kwargs,
+    )
 
 
-@register.inclusion_tag('elixir_toolkit/components/message.html')
+@register.inclusion_tag("elixir_toolkit/components/message.html")
 def ui_message_warning(content, title=None, css_classes="", is_safe=False, **kwargs):
     """Message avec couleur warning (jaune)."""
-    return ui_message_base(content, color="warning", title=title, css_classes=css_classes, is_safe=is_safe, **kwargs)
+    return ui_message_base(
+        content,
+        color="warning",
+        title=title,
+        css_classes=css_classes,
+        is_safe=is_safe,
+        **kwargs,
+    )
 
 
-@register.inclusion_tag('elixir_toolkit/components/message.html')
+@register.inclusion_tag("elixir_toolkit/components/message.html")
 def ui_message_danger(content, title=None, css_classes="", is_safe=False, **kwargs):
     """Message avec couleur danger (rouge)."""
-    return ui_message_base(content, color="danger", title=title, css_classes=css_classes, is_safe=is_safe, **kwargs)
+    return ui_message_base(
+        content,
+        color="danger",
+        title=title,
+        css_classes=css_classes,
+        is_safe=is_safe,
+        **kwargs,
+    )
 
 
-@register.filter(name='split')
+class MessageBlockNode(Node):
+    """Rend un message Bulma dont le corps est le contenu entre les tags.
+
+    Contrairement aux tags inline (ui_message...), le contenu est du template
+    rendu par le moteur : HTML littéral préservé, variables auto-échappées.
+    """
+
+    def __init__(self, color, default_color, title, css_classes, kwargs, nodelist):
+        self.color = color
+        self.default_color = default_color
+        self.title = title
+        self.css_classes = css_classes
+        self.kwargs = kwargs
+        self.nodelist = nodelist
+
+    def render(self, context):
+        color = self.color.resolve(context) if self.color else self.default_color
+        title = self.title.resolve(context) if self.title else None
+        resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
+        html_attrs = {k: v.resolve(context) for k, v in self.kwargs.items()}
+
+        t = template.loader.get_template("elixir_toolkit/components/message.html")
+        ctx = context.flatten()
+        ctx.update(
+            {
+                "content": self.nodelist.render(context),
+                "color_class": f"is-{color}" if color else "is-primary",
+                "title": escape(title) if title is not None else None,
+                "css_classes": resolved_classes,
+                "attrs": flatatt(html_attrs),
+            }
+        )
+        return t.render(ctx)
+
+
+def _register_message_block_tag(tag_name, default_color):
+    """Enregistre une paire de tags de block ``tag_name`` / ``end_tag_name``.
+
+    Usage :
+        {% ui_message_block title="Information" css_classes="mb-4" id="mon-message" %}
+            Du <strong>HTML</strong> libre, variables comprises : {{ variable }}
+        {% end_ui_message_block %}
+    """
+
+    @register.tag(name=tag_name)
+    def message_block(parser, token):
+        bits = token.split_contents()[1:]
+        title = None
+        css_classes = None
+        color = None
+        kwargs = {}
+
+        for bit in bits:
+            key, sep, value = bit.partition("=")
+            if not sep:
+                raise template.TemplateSyntaxError(
+                    f"{tag_name} attend des arguments clé=\"valeur\", reçu : {bit}"
+                )
+            if key in ("content", "is_safe"):
+                raise template.TemplateSyntaxError(
+                    f"{tag_name} n'accepte pas '{key}' : le contenu est le bloc "
+                    f"entre les tags. Utilisez le tag inline ui_message pour un contenu en argument."
+                )
+            compiled = parser.compile_filter(value)
+            if key == "title":
+                title = compiled
+            elif key == "css_classes":
+                css_classes = compiled
+            elif key == "color":
+                color = compiled
+            else:
+                kwargs[key.replace("_", "-")] = compiled
+
+        nodelist = parser.parse((f"end_{tag_name}",))
+        parser.delete_first_token()
+
+        return MessageBlockNode(
+            color, default_color, title, css_classes, kwargs, nodelist
+        )
+
+
+_register_message_block_tag("ui_message_block", "primary")
+_register_message_block_tag("ui_message_info_block", "info")
+_register_message_block_tag("ui_message_success_block", "success")
+_register_message_block_tag("ui_message_warning_block", "warning")
+_register_message_block_tag("ui_message_danger_block", "danger")
+
+
+@register.filter(name="split")
 def split(value):
     if value:
         return value.split()
     return None
 
-@register.inclusion_tag('elixir_toolkit/components/toolkit_assets.html')
+
+@register.inclusion_tag("elixir_toolkit/components/toolkit_assets.html")
 def toolkit_assets(version="1.0.0"):
-    return {
-        "bulma_version": version
-    }
+    return {"bulma_version": version}
 
-@register.inclusion_tag('elixir_toolkit/components/button.html')
-def ui_button(text=None, css_classes="", icon=None, icon_right=False, href=None, **kwargs):
+
+@register.inclusion_tag("elixir_toolkit/components/button.html")
+def ui_button(
+    text=None, css_classes="", icon=None, icon_right=False, href=None, **kwargs
+):
     # Nettoyage des clés (data_id -> data-id)
-    html_attrs = {k.replace('_', '-'): v for k, v in kwargs.items()}
-    
+    html_attrs = {k.replace("_", "-"): v for k, v in kwargs.items()}
+
     return {
-        'text': text,
-        'css_classes': css_classes,
-        'icon': icon,
-        'icon_right': icon_right,
-        'href': href,
-        'type': kwargs.get('type', 'button'),
-        'attrs': flatatt(html_attrs),
+        "text": text,
+        "css_classes": css_classes,
+        "icon": icon,
+        "icon_right": icon_right,
+        "href": href,
+        "type": kwargs.get("type", "button"),
+        "attrs": flatatt(html_attrs),
     }
 
-@register.inclusion_tag('elixir_toolkit/components/button.html')
+
+@register.inclusion_tag("elixir_toolkit/components/button.html")
 def ui_button_primary(text=None, css_classes="", **kwargs):
     new_classes = f"is-primary {css_classes}".strip()
     return ui_button(text, css_classes=new_classes, **kwargs)
 
 
-@register.inclusion_tag('elixir_toolkit/components/button.html')
+@register.inclusion_tag("elixir_toolkit/components/button.html")
 def ui_button_secondary(text=None, css_classes="", **kwargs):
     """Bouton secondaire - Couleur 'Link' (Bleu) en dur"""
-    new_classes = f"is-primary is-outlined {css_classes}".strip()
+    new_classes = f"is-primary {css_classes}".strip()
     return ui_button(text, css_classes=new_classes, **kwargs)
 
 
-@register.inclusion_tag('elixir_toolkit/components/tabs_scroll_hints.html')
+@register.inclusion_tag("elixir_toolkit/components/tabs_scroll_hints.html")
 def ui_tabs_scroll_hints():
     """Chevrons de défilement pour une barre d'onglets qui déborde.
 
@@ -135,30 +263,40 @@ def ui_tabs_scroll_hints():
     return {}
 
 
-@register.inclusion_tag('elixir_toolkit/components/select.html')
-def ui_select(name, options, element_id=None, selected=None, multiple=None, placeholder="Choisissez...", icon=None, css_classes=""):
+@register.inclusion_tag("elixir_toolkit/components/select.html")
+def ui_select(
+    name,
+    options,
+    element_id=None,
+    selected=None,
+    multiple=None,
+    placeholder="Choisissez...",
+    icon=None,
+    css_classes="",
+):
     if isinstance(options, str):
         try:
             options = ast.literal_eval(options)
-        except (ValueError, SyntaxError):
+        except ValueError, SyntaxError:
             options = []
 
     if isinstance(options, dict):
         options = options.items()
 
     return {
-        'name': name,
-        'element_id': element_id or f"id_{name}",
-        'options': options,
-        'selected': str(selected) if selected else None,
-        'selected_list': [str(selected)] if selected else [],
-        'placeholder': placeholder,
-        'icon': icon,
-        'css_classes': css_classes,
-        'multiple': multiple,
+        "name": name,
+        "element_id": element_id or f"id_{name}",
+        "options": options,
+        "selected": str(selected) if selected else None,
+        "selected_list": [str(selected)] if selected else [],
+        "placeholder": placeholder,
+        "icon": icon,
+        "css_classes": css_classes,
+        "multiple": multiple,
     }
-    
-@register.inclusion_tag('elixir_toolkit/components/filter_bar.html')
+
+
+@register.inclusion_tag("elixir_toolkit/components/filter_bar.html")
 def ui_filter_bar(filters, identifier="default"):
     is_multi = False
 
@@ -166,52 +304,74 @@ def ui_filter_bar(filters, identifier="default"):
         first = filters[0]
 
         # Si déjà liste de listes
-        if isinstance(first, (list, tuple)) and len(first) > 0 and isinstance(first[0], (list, tuple)):
+        if (
+            isinstance(first, (list, tuple))
+            and len(first) > 0
+            and isinstance(first[0], (list, tuple))
+        ):
             is_multi = True
         else:
             # 🔥 NORMALISATION : transformer en liste de listes
             filters = [filters]
             is_multi = True
 
-    return {
-        'filters': filters,
-        'identifier': identifier,
-        'is_multi': is_multi
-    }
-    
+    return {"filters": filters, "identifier": identifier, "is_multi": is_multi}
 
-@register.inclusion_tag('elixir_toolkit/components/list.html')
-def ui_list(items, title_field="title", desc_field="description", extra_field=None, 
-            icon_field=None, tag_label_field=None, tag_icon_field=None, 
-            link_url_name=None, **kwargs):
+
+@register.inclusion_tag("elixir_toolkit/components/list.html")
+def ui_list(
+    items,
+    title_field="title",
+    desc_field="description",
+    extra_field=None,
+    icon_field=None,
+    tag_label_field=None,
+    tag_icon_field=None,
+    link_url_name=None,
+    **kwargs,
+):
     processed_items = []
     for item in items:
+
         def get_val(field_name):
             if not field_name:
                 return None
             if isinstance(item, dict):
                 return item.get(field_name)
             return getattr(item, field_name, None)
-        
-        processed_items.append({
-            'title': get_val(title_field) or "",
-            'description': get_val(desc_field) or "",
-            'extra': get_val(extra_field),
-            'icon': get_val(icon_field) or "receipt",
-            'tag_label': get_val(tag_label_field),
-            'tag_icon': get_val(tag_icon_field) or "user",
-            'obj': item 
-        })
+
+        processed_items.append(
+            {
+                "title": get_val(title_field) or "",
+                "description": get_val(desc_field) or "",
+                "extra": get_val(extra_field),
+                "icon": get_val(icon_field) or "receipt",
+                "tag_label": get_val(tag_label_field),
+                "tag_icon": get_val(tag_icon_field) or "user",
+                "obj": item,
+            }
+        )
 
     return {
-        'items': processed_items,
-        'link_url_name': link_url_name,
-        'css_classes': kwargs.get('css_classes', '')
+        "items": processed_items,
+        "link_url_name": link_url_name,
+        "css_classes": kwargs.get("css_classes", ""),
     }
 
 
 class TableBlockNode(Node):
-    def __init__(self, css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, table_id, nodelist):
+    def __init__(
+        self,
+        css_classes,
+        expandable,
+        orderable,
+        filterable,
+        filter_id,
+        filter_columns,
+        filter_target,
+        table_id,
+        nodelist,
+    ):
         self.css_classes = css_classes
         self.expandable = expandable
         self.orderable = orderable
@@ -228,26 +388,35 @@ class TableBlockNode(Node):
         is_orderable = self.orderable.resolve(context) if self.orderable else False
         is_filterable = self.filterable.resolve(context) if self.filterable else False
         resolved_filter_id = self.filter_id.resolve(context) if self.filter_id else ""
-        resolved_filter_columns = self.filter_columns.resolve(context) if self.filter_columns else ""
-        resolved_filter_target = self.filter_target.resolve(context) if self.filter_target else ""
+        resolved_filter_columns = (
+            self.filter_columns.resolve(context) if self.filter_columns else ""
+        )
+        resolved_filter_target = (
+            self.filter_target.resolve(context) if self.filter_target else ""
+        )
         resolved_table_id = self.table_id.resolve(context) if self.table_id else ""
-        
+
         table_content = self.nodelist.render(context)
-        t = template.loader.get_template('elixir_toolkit/components/table.html')
-        
+        t = template.loader.get_template("elixir_toolkit/components/table.html")
+
         ctx = context.flatten()
-        ctx.update({
-            'css_classes': resolved_classes,
-            'table_content': table_content,
-            'expandable': str(is_expandable).lower() == 'true' or is_expandable is True,
-            'orderable': str(is_orderable).lower() == 'true' or is_orderable is True,
-            'filterable': str(is_filterable).lower() == 'true' or is_filterable is True,
-            'filter_id': resolved_filter_id,
-            'filter_columns': resolved_filter_columns,
-            'filter_target': resolved_filter_target,
-            'table_id': resolved_table_id,
-            'attrs': '',
-        })
+        ctx.update(
+            {
+                "css_classes": resolved_classes,
+                "table_content": table_content,
+                "expandable": str(is_expandable).lower() == "true"
+                or is_expandable is True,
+                "orderable": str(is_orderable).lower() == "true"
+                or is_orderable is True,
+                "filterable": str(is_filterable).lower() == "true"
+                or is_filterable is True,
+                "filter_id": resolved_filter_id,
+                "filter_columns": resolved_filter_columns,
+                "filter_target": resolved_filter_target,
+                "table_id": resolved_table_id,
+                "attrs": "",
+            }
+        )
         return t.render(ctx)
 
 
@@ -259,20 +428,20 @@ def ui_table(parser, token):
             <thead>...</thead>
             <tbody>...</tbody>
         {% end_ui_table %}
-        
+
         Avec filtrage:
         {% ui_table css_classes="is-striped" filterable=True filter_columns="0,1,2" filter_target="#search-input" %}
             <thead>...</thead>
             <tbody>...</tbody>
         {% end_ui_table %}
-        
+
         Ou avec identifiant pour lier manuellement:
         {% ui_table css_classes="is-striped" filterable=True filter_id="my-table" filter_columns="0,2" %}
             <thead>...</thead>
             <tbody>...</tbody>
         {% end_ui_table %}
         <input type="text" class="table-filter" data-filter-id="my-table">
-        
+
         Avec identifiant pour le tableau:
         {% ui_table id="my-table-id" css_classes="is-striped" %}
             <thead>...</thead>
@@ -288,7 +457,7 @@ def ui_table(parser, token):
     filter_columns = None
     filter_target = None
     table_id = None
-    
+
     for bit in bits:
         if bit.startswith("css_classes="):
             val = bit.split("=")[1]
@@ -315,10 +484,20 @@ def ui_table(parser, token):
             val = bit.split("=")[1]
             table_id = parser.compile_filter(val)
 
-    nodelist = parser.parse(('end_ui_table',))
+    nodelist = parser.parse(("end_ui_table",))
     parser.delete_first_token()
 
-    return TableBlockNode(css_classes, expandable, orderable, filterable, filter_id, filter_columns, filter_target, table_id, nodelist)
+    return TableBlockNode(
+        css_classes,
+        expandable,
+        orderable,
+        filterable,
+        filter_id,
+        filter_columns,
+        filter_target,
+        table_id,
+        nodelist,
+    )
 
 
 class THBlockNode(Node):
@@ -331,15 +510,18 @@ class THBlockNode(Node):
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
         is_orderable = self.orderable.resolve(context) if self.orderable else True
         th_content = self.nodelist.render(context)
-        
-        t = template.loader.get_template('elixir_toolkit/components/th.html')
-        
+
+        t = template.loader.get_template("elixir_toolkit/components/th.html")
+
         ctx = context.flatten()
-        ctx.update({
-            'css_classes': resolved_classes,
-            'th_content': th_content,
-            'orderable': str(is_orderable).lower() == 'true' or is_orderable is True,
-        })
+        ctx.update(
+            {
+                "css_classes": resolved_classes,
+                "th_content": th_content,
+                "orderable": str(is_orderable).lower() == "true"
+                or is_orderable is True,
+            }
+        )
         return t.render(ctx)
 
 
@@ -352,7 +534,7 @@ def ui_th(parser, token):
     bits = token.split_contents()[1:]
     css_classes = None
     orderable = None
-    
+
     for bit in bits:
         if bit.startswith("css_classes="):
             val = bit.split("=")[1]
@@ -361,7 +543,7 @@ def ui_th(parser, token):
             val = bit.split("=")[1]
             orderable = parser.compile_filter(val)
 
-    nodelist = parser.parse(('end_ui_th',))
+    nodelist = parser.parse(("end_ui_th",))
     parser.delete_first_token()
 
     return THBlockNode(css_classes, orderable, nodelist)
@@ -375,14 +557,16 @@ class TDBlockNode(Node):
     def render(self, context):
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
         td_content = self.nodelist.render(context)
-        
-        t = template.loader.get_template('elixir_toolkit/components/td.html')
-        
+
+        t = template.loader.get_template("elixir_toolkit/components/td.html")
+
         ctx = context.flatten()
-        ctx.update({
-            'css_classes': resolved_classes,
-            'td_content': td_content,
-        })
+        ctx.update(
+            {
+                "css_classes": resolved_classes,
+                "td_content": td_content,
+            }
+        )
         return t.render(ctx)
 
 
@@ -394,19 +578,19 @@ def ui_td(parser, token):
     """
     bits = token.split_contents()[1:]
     css_classes = None
-    
+
     for bit in bits:
         if bit.startswith("css_classes="):
             val = bit.split("=")[1]
             css_classes = parser.compile_filter(val)
 
-    nodelist = parser.parse(('end_ui_td',))
+    nodelist = parser.parse(("end_ui_td",))
     parser.delete_first_token()
 
     return TDBlockNode(css_classes, nodelist)
 
 
-@register.inclusion_tag('elixir_toolkit/components/tag.html')
+@register.inclusion_tag("elixir_toolkit/components/tag.html")
 def ui_tag(text, color="primary", dot=True, css_classes="", icon=None):
     """
     Composant Tag / Badge générique Bulma.
@@ -417,15 +601,15 @@ def ui_tag(text, color="primary", dot=True, css_classes="", icon=None):
     color_class = f"is-{color}" if color else ""
 
     return {
-        'text': text,
-        'color_class': color_class,
-        'dot': dot,
-        'css_classes': css_classes,
-        'icon': icon,
+        "text": text,
+        "color_class": color_class,
+        "dot": dot,
+        "css_classes": css_classes,
+        "icon": icon,
     }
 
 
-@register.inclusion_tag('elixir_toolkit/components/chevron.html')
+@register.inclusion_tag("elixir_toolkit/components/chevron.html")
 def ui_chevron(direction="down", size="", css_classes=""):
     """
     Composant Chevron / Icône de direction générique Bulma.
@@ -433,18 +617,21 @@ def ui_chevron(direction="down", size="", css_classes=""):
         {% ui_chevron direction="right" %}
     """
     # Sécurité pour s'assurer que la direction est valide
-    valid_directions = ['down', 'right', 'up', 'left']
+    valid_directions = ["down", "right", "up", "left"]
     if direction not in valid_directions:
-        direction = 'down'
+        direction = "down"
 
     return {
-        'direction': direction,
-        'size': size,
-        'css_classes': css_classes,
+        "direction": direction,
+        "size": size,
+        "css_classes": css_classes,
     }
 
-@register.inclusion_tag('elixir_toolkit/components/stepper.html')
-def ui_stepper(steps, current=None, completed=None, aria_label="Progression", css_classes=""):
+
+@register.inclusion_tag("elixir_toolkit/components/stepper.html")
+def ui_stepper(
+    steps, current=None, completed=None, aria_label="Progression", css_classes=""
+):
     """
     Composant Stepper : parcours en plusieurs étapes numérotées.
     Usage:
@@ -468,31 +655,40 @@ def ui_stepper(steps, current=None, completed=None, aria_label="Progression", cs
     for number, step in enumerate(steps, start=1):
         if not isinstance(step, dict):
             step = {"label": step}
-        items.append({
-            'number': number,
-            'label': step.get("label", ""),
-            'description': step.get("description", ""),
-            'icon': step.get("icon"),
-            'is_current': number == current,
-            'is_done': number in completed,
-        })
+        items.append(
+            {
+                "number": number,
+                "label": step.get("label", ""),
+                "description": step.get("description", ""),
+                "icon": step.get("icon"),
+                "is_current": number == current,
+                "is_done": number in completed,
+            }
+        )
 
     return {
-        'steps': items,
-        'aria_label': aria_label,
-        'css_classes': css_classes,
+        "steps": items,
+        "aria_label": aria_label,
+        "css_classes": css_classes,
     }
 
 
-@register.inclusion_tag('elixir_toolkit/components/form_confirm_submit.html')
-def ui_form_confirm_submit(form_id, content_id=None, modal_title=None, submit_text=None, 
-                         cancel_text=None, modal_size=None, summary_container_class="form-summary-container"):
+@register.inclusion_tag("elixir_toolkit/components/form_confirm_submit.html")
+def ui_form_confirm_submit(
+    form_id,
+    content_id=None,
+    modal_title=None,
+    submit_text=None,
+    cancel_text=None,
+    modal_size=None,
+    summary_container_class="form-summary-container",
+):
     """
     Composant de confirmation de soumission de formulaire avec modale Bulma.
-    
+
     Usage :
         {% ui_form_confirm_submit form_id="my-form" content_id="my-modal-content" %}
-    
+
     Paramètres :
         - form_id (requis) : ID du formulaire à intercepter
         - content_id (optionnel) : ID de l'élément contenant le contenu de la modale
@@ -501,29 +697,29 @@ def ui_form_confirm_submit(form_id, content_id=None, modal_title=None, submit_te
         - cancel_text (optionnel) : Texte du bouton Retour (défaut: "Retour")
         - modal_size (optionnel) : Taille de la modale (is-small, is-medium, is-large)
         - summary_container_class (optionnel) : Classe CSS du conteneur pour la synthèse des champs (défaut: "form-summary-container")
-    
+
     Le contenu de la modale doit être défini dans la page avec l'ID spécifié dans content_id :
         <div id="my-modal-content" style="display: none;">
             <p>Êtes-vous sûr de vouloir soumettre ?</p>
             <div class="form-summary-container"></div>
         </div>
-    
+
     Si content_id est fourni et qu'une div avec la classe summary_container_class existe dans le contenu,
     une synthèse des champs du formulaire sera automatiquement injectée.
     """
     return {
-        'form_id': form_id,
-        'form_confirm_submit_id': f"form-confirm-submit-btn-{form_id}",
-        'content_id': content_id,
-        'modal_title': modal_title,
-        'submit_text': submit_text,
-        'cancel_text': cancel_text,
-        'modal_size': modal_size,
-        'summary_container_class': summary_container_class,
+        "form_id": form_id,
+        "form_confirm_submit_id": f"form-confirm-submit-btn-{form_id}",
+        "content_id": content_id,
+        "modal_title": modal_title,
+        "submit_text": submit_text,
+        "cancel_text": cancel_text,
+        "modal_size": modal_size,
+        "summary_container_class": summary_container_class,
     }
 
 
-@register.inclusion_tag('elixir_toolkit/components/fields/field.html')
+@register.inclusion_tag("elixir_toolkit/components/fields/field.html")
 def ui_field(label, value=None, empty="", href=None, css_classes=""):
     """
     Couple libellé / valeur en lecture seule, dans une colonne Bulma.
@@ -537,9 +733,9 @@ def ui_field(label, value=None, empty="", href=None, css_classes=""):
     - href : transforme la valeur en lien (ignoré si la valeur est vide)
     """
     return {
-        'label': label,
-        'value': value,
-        'empty': empty,
-        'href': href,
-        'css_classes': css_classes,
+        "label": label,
+        "value": value,
+        "empty": empty,
+        "href": href,
+        "css_classes": css_classes,
     }

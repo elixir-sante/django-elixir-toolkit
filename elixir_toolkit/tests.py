@@ -1,7 +1,7 @@
 from datetime import date
 
 from django.test import TestCase
-from django.template import Context, Template
+from django.template import Context, Template, TemplateSyntaxError
 from django import forms
 from django.core import validators
 from django.core.exceptions import ValidationError
@@ -373,6 +373,103 @@ class ToolkitTableTest(ToolkitBaseTest):
         # Vérifie que filter_id reste indépendant
         self.assertIn('data-filter-id="filter-id"', rendered)
         self.assertIn('data-filter-columns="0,1"', rendered)
+
+
+class ToolkitMessageBlockTest(ToolkitBaseTest):
+    def test_block_basic_render(self):
+        """Le contenu du block devient le corps du message, HTML préservé"""
+        template = (
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_message_block %}Du <strong>HTML</strong> libre.{% end_ui_message_block %}"
+        )
+        rendered = self.render_template(template)
+
+        self.assertIn('class="message is-primary "', rendered)
+        self.assertIn('<div class="message-body">', rendered)
+        self.assertIn("Du <strong>HTML</strong> libre.", rendered)
+
+    def test_block_title_and_header(self):
+        template = (
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_message_block title='Information' %}Corps.{% end_ui_message_block %}"
+        )
+        rendered = self.render_template(template)
+
+        self.assertIn('<div class="message-header">', rendered)
+        self.assertIn("Information", rendered)
+
+    def test_block_title_is_escaped(self):
+        template = (
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_message_block title='<b>Gras</b>' %}Corps.{% end_ui_message_block %}"
+        )
+        rendered = self.render_template(template)
+
+        self.assertIn("&lt;b&gt;Gras&lt;/b&gt;", rendered)
+        self.assertNotIn("<b>Gras</b>", rendered)
+
+    def test_block_color_variants(self):
+        for tag_name, color_class in [
+            ("ui_message_info_block", "is-info"),
+            ("ui_message_success_block", "is-success"),
+            ("ui_message_warning_block", "is-warning"),
+            ("ui_message_danger_block", "is-danger"),
+        ]:
+            with self.subTest(tag_name=tag_name):
+                template = (
+                    "{% load elixir_toolkit_tags %}"
+                    f"{{% {tag_name} %}}Corps.{{% end_{tag_name} %}}"
+                )
+                rendered = self.render_template(template)
+                self.assertIn(f'class="message {color_class} "', rendered)
+
+    def test_block_color_parameter(self):
+        template = (
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_message_block color='danger' %}Corps.{% end_ui_message_block %}"
+        )
+        rendered = self.render_template(template)
+
+        self.assertIn('class="message is-danger "', rendered)
+
+    def test_block_css_classes_and_html_attributes(self):
+        template = (
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_message_block css_classes='mb-4' id='mon-message' data_severity='high' %}"
+            "Corps.{% end_ui_message_block %}"
+        )
+        rendered = self.render_template(template)
+
+        self.assertIn('class="message is-primary mb-4"', rendered)
+        self.assertIn('id="mon-message"', rendered)
+        self.assertIn('data-severity="high"', rendered)
+
+    def test_block_context_variables_rendered_and_escaped(self):
+        template = (
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_message_block %}Bonjour {{ nom }}{{ script }}{% end_ui_message_block %}"
+        )
+        rendered = self.render_template(template, {"nom": "Alice", "script": "<script>alert(1)</script>"})
+
+        self.assertIn("Bonjour Alice", rendered)
+        self.assertIn("&lt;script&gt;", rendered)
+        self.assertNotIn("<script>", rendered)
+
+    def test_block_rejects_inline_arguments(self):
+        template = (
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_message_block content='Texte' %}Corps.{% end_ui_message_block %}"
+        )
+        with self.assertRaises(TemplateSyntaxError):
+            self.render_template(template)
+
+    def test_inline_tags_still_work(self):
+        """Compatibilité : les tags inline ui_message restent inchangés"""
+        template = "{% load elixir_toolkit_tags %}{% ui_message content='Mon message' %}"
+        rendered = self.render_template(template)
+
+        self.assertIn('class="message is-primary "', rendered)
+        self.assertIn("Mon message", rendered)
 
 
 class ToolkitStepperTest(ToolkitBaseTest):

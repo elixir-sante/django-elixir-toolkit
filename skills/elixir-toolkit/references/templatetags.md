@@ -180,6 +180,9 @@ Le clic bascule l'affichage et pivote l'icône `fa-chevron-right` / `fa-chevron-
 
 ## Message
 
+Deux formes : inline (contenu en argument, échappé par défaut) et block (contenu riche
+entre les tags, rendu par le moteur de template).
+
 ```html
 {% ui_message content="Simple message" %}
 {% ui_message title="Avertissement" content="Action irréversible" color="warning" %}
@@ -190,10 +193,28 @@ Le clic bascule l'affichage et pivote l'icône `fa-chevron-right` / `fa-chevron-
 {% ui_message content="<strong>HTML de confiance</strong>" is_safe=True %}
 ```
 
-- `content` (requis) : **échappé par défaut** (`is_safe=False`). `is_safe=True` rend le HTML
-  tel quel — uniquement pour du contenu statique ou déjà assaini, jamais une saisie utilisateur
+Forme block (Node Block, comme `ui_table`) :
+
+```html
+{% ui_message_block title="Attention" css_classes="mb-4" id="mon-message" %}
+    <p>Contenu libre avec <strong>du gras</strong> et {{ variable }}.</p>
+{% end_ui_message_block %}
+
+{% ui_message_info_block %}Information.{% end_ui_message_info_block %}
+{% ui_message_success_block %}...{% end_ui_message_success_block %}
+{% ui_message_warning_block %}...{% end_ui_message_warning_block %}
+{% ui_message_danger_block %}...{% end_ui_message_danger_block %}
+```
+
+- Forme inline : `content` (requis) est **échappé par défaut** (`is_safe=False`).
+  `is_safe=True` rend le HTML tel quel — uniquement pour du contenu statique ou déjà
+  assaini, jamais une saisie utilisateur
 - `color` (défaut `primary`), `title` (toujours échappé), `css_classes`
 - kwargs → attributs HTML (`id`, `data-*`...)
+- Forme block : le contenu est le template entre les tags — HTML littéral préservé,
+  variables de contexte auto-échappées, `is_safe` inutile (refusé, comme `content`) ;
+  chaque tag de fermeture doit correspondre (`{% end_ui_message_block %}`,
+  `{% end_ui_message_info_block %}`, ...) ; `ui_message_block` seul accepte `color=`
 
 ---
 
