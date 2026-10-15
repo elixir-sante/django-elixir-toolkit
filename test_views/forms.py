@@ -1,6 +1,7 @@
 from datetime import date
 
 from django import forms
+from django.utils.safestring import mark_safe
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 from crispy_bulma.layout import IconField
 from django_ckeditor_5.widgets import CKEditor5Widget
@@ -14,6 +15,37 @@ from elixir_toolkit.forms import (
 )
 
 COLOR_CHOICES = (("red", "Red"), ("green", "Green"), ("blue", "Blue"))
+
+# ---------------------------------------------------------------------------
+# HACK - help_text par option d'un champ a choix multiples
+# ---------------------------------------------------------------------------
+# Django ne prevoit pas de help_text par option : les choices sont des
+# 2-tuples et le rendu crispy-bulma affiche le libelle seul. Ce contournement
+# injecte du HTML (mark_safe) dans le libelle du choix pour afficher une aide
+# sous la ligne ; le CSS du toolkit l'empile sous le libelle.
+#
+# A utiliser UNIQUEMENT pour du texte 100% statique ecrit par vous :
+# - le HTML n'est echappe nulle part : jamais de donnee utilisateur ici ;
+# - pour une aide sur tout le champ, preferer le help_text standard du champ
+#   (cf. checkbox_help ci-dessous), rendu par crispy sous le champ.
+# ---------------------------------------------------------------------------
+CHECKBOX_HELP_CHOICES = (
+    (
+        "red",
+        mark_safe(
+            "<span>Red</span>"
+            '<span class="help">Couleur chaude et énergique</span>'
+        ),
+    ),
+    ("green", "Green"),
+    (
+        "blue",
+        mark_safe(
+            "<span>Blue</span>"
+            '<span class="help">Couleur froide et apaisante</span>'
+        ),
+    ),
+)
 
 TYPE_ACTE_CHOICES = (
     ("Consultation", "Consultation"),
@@ -151,13 +183,20 @@ class FormExample(CustomFormHelper, forms.Form):
         initial="<p>Le texte <strong>visible</strong> est compté, pas les balises HTML.</p>",
     )
     checkbox = forms.BooleanField(label="J'accepte les conditions", required=True)
+    checkbox_help = forms.BooleanField(
+        label="J'accepte de recevoir la newsletter",
+        required=False,
+        help_text="Vous pourrez vous désinscrire à tout moment depuis le lien en bas de nos emails.",
+    )
     checkboxes = forms.MultipleChoiceField(
         label="Options à cocher",
-        choices=COLOR_CHOICES,
+        choices=CHECKBOX_HELP_CHOICES,  # HACK : cf. CHECKBOX_HELP_CHOICES
         widget=forms.CheckboxSelectMultiple(),
     )
     radios = forms.ChoiceField(
-        label="Choix exclusif", choices=COLOR_CHOICES, widget=forms.RadioSelect()
+        label="Choix exclusif",
+        choices=COLOR_CHOICES,
+        widget=forms.RadioSelect(),
     )
     # DateField standard : input natif, placeholder grisé et croix automatiques
     date_vide = forms.DateField(label="Date d'effet", required=False)
@@ -252,6 +291,8 @@ class FormExample(CustomFormHelper, forms.Form):
                     Div("radios", css_class="column is-6"),
                     css_class="columns",
                 ),
+                "checkbox",
+                "checkbox_help",
                 Div(
                     Div(FileUpload("fichier_unique"), css_class="column is-6"),
                     Div(FileUpload("fichiers_multiples"), css_class="column is-6"),

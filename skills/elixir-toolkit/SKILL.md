@@ -76,6 +76,7 @@ par CDN (défaut : `1.0.0`).
 | Bouton / lien bouton | `{% ui_button %}`, `{% ui_button_primary %}`, `{% ui_button_secondary %}` |
 | Sélecteur stylé (hors formulaire crispy) | `{% ui_select %}` |
 | Sélecteur dans un formulaire crispy | `ToolkitSelectField` |
+| Checkboxes / radios stylés | automatique via `{% toolkit_assets %}` (rendu crispy) — ne pas écrire de CSS ni de markup custom |
 | Barre de filtres | `{% ui_filter_bar %}` |
 | Liste d'éléments type Bulma | `{% ui_list %}` |
 | Tableau (tri, filtrage, expandable) | `{% ui_table %}` + `{% ui_th %}` / `{% ui_td %}` |
@@ -112,6 +113,11 @@ par CDN (défaut : `1.0.0`).
   `SyncMixinDispatch` refuse les vues async.
 - `CustomFormHelper` rend `form_tag = False` : le formulaire crispy n'écrit pas la balise
   `<form>`, à écrire dans le template.
+- Checkboxes / radios : stylés automatiquement (`bulma-checkbox.css` / `bulma-radio.css`
+  chargés par `{% toolkit_assets %}`). Un `help_text` **par option** n'est pas prévu par
+  Django : le contournement documenté (HTML `mark_safe` dans le libellé du choix) est un
+  hack — texte statique uniquement, jamais de donnée utilisateur ; préférer le
+  `help_text` du champ (détails dans `references/forms.md`).
 
 ## Références détaillées
 
