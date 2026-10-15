@@ -51,9 +51,5 @@
 .checkbox.is-danger input[type=checkbox]:indeterminate:not(:has(+.check)),.checkbox.is-danger input[type=checkbox].is-indeterminate:not(:has(+.check)){background:#f14668 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect style='fill:%23fff' width='0.7' height='0.2' x='.15' y='.4'%3E%3C/rect%3E%3C/svg%3E") no-repeat center center;border-color:#f14668}
 .checkbox.is-danger:hover input[type=checkbox]:not(:disabled):not(:has(+.check)){border-color:#f14668}
 .checkbox.is-danger input[type=checkbox]:focus:checked:not(:has(+.check)){box-shadow:0 0 0.5em rgba(241,70,104,0.8)}
-/* Checkbox avec help_text par ligne (libelle span + span.help) : input aligne en haut, aide sous le libelle */
-.checkbox:has(> .help){display:grid;grid-template-columns:auto 1fr;align-items:start}
-.checkbox:has(> .help) input[type=checkbox]:not(:has(+.check)){margin-top:.125em}
-.checkbox:has(> .help) .help{grid-column:2;margin-top:.1em;margin-bottom:.5rem}
 /* Help_text de champ (p.help rendu par crispy sous le controle d'une checkbox) : marge reduite avec la case */
 .control:has(> .checkbox) + .help{margin-top:.125rem}
