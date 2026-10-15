@@ -192,6 +192,11 @@ class FormExample(CustomFormHelper, forms.Form):
         initial="<p>Le texte <strong>visible</strong> est compté, pas les balises HTML.</p>",
     )
     checkbox = forms.BooleanField(label="J'accepte les conditions", required=True)
+    checkbox_help = forms.BooleanField(
+        label="J'accepte de recevoir la newsletter",
+        required=False,
+        help_text="Vous pourrez vous désinscrire à tout moment depuis le lien en bas de nos emails.",
+    )
     checkboxes = forms.MultipleChoiceField(
         label="Options à cocher",
         choices=CHECKBOX_DEMO_CHOICES,
@@ -296,6 +301,7 @@ class FormExample(CustomFormHelper, forms.Form):
                     css_class="columns",
                 ),
                 "checkbox",
+                "checkbox_help",
                 Div(
                     Div(FileUpload("fichier_unique"), css_class="column is-6"),
                     Div(FileUpload("fichiers_multiples"), css_class="column is-6"),
