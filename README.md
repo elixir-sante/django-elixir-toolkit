@@ -648,6 +648,56 @@ class MyForm(forms.Form):
 
 ---
 
+### Checkboxes et Radios stylés
+
+`{% toolkit_assets %}` charge `bulma-checkbox.css` et `bulma-radio.css` : toutes les
+`<label class="checkbox">` et `<label class="radio">` — y compris le rendu crispy-forms —
+sont stylées automatiquement (case carrée avec coche, pastille ronde pour les radios,
+états focus / survol / désactivé). Aucun markup spécifique à écrire.
+
+Couleurs et tailles via les classes Bulma sur le `<label>` :
+`is-primary`, `is-success`, ..., `is-small`, `is-medium`, `is-large`.
+
+Le `help_text` du champ fonctionne nativement (rendu par crispy sous le champ) :
+
+```python
+newsletter = forms.BooleanField(
+    label="J'accepte de recevoir la newsletter",
+    required=False,
+    help_text="Vous pourrez vous désinscrire à tout moment.",
+)
+```
+
+#### Hack : help_text par option (non standard)
+
+Django ne prévoit pas de `help_text` par option d'un champ à choix multiples.
+Si vous y tenez vraiment, le contournement est d'injecter du HTML **sûr** dans le
+libellé du choix — le CSS du toolkit affiche alors l'aide sous le libellé :
+
+```python
+from django.utils.safestring import mark_safe
+
+checkboxes = forms.MultipleChoiceField(
+    label="Options à cocher",
+    choices=(
+        ("red", mark_safe("<span>Red</span>"
+                          '<span class="help">Couleur chaude et énergique</span>')),
+        ("green", "Green"),
+        ("blue", mark_safe("<span>Blue</span>"
+                           '<span class="help">Couleur froide et apaisante</span>')),
+    ),
+    widget=forms.CheckboxSelectMultiple(),
+)
+```
+
+> **Attention : c'est un hack.** Le HTML n'est échappé nulle part — n'y mettez que
+> du texte statique écrit par vous, jamais de donnée utilisateur ou de variable de
+> base de données. Pour une aide qui porte sur tout le champ, utilisez le
+> `help_text` standard du champ, qui reste échappé et rendu par crispy.
+> Le même contournement fonctionne pour les radios (`<label class="radio">`).
+
+---
+
 ### Modale de Confirmation de Soumission
 
 Composant pour afficher une modale de confirmation avant la soumission d'un formulaire. Valide automatiquement les champs obligatoires (HTML5) avant d'ouvrir la modale.

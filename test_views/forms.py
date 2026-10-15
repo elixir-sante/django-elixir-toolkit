@@ -1,6 +1,7 @@
 from datetime import date
 
 from django import forms
+from django.utils.safestring import mark_safe
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 from crispy_bulma.layout import IconField
 from django_ckeditor_5.widgets import CKEditor5Widget
@@ -14,6 +15,37 @@ from elixir_toolkit.forms import (
 )
 
 COLOR_CHOICES = (("red", "Red"), ("green", "Green"), ("blue", "Blue"))
+
+# ---------------------------------------------------------------------------
+# HACK - help_text par option d'un champ a choix multiples
+# ---------------------------------------------------------------------------
+# Django ne prevoit pas de help_text par option : les choices sont des
+# 2-tuples et le rendu crispy-bulma affiche le libelle seul. Ce contournement
+# injecte du HTML (mark_safe) dans le libelle du choix pour afficher une aide
+# sous la ligne ; le CSS du toolkit l'empile sous le libelle.
+#
+# A utiliser UNIQUEMENT pour du texte 100% statique ecrit par vous :
+# - le HTML n'est echappe nulle part : jamais de donnee utilisateur ici ;
+# - pour une aide sur tout le champ, preferer le help_text standard du champ
+#   (cf. checkbox_help ci-dessous), rendu par crispy sous le champ.
+# ---------------------------------------------------------------------------
+CHECKBOX_HELP_CHOICES = (
+    (
+        "red",
+        mark_safe(
+            "<span>Red</span>"
+            '<span class="help">Couleur chaude et énergique</span>'
+        ),
+    ),
+    ("green", "Green"),
+    (
+        "blue",
+        mark_safe(
+            "<span>Blue</span>"
+            '<span class="help">Couleur froide et apaisante</span>'
+        ),
+    ),
+)
 
 TYPE_ACTE_CHOICES = (
     ("Consultation", "Consultation"),
@@ -158,7 +190,7 @@ class FormExample(CustomFormHelper, forms.Form):
     )
     checkboxes = forms.MultipleChoiceField(
         label="Options à cocher",
-        choices=COLOR_CHOICES,
+        choices=CHECKBOX_HELP_CHOICES,  # HACK : cf. CHECKBOX_HELP_CHOICES
         widget=forms.CheckboxSelectMultiple(),
     )
     radios = forms.ChoiceField(

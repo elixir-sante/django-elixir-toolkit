@@ -40,3 +40,7 @@
 .radio.is-danger input[type=radio]:checked:not(:has(+.check)){border-color:#f14668;background-image:radial-gradient(circle,#f14668 45%,transparent 50%)}
 .radio.is-danger:hover input[type=radio]:not(:disabled):not(:has(+.check)){border-color:#f14668}
 .radio.is-danger input[type=radio]:focus:checked:not(:has(+.check)){box-shadow:0 0 0.5em rgba(241,70,104,0.8)}
+/* HACK documente (README) : help_text par option injecte dans le libelle (span + span.help) : input aligne en haut, aide sous le libelle */
+.radio:has(> .help){display:grid;grid-template-columns:auto 1fr;align-items:start}
+.radio:has(> .help) input[type=radio]:not(:has(+.check)){margin-top:.125em}
+.radio:has(> .help) .help{grid-column:2;margin-top:.1em;margin-bottom:.5rem}

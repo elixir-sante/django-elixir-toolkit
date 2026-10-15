@@ -53,3 +53,7 @@
 .checkbox.is-danger input[type=checkbox]:focus:checked:not(:has(+.check)){box-shadow:0 0 0.5em rgba(241,70,104,0.8)}
 /* Help_text de champ (p.help rendu par crispy sous le controle d'une checkbox) : marge reduite avec la case */
 .control:has(> .checkbox) + .help{margin-top:.125rem}
+/* HACK documente (README) : help_text par option injecte dans le libelle (span + span.help) : input aligne en haut, aide sous le libelle */
+.checkbox:has(> .help){display:grid;grid-template-columns:auto 1fr;align-items:start}
+.checkbox:has(> .help) input[type=checkbox]:not(:has(+.check)){margin-top:.125em}
+.checkbox:has(> .help) .help{grid-column:2;margin-top:.1em;margin-bottom:.5rem}

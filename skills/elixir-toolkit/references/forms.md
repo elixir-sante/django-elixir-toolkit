@@ -168,6 +168,35 @@ self.helper.layout = Layout(
 `ModelMultipleChoiceField`) et prend `empty_label` du champ comme placeholder
 (défaut « Sélectionnez une option... »). Le champ Django reste un `ChoiceField` standard.
 
+### Checkboxes et radios stylés
+
+`{% toolkit_assets %}` charge `bulma-checkbox.css` / `bulma-radio.css` : tout
+`<label class="checkbox">` / `<label class="radio">` (rendu crispy compris) est
+stylé automatiquement. Couleurs et tailles par classes Bulma sur le `<label>`
+(`is-primary`, `is-small`, ...). Le `help_text` du champ reste standard (rendu
+par crispy sous le champ).
+
+**Hack — help_text par option** (Django ne le prévoit pas ; dernier recours, texte
+100% statique écrit par vous, jamais de donnée utilisateur — le HTML n'est
+échappé nulle part) :
+
+```python
+from django.utils.safestring import mark_safe
+
+checkboxes = forms.MultipleChoiceField(
+    label="Options à cocher",
+    choices=(
+        ("red", mark_safe("<span>Red</span>"
+                          '<span class="help">Couleur chaude et énergique</span>')),
+        ("green", "Green"),
+    ),
+    widget=forms.CheckboxSelectMultiple(),
+)
+```
+
+Le CSS du toolkit affiche l'aide sous le libellé. Préférer le `help_text` du
+champ quand l'aide porte sur tout le champ.
+
 ---
 
 ## Validateurs
