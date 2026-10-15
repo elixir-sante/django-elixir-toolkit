@@ -658,6 +658,11 @@ sont stylées automatiquement (case carrée avec coche, pastille ronde pour les 
 Couleurs et tailles via les classes Bulma sur le `<label>` :
 `is-primary`, `is-success`, ..., `is-small`, `is-medium`, `is-large`.
 
+La couleur primaire (état par défaut et `is-primary`) suit la variable Bulma
+`var(--bulma-primary)` — une personnalisation du primaire dans votre thème
+s'applique automatiquement aux cases cochées (fallback hex si la variable
+n'existe pas, Bulma < 1.x).
+
 Le `help_text` du champ fonctionne nativement (rendu par crispy sous le champ) :
 
 ```python

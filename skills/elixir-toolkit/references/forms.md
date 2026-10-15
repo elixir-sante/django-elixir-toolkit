@@ -173,8 +173,9 @@ self.helper.layout = Layout(
 `{% toolkit_assets %}` charge `bulma-checkbox.css` / `bulma-radio.css` : tout
 `<label class="checkbox">` / `<label class="radio">` (rendu crispy compris) est
 stylé automatiquement. Couleurs et tailles par classes Bulma sur le `<label>`
-(`is-primary`, `is-small`, ...). Le `help_text` du champ reste standard (rendu
-par crispy sous le champ).
+(`is-primary`, `is-small`, ...). La couleur primaire (défaut et `is-primary`)
+suit `var(--bulma-primary)` du thème. Le `help_text` du champ reste standard
+(rendu par crispy sous le champ).
 
 **Hack — help_text par option** (Django ne le prévoit pas ; dernier recours, texte
 100% statique écrit par vous, jamais de donnée utilisateur — le HTML n'est
