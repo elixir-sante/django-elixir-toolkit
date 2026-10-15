@@ -295,6 +295,7 @@ class FormExample(CustomFormHelper, forms.Form):
                     Div("radios", css_class="column is-6"),
                     css_class="columns",
                 ),
+                "checkbox",
                 Div(
                     Div(FileUpload("fichier_unique"), css_class="column is-6"),
                     Div(FileUpload("fichiers_multiples"), css_class="column is-6"),
