@@ -584,6 +584,16 @@ class ToolkitDateInputTest(ToolkitBaseTest):
         self.assertIn('elixir_toolkit/css/date-input.css', rendered)
         self.assertIn('elixir_toolkit/js/date-input.js', rendered)
 
+    def test_toolkit_assets_loads_bulma_checkbox_css(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+
+        self.assertIn("elixir_toolkit/css/bulma-checkbox.css", rendered)
+
+    def test_toolkit_assets_loads_bulma_radio_css(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+
+        self.assertIn("elixir_toolkit/css/bulma-radio.css", rendered)
+
 
 class ToolkitMaxLengthTest(ToolkitBaseTest):
     """`max_length` d'un `forms.CharField` (patché dans `apps.py`) : blocage

@@ -1,6 +1,7 @@
 from datetime import date
 
 from django import forms
+from django.utils.safestring import mark_safe
 from crispy_forms.layout import Layout, Fieldset, HTML, Field, Div
 from crispy_bulma.layout import IconField
 from django_ckeditor_5.widgets import CKEditor5Widget
@@ -14,6 +15,46 @@ from elixir_toolkit.forms import (
 )
 
 COLOR_CHOICES = (("red", "Red"), ("green", "Green"), ("blue", "Blue"))
+
+# Démo help_text par ligne de checkbox : libellé (span) + aide (span.help),
+# rendus dans le <label class="checkbox"> ; le CSS du toolkit les empile
+# sur deux lignes. Green reste sans help pour comparer.
+CHECKBOX_DEMO_CHOICES = (
+    (
+        "red",
+        mark_safe(
+            "<span>Red</span>"
+            '<span class="help">Couleur chaude et énergique</span>'
+        ),
+    ),
+    ("green", "Green"),
+    (
+        "blue",
+        mark_safe(
+            "<span>Blue</span>"
+            '<span class="help">Couleur froide et apaisante</span>'
+        ),
+    ),
+)
+
+# Démo help_text par ligne de radio, même principe que CHECKBOX_DEMO_CHOICES.
+RADIO_DEMO_CHOICES = (
+    (
+        "red",
+        mark_safe(
+            "<span>Red</span>"
+            '<span class="help">Couleur chaude et énergique</span>'
+        ),
+    ),
+    ("green", "Green"),
+    (
+        "blue",
+        mark_safe(
+            "<span>Blue</span>"
+            '<span class="help">Couleur froide et apaisante</span>'
+        ),
+    ),
+)
 
 TYPE_ACTE_CHOICES = (
     ("Consultation", "Consultation"),
@@ -153,11 +194,13 @@ class FormExample(CustomFormHelper, forms.Form):
     checkbox = forms.BooleanField(label="J'accepte les conditions", required=True)
     checkboxes = forms.MultipleChoiceField(
         label="Options à cocher",
-        choices=COLOR_CHOICES,
+        choices=CHECKBOX_DEMO_CHOICES,
         widget=forms.CheckboxSelectMultiple(),
     )
     radios = forms.ChoiceField(
-        label="Choix exclusif", choices=COLOR_CHOICES, widget=forms.RadioSelect()
+        label="Choix exclusif",
+        choices=RADIO_DEMO_CHOICES,
+        widget=forms.RadioSelect(),
     )
     # DateField standard : input natif, placeholder grisé et croix automatiques
     date_vide = forms.DateField(label="Date d'effet", required=False)
