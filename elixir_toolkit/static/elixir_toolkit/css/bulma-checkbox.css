@@ -55,3 +55,5 @@
 .checkbox:has(> .help){display:grid;grid-template-columns:auto 1fr;align-items:start}
 .checkbox:has(> .help) input[type=checkbox]:not(:has(+.check)){margin-top:.125em}
 .checkbox:has(> .help) .help{grid-column:2;margin-top:.1em;margin-bottom:.5rem}
+/* Help_text de champ (p.help rendu par crispy sous le controle d'une checkbox) : marge reduite avec la case */
+.control:has(> .checkbox) + .help{margin-top:.125rem}
