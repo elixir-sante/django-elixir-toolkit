@@ -84,6 +84,8 @@ CKEDITOR_5_CONFIGS = {
             'MyUploadAdapterPlugin',
             'MyClipboardIframePlugin',
             'MyClipboardBlockquotePlugin',
+            # Bouton « Insérer un fichier » (FileUploader n'existe plus dans django-ckeditor-5)
+            'MyFileUploadPlugin',
         ],
         'removePlugins': ['SimpleUploadAdapter'],
         'toolbar': [
@@ -96,7 +98,7 @@ CKEDITOR_5_CONFIGS = {
             'alignment',
             'insertTable',
             '|',
-            'link', 'insertImage', 'fileUpload',
+            'link', 'insertImage',
             'htmlEmbed',
             'MediaEmbed'
         ],
