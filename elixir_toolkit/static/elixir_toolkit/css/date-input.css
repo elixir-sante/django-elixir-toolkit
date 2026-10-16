@@ -49,8 +49,10 @@
     color: var(--bulma-input-placeholder-color, rgba(54, 54, 54, 0.3));
 }
 
-/* Croix à gauche du calendrier : son apparition ne décale pas le calendrier. */
-.toolkit-date-input__clear {
+/* Croix à gauche du calendrier : son apparition ne décale pas le calendrier.
+   Sélecteur enfant : plus spécifique que `.delete` de Bulma, qui la remettrait en position relative
+   si Bulma est chargé après la toolkit. */
+.toolkit-date-input > .toolkit-date-input__clear {
     position: absolute;
     top: 0;
     bottom: 0;
