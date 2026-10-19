@@ -329,6 +329,7 @@ class FormErrorsTestView(FormView):
     DEMO_DATA = {
         "text": "A",  # trop court (min_length=3)
         "email": "pas-un-email",  # format email invalide
+        "telephone": "1234567890",  # pas un numéro français (pattern + validator)
         "number": "150",  # supérieur au max (120)
         "url": "pas-une-url",  # format URL invalide
         "password": "court",  # trop court (min_length=12)

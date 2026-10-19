@@ -13,6 +13,7 @@ from elixir_toolkit.forms import (
     CustomFormHelper,
     PasswordWithIconField,
 )
+from elixir_toolkit.validators import FrenchPhoneNumberValidator, normalize_french_phone_number
 
 COLOR_CHOICES = (("red", "Red"), ("green", "Green"), ("blue", "Blue"))
 
@@ -158,6 +159,17 @@ class FormExample(CustomFormHelper, forms.Form):
     text = forms.CharField(label="Nom complet")
     text_with_icon = forms.CharField(label="Nom complet et icone")
     email = forms.EmailField(label="Adresse Email")
+    telephone = forms.CharField(
+        label="Téléphone",
+        help_text="Formats acceptés : 06 12 34 56 78, +33 6 12 34 56 78... "
+                  "(normalisé au format national)",
+        validators=[FrenchPhoneNumberValidator()],
+        widget=forms.TextInput(attrs={
+            "inputmode": "tel",
+            "pattern": r"(?:0033|\+?33|0)\s*[1-9](?:[\s\-.]*\d{2}){4}",
+            "title": "Numéro français : 06 12 34 56 78, +33 6 12 34 56 78...",
+        }),
+    )
     number = forms.CharField(label="Âge", widget=forms.NumberInput())
     url = forms.CharField(label="Site Web", widget=forms.URLInput())
     password = forms.CharField(
@@ -223,6 +235,11 @@ class FormExample(CustomFormHelper, forms.Form):
         required=False,
     )
 
+    def clean_telephone(self):
+        # Un validator ne peut pas réécrire la valeur : la normalisation
+        # (+33/0033 -> 06...) se fait dans le clean du champ.
+        return normalize_french_phone_number(self.cleaned_data["telephone"])
+
     @property
     def helper(self):
         helper = super().helper
@@ -239,6 +256,10 @@ class FormExample(CustomFormHelper, forms.Form):
                     ),
                     Div(
                         Field("email", placeholder="jean@email.com"),
+                        css_class="column is-6",
+                    ),
+                    Div(
+                        Field("telephone", placeholder="06 12 34 56 78"),
                         css_class="column is-6",
                     ),
                     css_class="columns",
@@ -322,6 +343,15 @@ class FormErrorsExample(CustomFormHelper, forms.Form):
 
     text = forms.CharField(label="Nom complet", min_length=3)
     email = forms.EmailField(label="Adresse email")
+    telephone = forms.CharField(
+        label="Téléphone",
+        validators=[FrenchPhoneNumberValidator()],
+        widget=forms.TextInput(attrs={
+            "inputmode": "tel",
+            "pattern": r"(?:0033|\+?33|0)\s*[1-9](?:[\s\-.]*\d{2}){4}",
+            "title": "Numéro français : 06 12 34 56 78, +33 6 12 34 56 78...",
+        }),
+    )
     number = forms.IntegerField(label="Âge", min_value=0, max_value=120)
     url = forms.URLField(label="Site web")
     password = forms.CharField(
@@ -372,6 +402,7 @@ class FormErrorsExample(CustomFormHelper, forms.Form):
                 Div(
                     Div(Field("text", placeholder="Ex: Jean Dupont"), css_class="column is-6"),
                     Div(Field("email", placeholder="jean@email.com"), css_class="column is-6"),
+                    Div(Field("telephone", placeholder="06 12 34 56 78"), css_class="column is-6"),
                     css_class="columns",
                 ),
                 Div(
