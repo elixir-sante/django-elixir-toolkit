@@ -820,6 +820,8 @@ from elixir_toolkit.validators import (
     MaxFilesValidator,
     TextMaxLengthValidator,
     RichTextMaxLengthValidator,
+    FrenchPhoneNumberValidator,
+    normalize_french_phone_number,
 )
 
 class MyForm(forms.Form):
