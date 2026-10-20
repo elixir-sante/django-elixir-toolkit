@@ -1,6 +1,8 @@
+import asyncio
 from datetime import date
 
-from django.test import TestCase
+from django.http import HttpResponse
+from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.template import Context, Template, TemplateSyntaxError
 from django import forms
 from django.core import validators
@@ -8,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django_ckeditor_5.fields import CKEditor5Field
 
 from crispy_forms.helper import FormHelper
+from elixir_toolkit.views import AsyncFormView
 from elixir_toolkit.forms import (
     limit_length,
     MultipleFileField,
@@ -890,3 +893,67 @@ class ToolkitLayoutColumnsTest(TestCase):
         self.assertIn(COLUMN_HALF_CLASS, html)
         self.assertIn(COLUMN_THIRD_CLASS, html)
         self.assertIn(COLUMN_FULL_CLASS, html)
+
+
+# ==========================================
+# AsyncFormView : contextes synchrones ou asynchrones
+# ==========================================
+
+
+class AsyncFormViewDummyForm(forms.Form):
+    name = forms.CharField(required=True)
+
+
+class _AsyncContextFormView(AsyncFormView):
+    """`get_context_data` asynchrone, comme les mixins AsyncView des projets."""
+
+    form_class = AsyncFormViewDummyForm
+    template_name = "dummy.html"
+
+    async def get_context_data(self, **kwargs):
+        return {"marker": "async", **kwargs}
+
+    def render_to_response(self, context, **response_kwargs):
+        return HttpResponse(f"marker={context.get('marker')},form={context.get('form') is not None}")
+
+
+class _SyncContextFormView(AsyncFormView):
+    """`get_context_data` synchrone (Django standard) : rétrocompatibilité."""
+
+    form_class = AsyncFormViewDummyForm
+    template_name = "dummy.html"
+
+    def get_context_data(self, **kwargs):
+        return {"marker": "sync", **kwargs}
+
+    def render_to_response(self, context, **response_kwargs):
+        return HttpResponse(f"marker={context.get('marker')},form={context.get('form') is not None}")
+
+
+class AsyncFormViewContextTest(SimpleTestCase):
+    """AsyncFormView attend `get_context_data` quel que soit son type."""
+
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_get_awaits_async_context(self):
+        view = _AsyncContextFormView()
+        view.setup(self.factory.get("/"))
+        response = asyncio.run(view.get(view.request))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("marker=async", response.content.decode())
+
+    def test_post_invalid_awaits_async_context(self):
+        """Régression : un contexte coroutine faisait lever un TypeError."""
+        view = _AsyncContextFormView()
+        view.setup(self.factory.post("/", data={}))
+        response = asyncio.run(view.post(view.request))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("marker=async,form=True", response.content.decode())
+
+    def test_sync_context_still_supported(self):
+        view = _SyncContextFormView()
+        view.setup(self.factory.get("/"))
+        response = asyncio.run(view.get(view.request))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("marker=sync", response.content.decode())

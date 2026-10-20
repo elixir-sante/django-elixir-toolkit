@@ -1,3 +1,5 @@
+import inspect
+
 from django.views.generic import FormView
 from django.shortcuts import render
 
@@ -6,13 +8,25 @@ class AsyncFormView(FormView):
     """Ceci est une réécriture async de la ProcessFormView de Django
     pour permettre d'utiliser des vues basées sur des formulaires avec
     des appels asynchrones (ex: httpx).
-    Voir le fichier django/views/generic/edit.py pour la version synchrone d'origine."""
+    Voir le fichier django/views/generic/edit.py pour la version synchrone d'origine.
+
+    `get_context_data` peut être synchrone (Django standard) ou asynchrone
+    (mixins projet du type AsyncView) : le résultat est attendu si c'est
+    une coroutine, ce qui évite aux vues filles de surcharger `get` et
+    `form_invalid` uniquement pour ce faire.
+    """
+
+    async def _get_context_data(self, **kwargs):
+        context = self.get_context_data(**kwargs)
+        if inspect.iscoroutine(context):
+            context = await context
+        return context
 
     async def get(self, request, *args, **kwargs):
-        return self.render_to_response(self.get_context_data())
+        return self.render_to_response(await self._get_context_data())
 
     async def post(self, request, *args, **kwargs):
-        self.context = self.get_context_data()
+        self.context = await self._get_context_data()
         form = self.get_form()
         if form.is_valid():
             return await self.form_valid(form)
@@ -20,7 +34,7 @@ class AsyncFormView(FormView):
             return await self.form_invalid(form)
 
     async def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
+        return self.render_to_response(await self._get_context_data(form=form))
 
     async def put(self, *args, **kwargs):
         return await self.post(*args, **kwargs)
