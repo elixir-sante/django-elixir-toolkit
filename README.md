@@ -782,6 +782,45 @@ FormConfirmSubmit.highlightInvalidFields(document.getElementById('my-form'));
 
 ---
 
+### Grille Bulma standard (Row / Column)
+
+Pour arrêter de répéter les classes CSS Bulma dans chaque formulaire, le toolkit fournit
+`Row` et `Column`, des `Div` crispy qui appliquent la grille standard du toolkit :
+
+```python
+from crispy_forms.layout import Layout
+from elixir_toolkit.forms import Row, Column
+
+self.helper.layout = Layout(
+    Row(
+        Column("nom", width="half"),
+        Column("email", width="half"),
+    ),
+    Row(
+        Column("code_naf", width="third"),
+        Column("siren", width="third"),
+        Column("siret", width="third"),
+    ),
+    Row(
+        Column("message"),  # width="full" par défaut
+    ),
+)
+```
+
+**Largeurs disponibles (`width`) :**
+
+| `width`     | Colonne        | Classes CSS appliquées                     |
+|-------------|----------------|--------------------------------------------|
+| `"full"`    | 1 par ligne    | `column pt-0` (défaut)                      |
+| `"half"`    | 2 par ligne    | `column is-12-mobile is-6-tablet`           |
+| `"third"`   | 3 par ligne    | `column is-6-tablet is-4-desktop`           |
+
+`Row` rend toujours `columns is-multiline`. Des classes supplémentaires se passent via
+`css_class` : `Column("nom", width="half", css_class="mb-2")`. Les constantes
+(`ROW_CLASS`, `COLUMN_FULL_CLASS`, `COLUMN_HALF_CLASS`, `COLUMN_THIRD_CLASS`) restent
+exportées pour un usage direct si besoin — utiliser `Row` / `Column` est la façon
+conventionnelle.
+
 ### Helpers de Formulaire
 
 #### SuperFormHelper

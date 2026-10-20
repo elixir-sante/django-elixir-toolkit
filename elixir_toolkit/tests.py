@@ -7,7 +7,18 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django_ckeditor_5.fields import CKEditor5Field
 
-from elixir_toolkit.forms import limit_length, MultipleFileField, ToolkitFileField
+from crispy_forms.helper import FormHelper
+from elixir_toolkit.forms import (
+    limit_length,
+    MultipleFileField,
+    ToolkitFileField,
+    Row,
+    Column,
+    ROW_CLASS,
+    COLUMN_FULL_CLASS,
+    COLUMN_HALF_CLASS,
+    COLUMN_THIRD_CLASS,
+)
 from elixir_toolkit.validators import (
     FrenchPhoneNumberValidator,
     normalize_french_phone_number,
@@ -830,3 +841,51 @@ class FrenchPhoneNumberValidatorTest(TestCase):
 
         self.assertTrue(PhoneForm(data={"phone": "+33 6 12 34 56 78"}).is_valid())
         self.assertFalse(PhoneForm(data={"phone": "06 12 34"}).is_valid())
+
+
+class ToolkitLayoutColumnsTest(TestCase):
+    """Classes Row / Column pour les Layouts crispy (grille Bulma standard)."""
+
+    def _render(self, layout):
+        class FakeForm(forms.Form):
+            name = forms.CharField(label="Nom")
+            email = forms.EmailField(label="Email")
+            phone = forms.CharField(label="Téléphone")
+
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.helper = FormHelper()
+                self.helper.layout = layout
+                self.helper.form_tag = False
+
+        from crispy_forms.utils import render_crispy_form
+        return render_crispy_form(FakeForm())
+
+    def test_row_renders_columns_multiline(self):
+        from elixir_toolkit.forms import Row, Column
+        html = self._render(Row(Column("name")))
+        self.assertIn("columns is-multiline", html)
+        self.assertIn(COLUMN_FULL_CLASS, html)
+
+    def test_column_half_and_third_classes(self):
+        from elixir_toolkit.forms import Row, Column, COLUMN_HALF_CLASS, COLUMN_THIRD_CLASS
+        html = self._render(Row(Column("name", width="half"), Column("email", width="third")))
+        self.assertIn(COLUMN_HALF_CLASS, html)
+        self.assertIn(COLUMN_THIRD_CLASS, html)
+
+    def test_column_extra_css_class_appended(self):
+        from elixir_toolkit.forms import Row, Column, COLUMN_FULL_CLASS
+        html = self._render(Row(Column("name", css_class="mb-2")))
+        self.assertIn(f'{COLUMN_FULL_CLASS} mb-2', html)
+
+    def test_column_invalid_width_raises(self):
+        from elixir_toolkit.forms import Column
+        with self.assertRaises(ValueError):
+            Column("name", width="quarter")
+
+    def test_columns_constants_values(self):
+        from elixir_toolkit import forms as toolkit_forms
+        self.assertEqual(toolkit_forms.ROW_CLASS, "columns is-multiline")
+        self.assertEqual(toolkit_forms.COLUMN_THIRD_CLASS, "column is-6-tablet is-4-desktop")
+        self.assertEqual(toolkit_forms.COLUMN_HALF_CLASS, "column is-12-mobile is-6-tablet")
+        self.assertEqual(toolkit_forms.COLUMN_FULL_CLASS, "column pt-0")

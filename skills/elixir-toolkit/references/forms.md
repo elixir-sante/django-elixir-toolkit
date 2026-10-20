@@ -96,6 +96,38 @@ Il réutilise `self.layout` si le formulaire définit un attribut `layout`.
 
 ---
 
+## Grille Bulma standard (Row / Column)
+
+Ne jamais écrire à la main `Div(css_class="columns is-multiline")` ni les classes de
+colonne Bulma dans les formulaires. Utiliser systématiquement `Row` et `Column` du
+toolkit :
+
+```python
+from crispy_forms.layout import Layout
+from elixir_toolkit.forms import Row, Column
+
+self.helper.layout = Layout(
+    Row(
+        Column("nom", width="half"),
+        Column("email", width="half"),
+    ),
+    Row(
+        Column("code_naf", width="third"),
+        Column("siren", width="third"),
+        Column("siret", width="third"),
+    ),
+    Row(Column("message")),  # pleine largeur par défaut
+)
+```
+
+- `Row` rend `columns is-multiline`.
+- `Column` accepte `width="full"` (défaut, `column pt-0`), `"half"`
+  (`column is-12-mobile is-6-tablet`) et `"third"` (`column is-6-tablet is-4-desktop`).
+- Toute largeur inconnue lève une `ValueError` au lieu de rendre une grille cassée.
+- Classes CSS supplémentaires : `Column("nom", width="half", css_class="mb-2")`.
+- Les constantes `ROW_CLASS` / `COLUMN_FULL_CLASS` / `COLUMN_HALF_CLASS` /
+  `COLUMN_THIRD_CLASS` existent mais `Row` / `Column` sont la référence canonique.
+
 ## Upload de fichiers
 
 ```python
