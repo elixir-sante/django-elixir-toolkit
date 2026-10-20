@@ -19,6 +19,14 @@ from .iban import (
     get_iban_check_digits,
 )
 
+# Import phone validators
+from .phone import (
+    FrenchPhoneNumberValidator,
+    normalize_french_phone_number,
+    FRENCH_PHONE_INPUT_PATTERN,
+    FRENCH_PHONE_INPUT_TITLE,
+)
+
 # Import file validators
 from .file_validators import (
     MaxFileSizeValidator,

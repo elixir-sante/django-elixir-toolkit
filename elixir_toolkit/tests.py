@@ -8,6 +8,11 @@ from django.core.exceptions import ValidationError
 from django_ckeditor_5.fields import CKEditor5Field
 
 from elixir_toolkit.forms import limit_length, MultipleFileField, ToolkitFileField
+from elixir_toolkit.validators import (
+    FrenchPhoneNumberValidator,
+    normalize_french_phone_number,
+    FRENCH_PHONE_INPUT_PATTERN,
+)
 
 class ToolkitBaseTest(TestCase):
     """Classe de base pour partager la logique de rendu des templates."""
@@ -752,3 +757,76 @@ class ToolkitFileUploadHelpTextTest(ToolkitBaseTest):
 
         self.assertEqual(single.help_text, "Mon texte personnalisé")
         self.assertEqual(multiple.help_text, "Autre texte")
+
+
+class FrenchPhoneNumberValidatorTest(TestCase):
+    """Validateur et normalisation des numéros de téléphone français."""
+
+    def test_accepts_national_format(self):
+        validator = FrenchPhoneNumberValidator()
+        validator("0612345678")
+        validator("01 23 45 67 89")
+        validator("04-56-78-90-12")
+        validator("05.67.89.01.23")
+
+    def test_accepts_international_format(self):
+        validator = FrenchPhoneNumberValidator()
+        validator("+33612345678")
+        validator("+33 6 12 34 56 78")
+        validator("0033 6 12 34 56 78")
+        validator("0033612345678")
+
+    def test_accepts_33_prefix_without_plus(self):
+        validator = FrenchPhoneNumberValidator()
+        validator("33612345678")
+
+    def test_empty_values_are_not_validated(self):
+        validator = FrenchPhoneNumberValidator()
+        validator(None)
+        validator("")
+
+    def test_rejects_invalid_numbers(self):
+        validator = FrenchPhoneNumberValidator()
+        for value in ("1234567890", "061234567", "06123456789", "+3312345678", "hello", "+441234567890"):
+            with self.assertRaises(ValidationError):
+                validator(value)
+
+    def test_normalize_rewrites_international_to_national(self):
+        self.assertEqual(normalize_french_phone_number("+33 6 12 34 56 78"), "0612345678")
+        self.assertEqual(normalize_french_phone_number("+33612345678"), "0612345678")
+        self.assertEqual(normalize_french_phone_number("0033 6 12 34 56 78"), "0612345678")
+        self.assertEqual(normalize_french_phone_number("33612345678"), "0612345678")
+
+    def test_normalize_keeps_national_format_without_separators(self):
+        self.assertEqual(normalize_french_phone_number("06 12 34 56 78"), "0612345678")
+        self.assertEqual(normalize_french_phone_number("01-23-45-67-89"), "0123456789")
+
+    def test_normalize_returns_none_for_empty_values(self):
+        self.assertIsNone(normalize_french_phone_number(None))
+        self.assertIsNone(normalize_french_phone_number(""))
+
+    def test_normalize_rejects_invalid_numbers(self):
+        with self.assertRaises(ValidationError):
+            normalize_french_phone_number("+44 20 7946 0958")
+
+    def test_input_pattern_matches_same_formats_as_validator(self):
+        import re
+        pattern = re.compile(FRENCH_PHONE_INPUT_PATTERN)
+        validator = FrenchPhoneNumberValidator()
+        valid = ["0612345678", "01 23 45 67 89", "04-56-78-90-12", "+33612345678",
+                 "+33 6 12 34 56 78", "0033 6 12 34 56 78", "33612345678"]
+        invalid = ["1234567890", "061234567", "06123456789", "+3312345678", "+441234567890"]
+        for value in valid:
+            validator(value)
+            self.assertIsNotNone(pattern.fullmatch(value), value)
+        for value in invalid:
+            with self.assertRaises(ValidationError):
+                validator(value)
+            self.assertIsNone(pattern.fullmatch(value), value)
+
+    def test_validator_in_form_field(self):
+        class PhoneForm(forms.Form):
+            phone = forms.CharField(validators=[FrenchPhoneNumberValidator()])
+
+        self.assertTrue(PhoneForm(data={"phone": "+33 6 12 34 56 78"}).is_valid())
+        self.assertFalse(PhoneForm(data={"phone": "06 12 34"}).is_valid())

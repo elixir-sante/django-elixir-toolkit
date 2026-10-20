@@ -211,6 +211,10 @@ from elixir_toolkit.validators import (
     TextMaxLengthValidator,     # (limit_value) — texte brut, \r\n = 1 caractère
     RichTextMaxLengthValidator, # (limit_value) — HTML : texte visible uniquement
     NIRValidator,               # numéro de sécurité sociale français
+    FrenchPhoneNumberValidator,  # téléphone français : 06..., +33 6..., 0033...
+    normalize_french_phone_number,  # réécrit +33/0033 en national (06...) — dans clean()
+    FRENCH_PHONE_INPUT_PATTERN,  # pattern HTML5 (attribut `pattern`) pour la validation navigateur
+    FRENCH_PHONE_INPUT_TITLE,    # message `title` HTML5 par défaut (optionnel)
     IBANValidator, FrenchIBANValidator,
     is_valid_iban, get_iban_country, get_iban_check_digits,
 )
@@ -218,3 +222,41 @@ from elixir_toolkit.validators import (
 
 Les validateurs de fichiers acceptent un fichier seul ou une liste. Ils sont comparables
 entre eux (`__eq__`/`__hash__`) pour ne pas générer de migrations en boucle.
+
+## Téléphone français
+
+```python
+from elixir_toolkit.validators import FrenchPhoneNumberValidator, normalize_french_phone_number
+
+class MyForm(forms.Form):
+    # Accepte 0612345678, "06 12 34 56 78", "+33 6 12 34 56 78", "0033 6 12 34 56 78"...
+    phone = forms.CharField(validators=[FrenchPhoneNumberValidator()])
+
+    def clean_phone(self):
+        # Un validator ne peut pas réécrire la valeur : la normalisation
+        # (+33/0033 -> 06...) se fait ici, dans le clean du champ.
+        return normalize_french_phone_number(self.cleaned_data["phone"])
+```
+
+Les valeurs vides ne sont pas validées (rôle de `blank`/`required`).
+
+### Validation front (HTML5)
+
+Le navigateur peut bloquer la soumission avant tout aller-retour serveur via
+l'attribut `pattern` (le regex est implicitement ancré `^...$`). `type="tel"`
+seul ne valide rien, c'est le `pattern` qui travaille. Sans attribut `title`
+explicite, le navigateur affiche son message générique : poser le format
+attendu dans le `placeholder`/`help_text` du champ :
+
+```python
+telephone = forms.CharField(
+    validators=[FrenchPhoneNumberValidator()],  # sécurité côté serveur, toujours
+    widget=forms.TextInput(attrs={
+        "inputmode": "tel",
+        "pattern": FRENCH_PHONE_INPUT_PATTERN,
+    }),
+)
+```
+
+La validation front est un confort UX uniquement : elle est contournable
+(JS désactivé, requête forgée). Garder le validator Django en parallèle.
