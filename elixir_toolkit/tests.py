@@ -7,7 +7,16 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django_ckeditor_5.fields import CKEditor5Field
 
-from elixir_toolkit.forms import limit_length, MultipleFileField, ToolkitFileField
+from crispy_forms.helper import FormHelper
+from elixir_toolkit.forms import (
+    limit_length,
+    MultipleFileField,
+    ToolkitFileField,
+    ROW_CLASS,
+    COLUMN_FULL_CLASS,
+    COLUMN_HALF_CLASS,
+    COLUMN_THIRD_CLASS,
+)
 from elixir_toolkit.validators import (
     FrenchPhoneNumberValidator,
     normalize_french_phone_number,
@@ -830,3 +839,54 @@ class FrenchPhoneNumberValidatorTest(TestCase):
 
         self.assertTrue(PhoneForm(data={"phone": "+33 6 12 34 56 78"}).is_valid())
         self.assertFalse(PhoneForm(data={"phone": "06 12 34"}).is_valid())
+
+class ToolkitLayoutColumnsTest(TestCase):
+    """Constantes de grille Bulma standard pour les Layouts crispy."""
+
+    def test_columns_constants_values(self):
+        from elixir_toolkit import forms as toolkit_forms
+        self.assertEqual(toolkit_forms.ROW_CLASS, "columns is-multiline")
+        self.assertEqual(toolkit_forms.COLUMN_THIRD_CLASS, "column is-6-tablet is-4-desktop")
+        self.assertEqual(toolkit_forms.COLUMN_HALF_CLASS, "column is-12-mobile is-6-tablet")
+        self.assertEqual(toolkit_forms.COLUMN_FULL_CLASS, "column")
+
+    def test_layout_renders_standard_grid(self):
+        from crispy_forms.layout import Div, Layout
+        from crispy_forms.helper import FormHelper
+        from crispy_forms.utils import render_crispy_form
+        from elixir_toolkit.forms import (
+            ROW_CLASS,
+            COLUMN_FULL_CLASS,
+            COLUMN_HALF_CLASS,
+            COLUMN_THIRD_CLASS,
+        )
+
+        class FakeForm(forms.Form):
+            name = forms.CharField(label="Nom")
+            email = forms.EmailField(label="Email")
+            message = forms.CharField(label="Message")
+
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.helper = FormHelper()
+                self.helper.form_tag = False
+                self.helper.layout = Layout(
+                    Div(
+                        Div("name", css_class=COLUMN_HALF_CLASS),
+                        Div("email", css_class=COLUMN_HALF_CLASS),
+                        css_class=ROW_CLASS,
+                    ),
+                    Div(
+                        Div("name", css_class=COLUMN_THIRD_CLASS),
+                        Div("email", css_class=COLUMN_THIRD_CLASS),
+                        Div("message", css_class=COLUMN_THIRD_CLASS),
+                        css_class=ROW_CLASS,
+                    ),
+                    Div("message", css_class=COLUMN_FULL_CLASS),
+                )
+
+        html = render_crispy_form(FakeForm())
+        self.assertIn("columns is-multiline", html)
+        self.assertIn(COLUMN_HALF_CLASS, html)
+        self.assertIn(COLUMN_THIRD_CLASS, html)
+        self.assertIn(COLUMN_FULL_CLASS, html)

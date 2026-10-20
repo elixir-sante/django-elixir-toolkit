@@ -295,6 +295,26 @@ class MultipleFileField(forms.FileField):
             validator(cleaned_files)
 
 
+# Grille Bulma standard pour les Layouts crispy : utiliser ces constantes avec
+# des Div, ne jamais écrire les classes CSS à la main dans les formulaires.
+#
+#     Layout(
+#         Div(
+#             Div('champ1', css_class=COLUMN_HALF_CLASS),
+#             Div('champ2', css_class=COLUMN_HALF_CLASS),
+#             css_class=ROW_CLASS,
+#         ),
+#     )
+
+ROW_CLASS = "columns is-multiline"
+
+COLUMN_THIRD_CLASS = "column is-6-tablet is-4-desktop"
+
+COLUMN_HALF_CLASS = "column is-12-mobile is-6-tablet"
+
+COLUMN_FULL_CLASS = "column"
+
+
 class PasswordWithIconField(CrispyField):
     template = "elixir_toolkit/components/fields/password_input.html"
 

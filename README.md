@@ -782,6 +782,49 @@ FormConfirmSubmit.highlightInvalidFields(document.getElementById('my-form'));
 
 ---
 
+### Grille Bulma standard (constantes de grille)
+
+Pour arrêter de répéter les classes CSS Bulma dans chaque formulaire, le toolkit fournit
+les constantes de la grille standard, à utiliser avec des `Div` crispy :
+
+```python
+from crispy_forms.layout import Div, Layout
+from elixir_toolkit.forms import (
+    ROW_CLASS,
+    COLUMN_FULL_CLASS,
+    COLUMN_HALF_CLASS,
+    COLUMN_THIRD_CLASS,
+)
+
+self.helper.layout = Layout(
+    Div(
+        Div("nom", css_class=COLUMN_HALF_CLASS),
+        Div("email", css_class=COLUMN_HALF_CLASS),
+        css_class=ROW_CLASS,
+    ),
+    Div(
+        Div("code_naf", css_class=COLUMN_THIRD_CLASS),
+        Div("siren", css_class=COLUMN_THIRD_CLASS),
+        Div("siret", css_class=COLUMN_THIRD_CLASS),
+        css_class=ROW_CLASS,
+    ),
+    Div("message", css_class=COLUMN_FULL_CLASS),
+)
+```
+
+**Constantes disponibles :**
+
+| Constante             | Usage                  | Classes CSS                                 |
+|-----------------------|------------------------|---------------------------------------------|
+| `ROW_CLASS`           | Conteneur de ligne     | `columns is-multiline`                      |
+| `COLUMN_FULL_CLASS`   | 1 colonne par ligne    | `column`                               |
+| `COLUMN_HALF_CLASS`   | 2 colonnes par ligne   | `column is-12-mobile is-6-tablet`           |
+| `COLUMN_THIRD_CLASS`  | 3 colonnes par ligne   | `column is-6-tablet is-4-desktop`           |
+
+Ne jamais écrire ces classes CSS à la main dans les formulaires : toujours importer
+les constantes depuis `elixir_toolkit.forms`, pour que la grille reste identique
+partout et évolue au même endroit.
+
 ### Helpers de Formulaire
 
 #### SuperFormHelper
