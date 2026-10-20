@@ -24,6 +24,18 @@ _PHONE_SEPARATORS = re.compile(r'[\s\-.()]')
 # le second chiffre identifie le type (1-5 fixe, 6-7 mobile, 8-9 spécial)
 _FRENCH_PHONE_REGEX = re.compile(r'^0[1-9]\d{8}$')
 
+# Pattern HTML5 (attribut `pattern`) pour la validation navigateur.
+# Accepte les mêmes formats que FrenchPhoneNumberValidator : 06...,
+# +33 6..., 0033 6..., 33..., avec espaces, tirets ou points.
+# Le regex d'un attribut `pattern` est implicitement ancré (^...$) ;
+# le message affiché vient de l'attribut `title`.
+FRENCH_PHONE_INPUT_PATTERN = r'(?:0033|\+?33|0)\s*[1-9](?:[\s\-.]*\d{2}){4}'
+
+# Message d'aide par défaut pour l'attribut `title` du champ téléphone
+FRENCH_PHONE_INPUT_TITLE = (
+    'Numéro français : 06 12 34 56 78, +33 6 12 34 56 78, 0033 6 12 34 56 78...'
+)
+
 
 def normalize_french_phone_number(value):
     """Normalise un numéro de téléphone français au format national à 10 chiffres.

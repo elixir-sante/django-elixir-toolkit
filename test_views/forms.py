@@ -13,7 +13,12 @@ from elixir_toolkit.forms import (
     CustomFormHelper,
     PasswordWithIconField,
 )
-from elixir_toolkit.validators import FrenchPhoneNumberValidator, normalize_french_phone_number
+from elixir_toolkit.validators import (
+    FrenchPhoneNumberValidator,
+    normalize_french_phone_number,
+    FRENCH_PHONE_INPUT_PATTERN,
+    FRENCH_PHONE_INPUT_TITLE,
+)
 
 COLOR_CHOICES = (("red", "Red"), ("green", "Green"), ("blue", "Blue"))
 
@@ -166,8 +171,8 @@ class FormExample(CustomFormHelper, forms.Form):
         validators=[FrenchPhoneNumberValidator()],
         widget=forms.TextInput(attrs={
             "inputmode": "tel",
-            "pattern": r"(?:0033|\+?33|0)\s*[1-9](?:[\s\-.]*\d{2}){4}",
-            "title": "Numéro français : 06 12 34 56 78, +33 6 12 34 56 78...",
+            "pattern": FRENCH_PHONE_INPUT_PATTERN,
+            "title": FRENCH_PHONE_INPUT_TITLE,
         }),
     )
     number = forms.CharField(label="Âge", widget=forms.NumberInput())
@@ -348,8 +353,8 @@ class FormErrorsExample(CustomFormHelper, forms.Form):
         validators=[FrenchPhoneNumberValidator()],
         widget=forms.TextInput(attrs={
             "inputmode": "tel",
-            "pattern": r"(?:0033|\+?33|0)\s*[1-9](?:[\s\-.]*\d{2}){4}",
-            "title": "Numéro français : 06 12 34 56 78, +33 6 12 34 56 78...",
+            "pattern": FRENCH_PHONE_INPUT_PATTERN,
+            "title": FRENCH_PHONE_INPUT_TITLE,
         }),
     )
     number = forms.IntegerField(label="Âge", min_value=0, max_value=120)

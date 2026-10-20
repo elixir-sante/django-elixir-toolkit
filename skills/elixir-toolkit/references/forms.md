@@ -213,6 +213,8 @@ from elixir_toolkit.validators import (
     NIRValidator,               # numéro de sécurité sociale français
     FrenchPhoneNumberValidator,  # téléphone français : 06..., +33 6..., 0033...
     normalize_french_phone_number,  # réécrit +33/0033 en national (06...) — dans clean()
+    FRENCH_PHONE_INPUT_PATTERN,  # pattern HTML5 (attribut `pattern`) pour la validation navigateur
+    FRENCH_PHONE_INPUT_TITLE,    # message `title` par défaut du champ téléphone
     IBANValidator, FrenchIBANValidator,
     is_valid_iban, get_iban_country, get_iban_check_digits,
 )
@@ -250,8 +252,8 @@ telephone = forms.CharField(
     validators=[FrenchPhoneNumberValidator()],  # sécurité côté serveur, toujours
     widget=forms.TextInput(attrs={
         "inputmode": "tel",
-        "pattern": r"(?:0033|\+?33|0)\s*[1-9](?:[\s\-.]*\d{2}){4}",
-        "title": "Numéro français : 06 12 34 56 78, +33 6 12 34 56 78...",
+        "pattern": FRENCH_PHONE_INPUT_PATTERN,
+        "title": FRENCH_PHONE_INPUT_TITLE,
     }),
 )
 ```

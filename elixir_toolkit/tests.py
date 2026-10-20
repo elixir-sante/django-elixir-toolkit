@@ -8,7 +8,11 @@ from django.core.exceptions import ValidationError
 from django_ckeditor_5.fields import CKEditor5Field
 
 from elixir_toolkit.forms import limit_length, MultipleFileField, ToolkitFileField
-from elixir_toolkit.validators import FrenchPhoneNumberValidator, normalize_french_phone_number
+from elixir_toolkit.validators import (
+    FrenchPhoneNumberValidator,
+    normalize_french_phone_number,
+    FRENCH_PHONE_INPUT_PATTERN,
+)
 
 class ToolkitBaseTest(TestCase):
     """Classe de base pour partager la logique de rendu des templates."""
@@ -804,6 +808,21 @@ class FrenchPhoneNumberValidatorTest(TestCase):
     def test_normalize_rejects_invalid_numbers(self):
         with self.assertRaises(ValidationError):
             normalize_french_phone_number("+44 20 7946 0958")
+
+    def test_input_pattern_matches_same_formats_as_validator(self):
+        import re
+        pattern = re.compile(FRENCH_PHONE_INPUT_PATTERN)
+        validator = FrenchPhoneNumberValidator()
+        valid = ["0612345678", "01 23 45 67 89", "04-56-78-90-12", "+33612345678",
+                 "+33 6 12 34 56 78", "0033 6 12 34 56 78", "33612345678"]
+        invalid = ["1234567890", "061234567", "06123456789", "+3312345678", "+441234567890"]
+        for value in valid:
+            validator(value)
+            self.assertIsNotNone(pattern.fullmatch(value), value)
+        for value in invalid:
+            with self.assertRaises(ValidationError):
+                validator(value)
+            self.assertIsNone(pattern.fullmatch(value), value)
 
     def test_validator_in_form_field(self):
         class PhoneForm(forms.Form):

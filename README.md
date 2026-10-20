@@ -822,6 +822,7 @@ from elixir_toolkit.validators import (
     RichTextMaxLengthValidator,
     FrenchPhoneNumberValidator,
     normalize_french_phone_number,
+    FRENCH_PHONE_INPUT_PATTERN,
 )
 
 class MyForm(forms.Form):
