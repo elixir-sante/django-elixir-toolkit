@@ -277,7 +277,7 @@ def ui_select(
     if isinstance(options, str):
         try:
             options = ast.literal_eval(options)
-        except ValueError, SyntaxError:
+        except (ValueError, SyntaxError):
             options = []
 
     if isinstance(options, dict):
