@@ -72,6 +72,35 @@ class FormTestView(FormView):
             ("CANC", "Annulé"),
         ]
 
+        # Grand nombre de choix pour tester le rendu multiligne du Selectize multiple
+        context["mes_options_multiples"] = [
+            ("CB", "Carte bancaire"),
+            ("VIR", "Virement SEPA"),
+            ("PRLV", "Prélèvement automatique"),
+            ("CHQ", "Chèque bancaire"),
+            ("ESPECES", "Espèces"),
+            ("PAYPAL", "PayPal"),
+            ("APPLEPAY", "Apple Pay"),
+            ("GOOGLEPAY", "Google Pay"),
+            ("TR", "Titre restaurant"),
+            ("ANCV", "Chèque vacances"),
+            ("CE", "Paiement employeur / Comité d'entreprise"),
+            ("MUTUELLE", "Prise en charge mutuelle"),
+            ("AMO", "Prise en charge AMO"),
+            ("SUBV", "Subvention"),
+            ("AVOIR", "Avoir commercial"),
+            ("GIFT", "Carte cadeau"),
+            ("TIERSPAYANT", "Tiers payant"),
+            ("SANTE", "Carte Santé"),
+            ("X3", "Paiement en 3 fois"),
+            ("X4", "Paiement en 4 fois"),
+            ("DIFF", "Paiement différé"),
+            ("COMPTA", "Compte prépayé"),
+            ("CRYPTO", "Cryptomonnaie"),
+            ("SWIFT", "Virement international SWIFT"),
+            ("AUTRE", "Autre"),
+        ]
+
         context["objets_test"] = [
             {"color": "red", "num": "1", "name": "Rouge 1"},
             {"color": "red", "num": "2", "name": "Rouge 2"},
