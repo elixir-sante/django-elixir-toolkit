@@ -47,6 +47,8 @@
     font-size: 16px !important;
 }
 
+
+
 .control .select .selectize-control .selectize-input {  
     /* FIX RADICAL DU BLOC GRIS : Force le blanc partout, tout le temps */
     background-color: #fff !important; 
@@ -87,6 +89,10 @@
     border: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+}
+
+.selectize-control.multi .selectize-input [data-value] {
+    text-shadow: none !important;
 }
 
 .control .select .selectize-control .selectize-input input {
@@ -147,15 +153,19 @@
     height: auto !important; /* Laisse le champ s'étendre verticalement si plusieurs lignes */
     align-items: center !important;
 }
+
 /* Multi-select (Tags) */
-.selectize-control.multi .selectize-input > div {
-    padding: 2px 8px !important;
-    margin: 3px !important;
-    background: #f5f5f5 !important;
-    color: #363636 !important;
-    border-radius: 2px !important;
+.selectize-control.multi .selectize-input > div.item {
+    /* padding: 2px 8px !important; */
+    margin: 0 0.25rem 0 0 !important;
+    background-color: var(--bulma-primary) !important;
+    background-image: none !important;
     box-shadow: none !important;
+    border: none !important;
+    border-radius: var(--bulma-radius) !important;
+    color: hsl(var(--bulma-tag-h), var(--bulma-tag-s), var(--bulma-tag-color-l));
 }
+
 .selectize-control.multi .selectize-input input {
     line-height: normal !important;
     height: auto !important;
@@ -241,4 +251,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.selectize-control.plugin-remove_button .item .remove {
+    border-left: 1px solid #aaa !important;
 }
