@@ -103,7 +103,8 @@
     {% ui_select name="payment_mode" options=mes_options_paiement icon="fa-credit-card" placeholder="Choisir le mode..." %}
     
     <h3 class="title is-4">Selectize multiple</h3>
-    {% ui_select name="payment_mode_multiple" multiple=True options=mes_options_paiement selected=None icon="fa-credit-card"  placeholder="Choisir le mode..." %}
+    <p>25 choix disponibles pour tester le passage en multiligne du champ quand il se remplit.</p>
+    {% ui_select name="payment_mode_multiple" multiple=True options=mes_options_multiples selected="CB" icon="fa-credit-card"  placeholder="Choisir le mode..." %}
 </div>
 
 

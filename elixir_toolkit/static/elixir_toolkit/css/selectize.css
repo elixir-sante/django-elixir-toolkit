@@ -152,6 +152,7 @@
 .selectize-control.multi .selectize-input {
     height: auto !important; /* Laisse le champ s'étendre verticalement si plusieurs lignes */
     align-items: center !important;
+    row-gap: 0.25rem; /* Espace uniquement entre les lignes de tags, aucun effet à une seule ligne */
 }
 
 /* Multi-select (Tags) */
@@ -163,7 +164,6 @@
     box-shadow: none !important;
     border: none !important;
     border-radius: var(--bulma-radius) !important;
-    color: hsl(var(--bulma-tag-h), var(--bulma-tag-s), var(--bulma-tag-color-l));
 }
 
 .selectize-control.multi .selectize-input input {
