@@ -214,7 +214,7 @@ from elixir_toolkit.validators import (
     FrenchPhoneNumberValidator,  # téléphone français : 06..., +33 6..., 0033...
     normalize_french_phone_number,  # réécrit +33/0033 en national (06...) — dans clean()
     FRENCH_PHONE_INPUT_PATTERN,  # pattern HTML5 (attribut `pattern`) pour la validation navigateur
-    FRENCH_PHONE_INPUT_TITLE,    # message `title` par défaut du champ téléphone
+    FRENCH_PHONE_INPUT_TITLE,    # message `title` HTML5 par défaut (optionnel)
     IBANValidator, FrenchIBANValidator,
     is_valid_iban, get_iban_country, get_iban_check_digits,
 )
@@ -243,9 +243,10 @@ Les valeurs vides ne sont pas validées (rôle de `blank`/`required`).
 ### Validation front (HTML5)
 
 Le navigateur peut bloquer la soumission avant tout aller-retour serveur via
-l'attribut `pattern` (le regex est implicitement ancré `^...$` ; `title` fournit
-le message affiché). `type="tel"` seul ne valide rien, c'est le `pattern` qui
-travaille :
+l'attribut `pattern` (le regex est implicitement ancré `^...$`). `type="tel"`
+seul ne valide rien, c'est le `pattern` qui travaille. Sans attribut `title`
+explicite, le navigateur affiche son message générique : poser le format
+attendu dans le `placeholder`/`help_text` du champ :
 
 ```python
 telephone = forms.CharField(
@@ -253,7 +254,6 @@ telephone = forms.CharField(
     widget=forms.TextInput(attrs={
         "inputmode": "tel",
         "pattern": FRENCH_PHONE_INPUT_PATTERN,
-        "title": FRENCH_PHONE_INPUT_TITLE,
     }),
 )
 ```

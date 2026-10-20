@@ -17,7 +17,6 @@ from elixir_toolkit.validators import (
     FrenchPhoneNumberValidator,
     normalize_french_phone_number,
     FRENCH_PHONE_INPUT_PATTERN,
-    FRENCH_PHONE_INPUT_TITLE,
 )
 
 COLOR_CHOICES = (("red", "Red"), ("green", "Green"), ("blue", "Blue"))
@@ -172,7 +171,6 @@ class FormExample(CustomFormHelper, forms.Form):
         widget=forms.TextInput(attrs={
             "inputmode": "tel",
             "pattern": FRENCH_PHONE_INPUT_PATTERN,
-            "title": FRENCH_PHONE_INPUT_TITLE,
         }),
     )
     number = forms.CharField(label="Âge", widget=forms.NumberInput())
@@ -354,7 +352,6 @@ class FormErrorsExample(CustomFormHelper, forms.Form):
         widget=forms.TextInput(attrs={
             "inputmode": "tel",
             "pattern": FRENCH_PHONE_INPUT_PATTERN,
-            "title": FRENCH_PHONE_INPUT_TITLE,
         }),
     )
     number = forms.IntegerField(label="Âge", min_value=0, max_value=120)
