@@ -782,44 +782,48 @@ FormConfirmSubmit.highlightInvalidFields(document.getElementById('my-form'));
 
 ---
 
-### Grille Bulma standard (Row / Column)
+### Grille Bulma standard (constantes de grille)
 
 Pour arrêter de répéter les classes CSS Bulma dans chaque formulaire, le toolkit fournit
-`Row` et `Column`, des `Div` crispy qui appliquent la grille standard du toolkit :
+les constantes de la grille standard, à utiliser avec des `Div` crispy :
 
 ```python
-from crispy_forms.layout import Layout
-from elixir_toolkit.forms import Row, Column
+from crispy_forms.layout import Div, Layout
+from elixir_toolkit.forms import (
+    ROW_CLASS,
+    COLUMN_FULL_CLASS,
+    COLUMN_HALF_CLASS,
+    COLUMN_THIRD_CLASS,
+)
 
 self.helper.layout = Layout(
-    Row(
-        Column("nom", width="half"),
-        Column("email", width="half"),
+    Div(
+        Div("nom", css_class=COLUMN_HALF_CLASS),
+        Div("email", css_class=COLUMN_HALF_CLASS),
+        css_class=ROW_CLASS,
     ),
-    Row(
-        Column("code_naf", width="third"),
-        Column("siren", width="third"),
-        Column("siret", width="third"),
+    Div(
+        Div("code_naf", css_class=COLUMN_THIRD_CLASS),
+        Div("siren", css_class=COLUMN_THIRD_CLASS),
+        Div("siret", css_class=COLUMN_THIRD_CLASS),
+        css_class=ROW_CLASS,
     ),
-    Row(
-        Column("message"),  # width="full" par défaut
-    ),
+    Div("message", css_class=COLUMN_FULL_CLASS),
 )
 ```
 
-**Largeurs disponibles (`width`) :**
+**Constantes disponibles :**
 
-| `width`     | Colonne        | Classes CSS appliquées                     |
-|-------------|----------------|--------------------------------------------|
-| `"full"`    | 1 par ligne    | `column pt-0` (défaut)                      |
-| `"half"`    | 2 par ligne    | `column is-12-mobile is-6-tablet`           |
-| `"third"`   | 3 par ligne    | `column is-6-tablet is-4-desktop`           |
+| Constante             | Usage                  | Classes CSS                                 |
+|-----------------------|------------------------|---------------------------------------------|
+| `ROW_CLASS`           | Conteneur de ligne     | `columns is-multiline`                      |
+| `COLUMN_FULL_CLASS`   | 1 colonne par ligne    | `column pt-0`                               |
+| `COLUMN_HALF_CLASS`   | 2 colonnes par ligne   | `column is-12-mobile is-6-tablet`           |
+| `COLUMN_THIRD_CLASS`  | 3 colonnes par ligne   | `column is-6-tablet is-4-desktop`           |
 
-`Row` rend toujours `columns is-multiline`. Des classes supplémentaires se passent via
-`css_class` : `Column("nom", width="half", css_class="mb-2")`. Les constantes
-(`ROW_CLASS`, `COLUMN_FULL_CLASS`, `COLUMN_HALF_CLASS`, `COLUMN_THIRD_CLASS`) restent
-exportées pour un usage direct si besoin — utiliser `Row` / `Column` est la façon
-conventionnelle.
+Ne jamais écrire ces classes CSS à la main dans les formulaires : toujours importer
+les constantes depuis `elixir_toolkit.forms`, pour que la grille reste identique
+partout et évolue au même endroit.
 
 ### Helpers de Formulaire
 

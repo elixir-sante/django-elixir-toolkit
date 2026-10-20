@@ -1,6 +1,5 @@
 import json
 
-from crispy_forms.layout import Div
 from crispy_forms.layout import Field as CrispyField
 from crispy_forms.layout import HTML
 from crispy_forms.helper import FormHelper
@@ -296,6 +295,17 @@ class MultipleFileField(forms.FileField):
             validator(cleaned_files)
 
 
+# Grille Bulma standard pour les Layouts crispy : utiliser ces constantes avec
+# des Div, ne jamais écrire les classes CSS à la main dans les formulaires.
+#
+#     Layout(
+#         Div(
+#             Div('champ1', css_class=COLUMN_HALF_CLASS),
+#             Div('champ2', css_class=COLUMN_HALF_CLASS),
+#             css_class=ROW_CLASS,
+#         ),
+#     )
+
 ROW_CLASS = "columns is-multiline"
 
 COLUMN_THIRD_CLASS = "column is-6-tablet is-4-desktop"
@@ -303,49 +313,6 @@ COLUMN_THIRD_CLASS = "column is-6-tablet is-4-desktop"
 COLUMN_HALF_CLASS = "column is-12-mobile is-6-tablet"
 
 COLUMN_FULL_CLASS = "column pt-0"
-
-
-class Row(Div):
-    """Ligne Bulma : conteneur `columns is-multiline` pour des `Column`.
-
-    Usage dans un Layout crispy :
-        Layout(
-            Row(
-                Column('champ1'),
-                Column('champ2'),
-            ),
-        )
-    """
-
-    css_class = ROW_CLASS
-
-
-class Column(Div):
-    """Colonne Bulma dans une `Row`.
-
-    `width` accepte "full" (1 colonne), "half" (2 colonnes) ou "third" (3 colonnes),
-    et applique les classes standard du toolkit. Des classes CSS supplémentaires
-    peuvent être passées via `css_class`.
-    """
-
-    css_class = COLUMN_FULL_CLASS
-
-    def __init__(self, *args, width="full", **kwargs):
-        css_class = kwargs.pop("css_class", "")
-        width_classes = {
-            "full": COLUMN_FULL_CLASS,
-            "half": COLUMN_HALF_CLASS,
-            "third": COLUMN_THIRD_CLASS,
-        }
-        try:
-            base_class = width_classes[width]
-        except KeyError:
-            raise ValueError(
-                f"Largeur de colonne inconnue : {width!r}. "
-                "Valeurs acceptées : 'full', 'half', 'third'."
-            )
-        kwargs["css_class"] = f"{base_class} {css_class}".strip()
-        super().__init__(*args, **kwargs)
 
 
 class PasswordWithIconField(CrispyField):
