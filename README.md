@@ -817,7 +817,7 @@ self.helper.layout = Layout(
 | Constante             | Usage                  | Classes CSS                                 |
 |-----------------------|------------------------|---------------------------------------------|
 | `ROW_CLASS`           | Conteneur de ligne     | `columns is-multiline`                      |
-| `COLUMN_FULL_CLASS`   | 1 colonne par ligne    | `column pt-0`                               |
+| `COLUMN_FULL_CLASS`   | 1 colonne par ligne    | `column`                               |
 | `COLUMN_HALF_CLASS`   | 2 colonnes par ligne   | `column is-12-mobile is-6-tablet`           |
 | `COLUMN_THIRD_CLASS`  | 3 colonnes par ligne   | `column is-6-tablet is-4-desktop`           |
 

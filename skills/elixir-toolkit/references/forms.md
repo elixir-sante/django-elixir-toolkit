@@ -128,7 +128,7 @@ self.helper.layout = Layout(
 ```
 
 - `ROW_CLASS` : conteneur `columns is-multiline` (une `Div` par ligne).
-- `COLUMN_FULL_CLASS` : pleine largeur (`column pt-0`).
+- `COLUMN_FULL_CLASS` : pleine largeur (`column`).
 - `COLUMN_HALF_CLASS` : 2 colonnes par ligne (`column is-12-mobile is-6-tablet`).
 - `COLUMN_THIRD_CLASS` : 3 colonnes par ligne (`column is-6-tablet is-4-desktop`).
 
