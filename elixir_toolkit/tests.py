@@ -768,6 +768,29 @@ class ToolkitFileUploadHelpTextTest(ToolkitBaseTest):
         self.assertEqual(multiple.help_text, "Autre texte")
 
 
+class ToolkitFileUploadWidgetAttrsTest(ToolkitBaseTest):
+    """Attributs data-* et accept transmis au widget pour le JS de file_input.html."""
+
+    def test_toolkit_file_field_widget_attrs(self):
+        field = ToolkitFileField(max_size=10 * 1024 * 1024, allowed_extensions=["pdf", "png"])
+        attrs = field.widget_attrs(field.widget)
+
+        self.assertEqual(attrs["data-max-size"], 10 * 1024 * 1024)
+        self.assertEqual(attrs["data-max-total-size"], 10 * 1024 * 1024)
+        self.assertEqual(attrs["accept"], ".pdf,.png")
+
+    def test_multiple_file_field_widget_attrs(self):
+        field = MultipleFileField(
+            max_size=2 * 1024 * 1024,
+            max_total_size=10 * 1024 * 1024,
+            allowed_extensions=["pdf"],
+        )
+        attrs = field.widget_attrs(field.widget)
+
+        self.assertEqual(attrs["data-max-total-size"], 10 * 1024 * 1024)
+        self.assertEqual(attrs["accept"], ".pdf")
+
+
 class FrenchPhoneNumberValidatorTest(TestCase):
     """Validateur et normalisation des numéros de téléphone français."""
 

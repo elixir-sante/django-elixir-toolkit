@@ -210,8 +210,12 @@ class ToolkitFileField(forms.FileField):
         attrs = super().widget_attrs(widget)
         attrs.update({
             'data-max-size': self.max_size,
+            # Fichier unique : la taille totale vaut la taille unitaire
+            # (sinon le JS de file_input.html retombe sur 5 Mo)
+            'data-max-total-size': self.max_size,
             'data-allowed-extensions': json.dumps(self.allowed_extensions),
             'data-max-files': 1,
+            'accept': ",".join(f".{e}" for e in self.allowed_extensions),
         })
         return attrs
 
@@ -270,6 +274,7 @@ class MultipleFileField(forms.FileField):
             'data-max-total-size': self.max_total_size,
             'data-allowed-extensions': json.dumps(self.allowed_extensions),
             'data-max-files': self.max_files,
+            'accept': ",".join(f".{e}" for e in self.allowed_extensions),
         })
         return attrs
 
