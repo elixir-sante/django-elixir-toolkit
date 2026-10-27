@@ -646,6 +646,9 @@ class MyForm(forms.Form):
         )
 ```
 
+Un bouton `type="reset"` du formulaire remet le sélecteur à sa valeur initiale
+(`{% ui_button text="Réinitialiser" type="reset" %}`) : aucun script à ajouter.
+
 ---
 
 ### Checkboxes et Radios stylés
@@ -794,6 +797,7 @@ from elixir_toolkit.forms import (
     COLUMN_FULL_CLASS,
     COLUMN_HALF_CLASS,
     COLUMN_THIRD_CLASS,
+    COLUMN_QUARTER_CLASS,
 )
 
 self.helper.layout = Layout(
@@ -820,6 +824,7 @@ self.helper.layout = Layout(
 | `COLUMN_FULL_CLASS`   | 1 colonne par ligne    | `column`                               |
 | `COLUMN_HALF_CLASS`   | 2 colonnes par ligne   | `column is-12-mobile is-6-tablet`           |
 | `COLUMN_THIRD_CLASS`  | 3 colonnes par ligne   | `column is-6-tablet is-4-desktop`           |
+| `COLUMN_QUARTER_CLASS`| 4 colonnes par ligne   | `column is-12-mobile is-3-tablet`           |
 
 Ne jamais écrire ces classes CSS à la main dans les formulaires : toujours importer
 les constantes depuis `elixir_toolkit.forms`, pour que la grille reste identique

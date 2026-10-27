@@ -871,6 +871,7 @@ class ToolkitLayoutColumnsTest(TestCase):
         self.assertEqual(toolkit_forms.ROW_CLASS, "columns is-multiline")
         self.assertEqual(toolkit_forms.COLUMN_THIRD_CLASS, "column is-6-tablet is-4-desktop")
         self.assertEqual(toolkit_forms.COLUMN_HALF_CLASS, "column is-12-mobile is-6-tablet")
+        self.assertEqual(toolkit_forms.COLUMN_QUARTER_CLASS, "column is-12-mobile is-3-tablet")
         self.assertEqual(toolkit_forms.COLUMN_FULL_CLASS, "column")
 
     def test_layout_renders_standard_grid(self):
