@@ -317,6 +317,8 @@ COLUMN_THIRD_CLASS = "column is-6-tablet is-4-desktop"
 
 COLUMN_HALF_CLASS = "column is-12-mobile is-6-tablet"
 
+COLUMN_QUARTER_CLASS = "column is-12-mobile is-3-tablet"
+
 COLUMN_FULL_CLASS = "column"
 
 

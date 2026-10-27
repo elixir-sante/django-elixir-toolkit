@@ -107,7 +107,18 @@
 
         var $control = $(instance.$control);
         $control.addClass('input');
-        $('.selectize-dropdown').removeClass('input'); 
+        $('.selectize-dropdown').removeClass('input');
+
+        // Le reset natif du formulaire ne resynchronise pas selectize : on
+        // restaure la valeur initiale une fois le reset terminé.
+        var initialValue = instance.getValue();
+        $el.closest('form').off('reset.' + elementId).on('reset.' + elementId, function() {
+            setTimeout(function() {
+                if ($el[0].selectize) {
+                    $el[0].selectize.setValue(initialValue);
+                }
+            }, 0);
+        });
     }
 
     function destroySelectize() {
