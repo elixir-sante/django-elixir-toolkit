@@ -955,11 +955,12 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         self.assertIn("setPressed(this, true)", rendered)  # synchro JS de l'état
 
     def test_form_confirm_submit_modal_is_a_dialog(self):
-        """4.1.2 : role=dialog + aria-modal + aria-labelledby, fermeture « Fermer » (3.1.1)"""
+        """4.1.2 : élément <dialog> natif (sans role="dialog") + aria-modal + aria-labelledby, fermeture « Fermer » (3.1.1)"""
         rendered = self.render_template(
             "{% load elixir_toolkit_tags %}{% ui_form_confirm_submit form_id='my-form' modal_title='Confirmer' %}"
         )
-        self.assertIn('role="dialog"', rendered)
+        self.assertIn('<dialog', rendered)
+        self.assertNotIn('role="dialog"', rendered)
         self.assertIn('aria-modal="true"', rendered)
         self.assertIn('aria-labelledby="form-confirm-title-my-form"', rendered)
         self.assertIn('id="form-confirm-title-my-form"', rendered)

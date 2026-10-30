@@ -9,7 +9,7 @@
     // 4.1.2 : état du bouton d'expansion exposé (aria-expanded / aria-controls)
     function initToggleRowBtns() {
         document.querySelectorAll('.toggle-row-btn[data-target]').forEach(function(btn) {
-            btn.setAttribute('aria-controls', btn.getAttribute('data-target'));
+            btn.setAttribute('aria-controls', btn.dataset.target);
             if (!btn.hasAttribute('aria-expanded')) {
                 btn.setAttribute('aria-expanded', 'false');
             }
@@ -21,7 +21,7 @@
         if (!btn) return;
 
         // On récupère l'ID cible stocké dans data-target (ex: "details-row-6")
-        var targetId = btn.getAttribute('data-target');
+        var targetId = btn.dataset.target;
         if (!targetId) return;
 
         var targetRow = document.getElementById(targetId);

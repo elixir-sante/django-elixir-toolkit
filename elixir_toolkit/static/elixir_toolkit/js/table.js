@@ -33,7 +33,7 @@ function setupTableExpandables() {
     // Toggle pour les lignes expandables (clic sur le bouton)
     document.querySelectorAll('.expand-toggle').forEach(button => {
         // 4.1.2 : état initial exposé
-        const targetId = button.getAttribute('data-target');
+        const targetId = button.dataset.target;
         if (targetId) {
             button.setAttribute('aria-controls', targetId);
             if (!button.hasAttribute('aria-expanded')) {
@@ -43,7 +43,7 @@ function setupTableExpandables() {
         if (button.dataset.bound) return;
         button.dataset.bound = '1';
         button.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
+            const targetId = this.dataset.target;
             const row = this.closest('.table-row-expandable');
             const icon = this.querySelector('.fa-chevron-down, .fa-chevron-up');
             const textSpan = this.querySelector('span:not(.icon)');
@@ -60,7 +60,7 @@ function setupTableExpandables() {
             // Ne pas déclencher si on a cliqué sur le bouton
             if (e.target.closest('.expand-toggle')) return;
 
-            const targetId = this.getAttribute('data-target');
+            const targetId = this.dataset.target;
             const button = this.querySelector('.expand-toggle');
             if (!button) return;
             const icon = button.querySelector('.fa-chevron-down, .fa-chevron-up');

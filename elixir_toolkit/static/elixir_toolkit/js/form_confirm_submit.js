@@ -32,6 +32,10 @@
         if ($el.classList.contains('is-active')) return;
         lastTrigger = trigger || lastTrigger;
         $el.classList.add('is-active');
+        // <dialog> natif : ouverture modale (top layer, aria-modal implicite, Échap géré nativement)
+        if ($el.tagName === 'DIALOG' && !$el.open) {
+            $el.showModal();
+        }
         // 2.4.3 : le focus entre dans la modale à l'ouverture
         var target = $el.querySelector('.button[action="cancel"]') || focusables($el)[0];
         if (target) target.focus();
@@ -40,6 +44,9 @@
     function closeModal($el) {
         if (!$el.classList.contains('is-active')) return;
         $el.classList.remove('is-active');
+        if ($el.tagName === 'DIALOG' && $el.open) {
+            $el.close();
+        }
         // 2.4.3 : retour du focus sur l'élément déclencheur
         if (lastTrigger && document.contains(lastTrigger)) {
             lastTrigger.focus();
