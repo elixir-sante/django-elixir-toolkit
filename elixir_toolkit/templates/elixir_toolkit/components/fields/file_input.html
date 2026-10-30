@@ -2,20 +2,25 @@
 {% load crispy_forms_field %}
 
 <div class="field file-uploader" data-field-id="{{ field.id_for_label }}">
-    <label class="label">{{ field.label }}</label>
+    <label class="label" for="{{ field.id_for_label }}">
+        {{ field.label }}
+        {% if field.field.required %}
+            <span class="asterisk" aria-hidden="true">*</span>
+        {% endif %}
+    </label>
     <div class="control">
         <div class="file has-name is-fullwidth {% if field.errors %}is-danger{% else %}is-primary{% endif %}">
             <label class="file-label">
                 {% crispy_field field 'class' 'file-input' %}
                 <span class="file-cta">
-                    <span class="file-icon"><i class="fas fa-upload"></i></span>
+                    <span class="file-icon" aria-hidden="true"><i class="fas fa-upload"></i></span>
                     <span class="file-label">Choisir...</span>
                 </span>
                 <span class="file-name" id="name-{{ field.id_for_label }}">Aucun fichier</span>
             </label>
         </div>
     </div>
-    {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
+    {% if field.help_text %}<p class="help" id="{{ field.id_for_label }}-help">{{ field.help_text|safe }}</p>{% endif %}
 
     <div style="display: none;">
         <input type="checkbox" name="{{ field.name }}-clear" id="{{ field.id_for_label }}-clear_id">
@@ -23,13 +28,13 @@
 
     <div id="list-{{ field.id_for_label }}" class="mt-2 tags"></div>
     <p class="help file-size" id="size-{{ field.id_for_label }}"></p>
-    
-    <!-- Zone dédiée aux erreurs dynamiques JS -->
-    <p class="help is-danger file-error-help mt-1" id="error-{{ field.id_for_label }}"></p>
+
+    <!-- Zone dédiée aux erreurs dynamiques JS (annoncée aux lecteurs d'écran) -->
+    <p class="help is-danger file-error-help mt-1" id="error-{{ field.id_for_label }}" role="alert"></p>
 
     {% if field.errors %}
         {% for error in field.errors %}
-            <p class="help is-danger"><strong>{{ error }}</strong></p>
+            <p class="help is-danger"{% if forloop.first %} id="{{ field.id_for_label }}-errors"{% endif %}><strong>{{ error }}</strong></p>
         {% endfor %}
     {% endif %}
 </div>
@@ -52,7 +57,16 @@
             const clearCheckbox = document.getElementById(`${fieldId}-clear_id`);
 
             if (!fileInput || !fileListDisplay) return;
-            
+
+            // 3.3.1 / 4.1.2 : relie le champ à son aide, la taille, et les erreurs (statiques + JS)
+            var describedby = [];
+            if (document.getElementById(fieldId + '-help')) describedby.push(fieldId + '-help');
+            describedby.push('size-' + fieldId);
+            if (document.getElementById(fieldId + '-errors')) describedby.push(fieldId + '-errors');
+            describedby.push('error-' + fieldId);
+            fileInput.setAttribute('aria-describedby', describedby.join(' '));
+            if (document.getElementById(fieldId + '-errors')) fileInput.setAttribute('aria-invalid', 'true');
+
             container.dataset.initialized = "true";
             let allFiles = new DataTransfer();
 
@@ -83,16 +97,27 @@
                     totalSize += file.size;
                     const fileControl = document.createElement('div');
                     fileControl.className = 'control';
-                    fileControl.innerHTML = `
-                        <div class="tags has-addons">
-                            <a class="tag is-delete is-medium" data-index="${index}"></a>
-                            <span class="tag is-link is-medium">${file.name.substring(0, 25)}</span>
-                        </div>
-                    `;
-                    fileControl.querySelector('.is-delete').onclick = (e) => {
+
+                    const tags = document.createElement('div');
+                    tags.className = 'tags has-addons';
+
+                    // 2.1.1 / 4.1.2 : vrai bouton focusable, avec un nom accessible explicite
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'tag is-delete is-medium';
+                    removeBtn.setAttribute('aria-label', 'Retirer le fichier ' + file.name);
+                    removeBtn.addEventListener('click', (e) => {
                         e.preventDefault();
                         removeFile(index);
-                    };
+                    });
+
+                    const nameTag = document.createElement('span');
+                    nameTag.className = 'tag is-link is-medium';
+                    nameTag.textContent = file.name.substring(0, 25);
+
+                    tags.appendChild(removeBtn);
+                    tags.appendChild(nameTag);
+                    fileControl.appendChild(tags);
                     fileListDisplay.appendChild(fileControl);
                 });
 

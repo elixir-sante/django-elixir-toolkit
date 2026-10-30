@@ -24,15 +24,15 @@ class MyUploadAdapter {
 
                     // Affichage barre de progression
                     const container = document.getElementById('uploadProgressContainer');
-                    const bar = document.getElementById('uploadProgressBar');
                     const text = document.getElementById('uploadProgressText');
-                    if (!container || !bar || !text) {
+                    if (!container || !text) {
                         return;
                     }
                     container.style.display = 'block';
                     text.style.display = 'block';
 
-                    bar.style.width = percent + '%';
+                    // 4.1.2 : valeur courante exposée aux lecteurs d'écran via la propriété value du <progress>
+                    container.value = Math.round(percent);
                     text.textContent = `Téléchargement en cours : ${percent.toFixed(0)}%`;
                 }
             };
@@ -46,7 +46,10 @@ class MyUploadAdapter {
                     setTimeout(() => {
                         const container = document.getElementById('uploadProgressContainer');
                         const text = document.getElementById('uploadProgressText');
-                        if (container) container.style.display = 'none';
+                        if (container) {
+                            container.style.display = 'none';
+                            container.value = 100;
+                        }
                         if (text) text.style.display = 'none';
                     }, 1500);
 

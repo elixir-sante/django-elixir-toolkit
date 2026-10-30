@@ -59,7 +59,7 @@ class ToolkitButtonsTest(ToolkitBaseTest):
         rendered = self.render_template(template)
         
         self.assertIn('<i class="fas fa-envelope"></i>', rendered)
-        self.assertIn('<span class="icon">', rendered)
+        self.assertIn('<span class="icon" aria-hidden="true">', rendered)
 
 
 class ToolkitValidationTest(ToolkitBaseTest):
@@ -227,16 +227,18 @@ class ToolkitListTest(ToolkitBaseTest):
         self.assertIn('fa-pills', rendered)
         self.assertIn('tag is-primary', rendered)
 
-    def test_ui_list_clickable_logic(self):
-        """Vérifie la présence du container cliquable et du lien par défaut"""
+    def test_ui_list_accessible_without_link_url(self):
+        """Sans link_url_name : pas de lien factice href="#" ni de container cliquable
+        (WCAG 2.1.1 / 4.1.2) — le titre est alors du texte simple."""
         items = [{'id': 1, 'name': 'Lien Test'}]
         template = "{% load elixir_toolkit_tags %}{% ui_list items=items title_field='name' %}"
         rendered = self.render_template(template, {'items': items})
-        
-        # Vérifie que href="#" est généré quand link_url_name est absent
-        self.assertIn('href="#"', rendered)
-        self.assertIn('is-clickable-container', rendered)
-        self.assertIn('item-main-link', rendered)
+
+        self.assertNotIn('href="#"', rendered)
+        self.assertNotIn('is-clickable-container', rendered)
+        self.assertIn('Lien Test', rendered)
+        # Icônes décoratives masquées aux lecteurs d'écran (1.1.1)
+        self.assertIn('aria-hidden="true"', rendered)
 
     def test_ui_list_empty_state(self):
         """Vérifie le message si la liste est vide"""
@@ -914,3 +916,195 @@ class ToolkitLayoutColumnsTest(TestCase):
         self.assertIn(COLUMN_HALF_CLASS, html)
         self.assertIn(COLUMN_THIRD_CLASS, html)
         self.assertIn(COLUMN_FULL_CLASS, html)
+
+
+class ToolkitAccessibilityTest(ToolkitBaseTest):
+    """Conformité WCAG 2.1 AA des composants rendus (revue accessibilité)."""
+
+    def test_button_icon_is_aria_hidden(self):
+        """1.1.1 : l'icône décorative d'un bouton est masquée aux lecteurs d'écran"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_button text='Supprimer' icon='fas fa-trash' %}"
+        )
+        self.assertIn('<span class="icon" aria-hidden="true">', rendered)
+
+    def test_chevron_and_tag_icons_aria_hidden(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% ui_chevron direction='right' %}")
+        self.assertIn('aria-hidden="true"', rendered)
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_tag text='Actif' icon='fas fa-check' %}"
+        )
+        self.assertIn('aria-hidden="true"', rendered)
+
+    def test_ui_th_has_scope_col(self):
+        """1.3.1 : les en-têtes de tableau ont scope="col" """
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_th %}Nom{% end_ui_th %}"
+        )
+        self.assertIn('scope="col"', rendered)
+
+    def test_filter_bar_buttons_have_aria_pressed(self):
+        """4.1.2 / 1.4.1 : boutons à bascule avec aria-pressed (état non couleur seul)"""
+        filters = [('active', 'Actifs'), ('closed', 'Fermés')]
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=filters %}",
+            {'filters': filters},
+        )
+        self.assertIn('aria-pressed="true"', rendered)   # bouton « Tout » actif
+        self.assertEqual(rendered.count('aria-pressed="false"'), 2)
+        self.assertIn("setPressed(this, true)", rendered)  # synchro JS de l'état
+
+    def test_form_confirm_submit_modal_is_a_dialog(self):
+        """4.1.2 : élément <dialog> natif (sans role="dialog") + aria-modal + aria-labelledby, fermeture « Fermer » (3.1.1)"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_form_confirm_submit form_id='my-form' modal_title='Confirmer' %}"
+        )
+        self.assertIn('<dialog', rendered)
+        self.assertNotIn('role="dialog"', rendered)
+        self.assertIn('aria-modal="true"', rendered)
+        self.assertIn('aria-labelledby="form-confirm-title-my-form"', rendered)
+        self.assertIn('id="form-confirm-title-my-form"', rendered)
+        self.assertIn('aria-label="Fermer"', rendered)
+        self.assertNotIn('aria-label="close"', rendered)
+
+    def test_message_roles(self):
+        """4.1.3 : role=status par défaut, role=alert pour danger, surchargeable"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_message content='Info' %}"
+        )
+        self.assertIn('role="status"', rendered)
+
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_message_danger content='Erreur' %}"
+        )
+        self.assertIn('role="alert"', rendered)
+
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_message content='Info' role='log' %}"
+        )
+        self.assertIn('role="log"', rendered)
+
+    def test_message_block_danger_is_alert(self):
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_message_danger_block %}Erreur{% end_ui_message_danger_block %}"
+        )
+        self.assertIn('role="alert"', rendered)
+
+    def test_ui_select_has_no_aria_label_overriding_visible_label(self):
+        """4.1.2 : le nom accessible vient du label visible (for=), pas d'un aria-label"""
+        class F(forms.Form):
+            color = forms.ChoiceField(label="Couleur", choices=[('red', 'Rouge')], required=False)
+
+        field = F()['color']
+        rendered = self.render_template(
+            '{% include "elixir_toolkit/components/select.html" with field=field label=field.label name="color" element_id="id_color" %}',
+            {'field': field},
+        )
+        self.assertIn('for="id_color"', rendered)
+        self.assertNotIn('aria-label="color"', rendered)
+
+    def test_ui_select_field_errors_are_linked(self):
+        """3.3.1 / 4.1.2 : erreurs reliées au champ (aria-invalid + aria-describedby)"""
+        class F(forms.Form):
+            choice = forms.ChoiceField(choices=[('A', 'Option A')], required=True)
+
+        form = F(data={})
+        self.assertFalse(form.is_valid())
+        field = form['choice']
+        rendered = self.render_template(
+            '{% include "elixir_toolkit/components/select.html" with field=field name="choice" element_id="id_choice" %}',
+            {'field': field},
+        )
+        self.assertIn('aria-invalid="true"', rendered)
+        self.assertIn('aria-describedby="id_choice-errors"', rendered)
+        self.assertIn('id="id_choice-errors"', rendered)
+
+    def test_ui_field_uses_dl_semantics(self):
+        """1.3.1 : couple libellé/valeur en dl/dt/dd, contraste du libellé renforcé"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_field label='Code NAF' value='6201Z' %}"
+        )
+        self.assertIn('<dl>', rendered)
+        self.assertIn('<dt', rendered)
+        self.assertIn('<dd', rendered)
+        self.assertIn('has-text-grey', rendered)
+
+    def test_password_widget_toggle_is_a_button(self):
+        """2.1.1 / 4.1.2 : bascule voir/masquer = vrai bouton avec aria-pressed et nom"""
+        class P(forms.Form):
+            password = forms.CharField(widget=forms.PasswordInput, label="Mot de passe")
+
+        form = P()
+        rendered = self.render_template(
+            '{% include "elixir_toolkit/components/fields/password_input.html" with field=form.password %}',
+            {'form': form},
+        )
+        self.assertIn('<button type="button"', rendered)
+        self.assertIn('aria-label="Afficher le mot de passe"', rendered)
+        self.assertIn('aria-pressed="false"', rendered)
+        self.assertIn('toggle-password', rendered)
+        self.assertIn('for="id_password"', rendered)
+        # l'icône de cadenas est décorative
+        self.assertIn('aria-hidden="true"', rendered)
+
+    def test_ui_select_aria_label_fallback_without_label(self):
+        """4.1.2 : sans label visible, un aria-label explicite est requis"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" aria_label='Couleur' %}"
+        )
+        self.assertIn('aria-label="Couleur"', rendered)
+
+        # avec un label visible, pas d'aria-label en double
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" label='Couleur' %}"
+        )
+        self.assertIn('for="id_color"', rendered)
+        self.assertNotIn('aria-label=', rendered)
+
+        # sans rien, fallback sur le name (comportement historique)
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" %}"
+        )
+        self.assertIn('aria-label="color"', rendered)
+
+    def test_focus_css_based_on_primary(self):
+        """2.4.7 : le focus est branché sur la couleur primary du thème"""
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+        self.assertIn('elixir_toolkit/css/focus.css', rendered)
+
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/focus.css').read_text()
+        self.assertIn('--bulma-focus-h: var(--bulma-primary-h)', css)
+        self.assertIn('--bulma-input-focus-h: var(--bulma-primary-h)', css)
+        self.assertIn('outline: 2px solid var(--bulma-primary)', css)
+
+    def test_no_django_comment_leaks_in_rendered_html(self):
+        """Un commentaire {# ... #} multi-lignes n'est PAS supprimé par Django
+        (il faut une seule ligne ou {% comment %}) : aucun ne doit fuir dans le rendu."""
+        templates = [
+            "{% load elixir_toolkit_tags %}{% ui_select name='c' options=\"[('a','A')]\" label='C' %}",
+            "{% load elixir_toolkit_tags %}{% ui_button text='B' icon='fas fa-x' %}",
+            "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=f %}",
+            "{% load elixir_toolkit_tags %}{% ui_form_confirm_submit form_id='f' %}",
+            "{% load elixir_toolkit_tags %}{% ui_list items=i title_field='n' %}",
+            "{% load elixir_toolkit_tags %}{% ui_stepper steps=s current=1 %}",
+            "{% load elixir_toolkit_tags %}{% ui_message content='m' %}",
+            "{% load elixir_toolkit_tags %}{% ui_th %}T{% end_ui_th %}",
+            "{% load elixir_toolkit_tags %}{% ui_field label='L' value='V' %}",
+            "{% load elixir_toolkit_tags %}{% ui_tag text='T' %}",
+            "{% load elixir_toolkit_tags %}{% ui_chevron direction='down' %}",
+            "{% load elixir_toolkit_tags %}{% ui_table %}<thead><tr>{% ui_th %}H{% end_ui_th %}</tr></thead>{% end_ui_table %}",
+        ]
+        ctx = {'f': [('a', 'A')], 'i': [{'n': 'x'}], 's': ['a', 'b']}
+        for t in templates:
+            rendered = self.render_template(t, ctx)
+            self.assertNotIn('{#', rendered, msg=t)
+            self.assertNotIn('#}', rendered, msg=t)
+
+    def test_selectize_dropdown_hover_uses_primary(self):
+        """Le survol du menu déroulant Selectize est basé sur var(--bulma-primary),
+        pas sur le bleu link/secondary par défaut."""
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/selectize.css').read_text()
+        self.assertIn('var(--toolkit-select-active-bg, var(--bulma-primary))', css)
+        self.assertNotIn('var(--secondary-color, #485fc7)', css)

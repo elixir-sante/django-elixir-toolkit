@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load elixir_toolkit_tags %}
 
+{% block title %}Test du composant Message - Démo Elixir Toolkit{% endblock %}
+
 {% block body %}
 <div class="container">
     <h1 class="title is-1">Test des composants Message</h1>
@@ -10,7 +12,7 @@
         <ul>
             <li><a href="#messages-sans-titre">Messages sans titre</a></li>
             <li><a href="#messages-avec-titre">Messages avec titre</a></li>
-            <li><a href="#messages-avec-contenu-html">Messages avec contenu HTML</a></li>
+            <li><a href='#messages-avec-contenu-html'>Messages avec contenu HTML</a></li>
             <li><a href="#messages-avec-classes-supplementaires">Messages avec classes CSS supplémentaires</a></li>
             <li><a href="#messages-avec-attributs-html">Messages avec attributs HTML</a></li>
             <li><a href="#messages-mode-securise">Messages en mode sécurisé (is_safe=False)</a></li>
@@ -57,7 +59,7 @@
         
         {% ui_message content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. <strong>Pellentesque risus mi</strong>, tempus quis placerat ut, porta nec nulla. Vestibulum rhoncus ac ex sit amet fringilla. Nullam gravida purus diam, et dictum <a>felis venenatis</a> efficitur." is_safe=True %}
         
-        {% ui_message_info content="Message avec <em>italique</em>, <strong>gras</strong>, et un <a href='#'>lien</a>." is_safe=True %}
+        {% ui_message_info content="Message avec <em>italique</em>, <strong>gras</strong>, et un <a href='#messages-avec-contenu-html'>lien</a>." is_safe=True %}
         
         {% ui_message_success content="<ul><li>Élément 1</li><li>Élément 2</li><li>Élément 3</li></ul>" is_safe=True %}
     </div>
@@ -129,7 +131,7 @@
 
         <h3 class="title is-4">Bloc simple</h3>
         {% ui_message_block %}
-            Du contenu libre avec <strong>du gras</strong> et <a href="#">un lien</a>.
+            Du contenu libre avec <strong>du gras</strong> et <a href='#messages-avec-contenu-html'>un lien</a>.
         {% end_ui_message_block %}
 
         <h3 class="title is-4 mt-4">Bloc avec titre, couleur et attributs</h3>

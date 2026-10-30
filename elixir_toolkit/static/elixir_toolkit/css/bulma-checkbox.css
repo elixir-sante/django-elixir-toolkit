@@ -57,3 +57,12 @@
 .checkbox:has(> .help){display:grid;grid-template-columns:auto 1fr;align-items:start}
 .checkbox:has(> .help) input[type=checkbox]:not(:has(+.check)){margin-top:.125em}
 .checkbox:has(> .help) .help{grid-column:2;margin-top:.1em;margin-bottom:.5rem}
+
+/* --- Accessibilite WCAG 2.1 AA --- */
+/* 2.4.7 : indicateur de focus clavier bien visible sur la case stylisee (.check)
+   et sur l'input natif stylise (variante sans span.check). */
+.checkbox input[type=checkbox]:focus-visible+.check,
+.checkbox input[type=checkbox]:focus-visible:not(:has(+.check)){
+  outline:2px solid var(--bulma-primary, #00d1b2);
+  outline-offset:2px;
+}

@@ -50,6 +50,14 @@
         error.textContent = element.getAttribute('data-max-length-message')
             || 'Ce champ est limité à ' + max + ' caractères.';
 
+        // 1.3.1 / 3.3.1 : compteur et erreur reliés au champ par aria-describedby
+        var baseId = element.id || element.getAttribute('name') || 'field';
+        counter.id = baseId + '-max-length-counter';
+        error.id = baseId + '-max-length-error';
+        var extra = counter.id + ' ' + error.id;
+        var describedby = element.getAttribute('aria-describedby');
+        element.setAttribute('aria-describedby', describedby ? describedby + ' ' + extra : extra);
+
         anchor.after(counter, error);
 
         return function update(length) {

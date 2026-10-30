@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load elixir_toolkit_tags %}
 
+{% block title %}Exemples de filtrage de tableau - Démo Elixir Toolkit{% endblock %}
+
 {% block body %}
 <style>
     :root {
@@ -20,7 +22,7 @@
     <form id="form-example1">
         <div class="field has-addons mb-4">
             <div class="control is-expanded">
-                <input type="text" id="search-all" class="input" placeholder="Rechercher dans toutes les colonnes...">
+                <input type="text" id="search-all" class="input" placeholder="Rechercher dans toutes les colonnes..." aria-label="Rechercher dans toutes les colonnes...">
             </div>
         </div>
         <div class="control mb-4">
@@ -63,7 +65,7 @@
     
     <div class="field has-addons mb-4">
         <div class="control is-expanded">
-            <input type="text" id="search-specific" class="input" placeholder="Rechercher dans Nom et Catégorie...">
+            <input type="text" id="search-specific" class="input" placeholder="Rechercher dans Nom et Catégorie..." aria-label="Rechercher dans Nom et Catégorie...">
         </div>
     </div>
 
@@ -100,7 +102,7 @@
     
     <div class="field has-addons mb-4">
         <div class="control is-expanded">
-            <input type="text" id="search-category" class="input" placeholder="Rechercher par catégorie...">
+            <input type="text" id="search-category" class="input" placeholder="Rechercher par catégorie..." aria-label="Rechercher par catégorie...">
         </div>
     </div>
 
@@ -138,7 +140,7 @@
     
     <div class="field has-addons mb-4">
         <div class="control is-expanded">
-            <input type="text" class="input table-filter" data-filter-id="custom-table" placeholder="Rechercher...">
+            <input type="text" class="input table-filter" data-filter-id="custom-table" placeholder="Rechercher..." aria-label="Rechercher...">
         </div>
     </div>
 
@@ -195,7 +197,7 @@
     
     <div class="field has-addons mb-4">
         <div class="control is-expanded">
-            <input type="text" id="search-data-search" class="input" placeholder="Rechercher (y compris dans les champs cachés)...">
+            <input type="text" id="search-data-search" class="input" placeholder="Rechercher (y compris dans les champs cachés)..." aria-label="Rechercher (y compris dans les champs cachés)...">
         </div>
     </div>
 
