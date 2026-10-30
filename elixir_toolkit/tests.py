@@ -1076,3 +1076,26 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         self.assertIn('--bulma-focus-h: var(--bulma-primary-h)', css)
         self.assertIn('--bulma-input-focus-h: var(--bulma-primary-h)', css)
         self.assertIn('outline: 2px solid var(--bulma-primary)', css)
+
+    def test_no_django_comment_leaks_in_rendered_html(self):
+        """Un commentaire {# ... #} multi-lignes n'est PAS supprimé par Django
+        (il faut une seule ligne ou {% comment %}) : aucun ne doit fuir dans le rendu."""
+        templates = [
+            "{% load elixir_toolkit_tags %}{% ui_select name='c' options=\"[('a','A')]\" label='C' %}",
+            "{% load elixir_toolkit_tags %}{% ui_button text='B' icon='fas fa-x' %}",
+            "{% load elixir_toolkit_tags %}{% ui_filter_bar filters=f %}",
+            "{% load elixir_toolkit_tags %}{% ui_form_confirm_submit form_id='f' %}",
+            "{% load elixir_toolkit_tags %}{% ui_list items=i title_field='n' %}",
+            "{% load elixir_toolkit_tags %}{% ui_stepper steps=s current=1 %}",
+            "{% load elixir_toolkit_tags %}{% ui_message content='m' %}",
+            "{% load elixir_toolkit_tags %}{% ui_th %}T{% end_ui_th %}",
+            "{% load elixir_toolkit_tags %}{% ui_field label='L' value='V' %}",
+            "{% load elixir_toolkit_tags %}{% ui_tag text='T' %}",
+            "{% load elixir_toolkit_tags %}{% ui_chevron direction='down' %}",
+            "{% load elixir_toolkit_tags %}{% ui_table %}<thead><tr>{% ui_th %}H{% end_ui_th %}</tr></thead>{% end_ui_table %}",
+        ]
+        ctx = {'f': [('a', 'A')], 'i': [{'n': 'x'}], 's': ['a', 'b']}
+        for t in templates:
+            rendered = self.render_template(t, ctx)
+            self.assertNotIn('{#', rendered, msg=t)
+            self.assertNotIn('#}', rendered, msg=t)
