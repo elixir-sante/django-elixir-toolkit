@@ -2,6 +2,8 @@
 {% load elixir_toolkit_tags %}
 {% load crispy_forms_tags %}
 
+{% block title %}Filtrage de grand tableau - Démo Elixir Toolkit{% endblock %}
+
 {% block body %}
 <div class="container">
     <h1 class="title is-1">Table Filter Large</h1>
@@ -36,7 +38,7 @@
                 <tr class="table-row-expandable" data-target="large-details-{{ ligne.id }}"{% if ligne.tiers_payant %} data-search="tiers-payant"{% endif %}>
                     <td>
                         <strong>{{ ligne.beneficiaire }}</strong>
-                        <div class="is-size-7 has-text-grey">{{ ligne.reference }}</div>
+                        <div class="is-size-7 has-text-grey-dark">{{ ligne.reference }}</div>
                     </td>
                     <td>{{ ligne.type_acte }}</td>
                     <td>{{ ligne.ville }}</td>

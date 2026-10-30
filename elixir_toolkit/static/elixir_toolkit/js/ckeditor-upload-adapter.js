@@ -33,6 +33,8 @@ class MyUploadAdapter {
                     text.style.display = 'block';
 
                     bar.style.width = percent + '%';
+                    // 4.1.2 : valeur courante du progressbar exposée aux lecteurs d'écran
+                    container.setAttribute('aria-valuenow', String(Math.round(percent)));
                     text.textContent = `Téléchargement en cours : ${percent.toFixed(0)}%`;
                 }
             };
@@ -46,7 +48,10 @@ class MyUploadAdapter {
                     setTimeout(() => {
                         const container = document.getElementById('uploadProgressContainer');
                         const text = document.getElementById('uploadProgressText');
-                        if (container) container.style.display = 'none';
+                        if (container) {
+                            container.style.display = 'none';
+                            container.setAttribute('aria-valuenow', '100');
+                        }
                         if (text) text.style.display = 'none';
                     }, 1500);
 

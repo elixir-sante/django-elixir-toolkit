@@ -4,30 +4,33 @@
     <div class="buttons filter-group">
 
         <!-- Bouton reset global -->
-        <button 
-            class="button is-rounded is-primary filter-btn" 
-            data-filter="" 
-            data-group="all">
+        <button
+            class="button is-rounded is-primary filter-btn"
+            data-filter=""
+            data-group="all"
+            aria-pressed="true">
             Tout
         </button>
 
         {% if is_multi %}
             {% for sub_filters in filters %}
                 {% for val, label in sub_filters %}
-                    <button 
-                        class="button is-rounded is-primary-light has-text-primary filter-btn"
+                    <button
+                        class="button is-rounded is-primary-light filter-btn"
                         data-filter="{{ val }}"
-                        data-group="{{ forloop.parentloop.counter0 }}">
+                        data-group="{{ forloop.parentloop.counter0 }}"
+                        aria-pressed="false">
                         {{ label }}
                     </button>
                 {% endfor %}
             {% endfor %}
         {% else %}
             {% for val, label in filters %}
-                <button 
-                    class="button is-rounded is-primary-light has-text-primary filter-btn"
+                <button
+                    class="button is-rounded is-primary-light filter-btn"
                     data-filter="{{ val }}"
-                    data-group="0">
+                    data-group="0"
+                    aria-pressed="false">
                     {{ label }}
                 </button>
             {% endfor %}
@@ -41,6 +44,13 @@
     const mainContainer = document.getElementById('filter-system-{{ identifier }}');
     const state = {};
 
+    // 4.1.2 / 1.4.1 : l'état « sélectionné » est exposé par aria-pressed (pas seulement par la couleur)
+    function setPressed(btn, pressed) {
+        btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+        btn.classList.toggle('is-primary', pressed);
+        btn.classList.toggle('is-primary-light', !pressed);
+    }
+
     mainContainer.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const value = this.dataset.filter;
@@ -49,31 +59,20 @@
             if (group === "all") {
                 Object.keys(state).forEach(k => state[k] = []);
 
-                mainContainer.querySelectorAll('.filter-btn').forEach(b => {
-                    b.classList.replace('is-primary', 'is-primary-light');
-                    b.classList.add('has-text-primary');
-                });
-
-                this.classList.replace('is-primary-light', 'is-primary');
-                this.classList.remove('has-text-primary');
+                mainContainer.querySelectorAll('.filter-btn').forEach(b => setPressed(b, false));
+                setPressed(this, true);
             } else {
                 if (!state[group]) state[group] = [];
 
                 if (state[group].includes(value)) {
                     state[group] = state[group].filter(v => v !== value);
-
-                    this.classList.replace('is-primary', 'is-primary-light');
-                    this.classList.add('has-text-primary');
+                    setPressed(this, false);
                 } else {
                     state[group].push(value);
-
-                    this.classList.replace('is-primary-light', 'is-primary');
-                    this.classList.remove('has-text-primary');
+                    setPressed(this, true);
                 }
 
-                const allBtn = mainContainer.querySelector('[data-group="all"]');
-                allBtn.classList.replace('is-primary', 'is-primary-light');
-                allBtn.classList.add('has-text-primary');
+                setPressed(mainContainer.querySelector('[data-group="all"]'), false);
             }
 
             document.dispatchEvent(new CustomEvent('filterChanged', {

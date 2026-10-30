@@ -17,8 +17,15 @@
   border: none;
   display: flex;
   align-items: center;
-  color: var(--bulma-primary, #485fc7);
+  /* 1.4.11 : l'icone du bouton >= 3:1 (primary par defaut = 1.95:1) */
+  color: color-mix(in srgb, var(--bulma-primary, #485fc7) 60%, #000);
   cursor: pointer;
+}
+
+/* 2.4.7 : focus clavier visible (le bouton n'a pas de bordure) */
+.tabs-scroll-hint:focus-visible {
+  outline: 2px solid var(--bulma-primary, #485fc7);
+  outline-offset: -2px;
 }
 
 .tabs-scroll-hint-right {

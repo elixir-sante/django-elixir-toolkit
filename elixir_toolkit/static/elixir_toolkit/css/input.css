@@ -5,3 +5,30 @@ input[type="password"]::-ms-clear {
     width: 0;
     height: 0;
 }
+
+/* --- Accessibilite WCAG 2.1 AA --- */
+
+/* 1.4.11 : la bordure des champs est un indicateur visuel du controle,
+   elle doit contraster >= 3:1 avec le fond (Bulma #dbdbdb = 1.38:1). */
+.input,
+.textarea,
+.select select,
+.file-label {
+    border-color: #8a8a8a; /* 3.45:1 sur blanc */
+}
+
+/* 1.4.3 : texte d'erreur >= 4.5:1 (le is-danger Bulma #f14668 = 3.6:1 ne suffit pas). */
+.help.is-danger,
+.has-text-danger {
+    color: #c62f4d; /* 5.36:1 sur blanc */
+}
+.input.is-danger,
+.textarea.is-danger,
+.select.is-danger select {
+    border-color: #c62f4d;
+}
+
+/* 1.4.3 : les placeholders sont du texte, >= 4.5:1 (Bulma --bulma-input-placeholder-color = #7a7a7a = 4.29:1). */
+:root {
+    --bulma-input-placeholder-color: rgba(54, 54, 54, 0.7); /* ~#767676 = 4.8:1 sur blanc */
+}

@@ -29,12 +29,12 @@ Exemple :
 
 {% comment %} Définir les valeurs par défaut et les valeurs finales {% endcomment %}
 
-<div class="modal form-confirm-submit-modal" data-form-id="{{ form_id }}" data-modal-id="form-confirm-{{ form_id }}">
+<div class="modal form-confirm-submit-modal" role="dialog" aria-modal="true" aria-labelledby="form-confirm-title-{{ form_id }}" data-form-id="{{ form_id }}" data-modal-id="form-confirm-{{ form_id }}">
     <div class="modal-background"></div>
     <div class="modal-card {{ modal_size|default:'' }}">
         <header class="modal-card-head">
-            <p class="modal-card-title">{{ modal_title|default:"Confirmation" }}</p>
-            <button class="delete" aria-label="close"></button>
+            <p class="modal-card-title" id="form-confirm-title-{{ form_id }}">{{ modal_title|default:"Confirmation" }}</p>
+            <button class="delete" aria-label="Fermer"></button>
         </header>
         <section class="modal-card-body">
             {% if content_id %}

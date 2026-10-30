@@ -27,6 +27,8 @@ def ui_message_base(content, color="primary", title=None, css_classes="", is_saf
     """
     color_class = f"is-{color}" if color else "is-primary"
     html_attrs = {k.replace('_', '-'): v for k, v in kwargs.items()}
+    # 4.1.3 : annonce du message aux lecteurs d'écran (alert pour les erreurs, status sinon)
+    role = html_attrs.pop('role', 'alert' if color == 'danger' else 'status')
 
     # Django marque les littéraux passés aux tags de template comme "safe"
     # (mark_safe dans django.template.base.Variable) : un simple
@@ -44,6 +46,7 @@ def ui_message_base(content, color="primary", title=None, css_classes="", is_saf
         'color_class': color_class,
         'title': title,
         'css_classes': css_classes,
+        'role': role,
         'attrs': flatatt(html_attrs),
     }
 

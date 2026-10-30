@@ -18,13 +18,33 @@
 (function() {
     'use strict';
 
+    // Élément qui avait le focus avant l'ouverture de la modale (2.4.3 : retour du focus)
+    var lastTrigger = null;
+
+    function focusables($el) {
+        return Array.from($el.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )).filter(function(el) { return el.offsetParent !== null || el === document.activeElement; });
+    }
+
     // Functions to open and close a modal (approche standard Bulma)
-    function openModal($el) {
+    function openModal($el, trigger) {
+        if ($el.classList.contains('is-active')) return;
+        lastTrigger = trigger || lastTrigger;
         $el.classList.add('is-active');
+        // 2.4.3 : le focus entre dans la modale à l'ouverture
+        var target = $el.querySelector('.button[action="cancel"]') || focusables($el)[0];
+        if (target) target.focus();
     }
 
     function closeModal($el) {
+        if (!$el.classList.contains('is-active')) return;
         $el.classList.remove('is-active');
+        // 2.4.3 : retour du focus sur l'élément déclencheur
+        if (lastTrigger && document.contains(lastTrigger)) {
+            lastTrigger.focus();
+        }
+        lastTrigger = null;
     }
 
     function closeAllModals() {
@@ -38,19 +58,22 @@
         var inputs = formElement.querySelectorAll('input, textarea, select');
         
         inputs.forEach(function(input) {
-            
+
             if (!input.checkValidity()) {
-                // Ajouter is-danger sur le parent .control
+                // Ajouter is-danger sur le parent .control + aria-invalid (3.3.1 / 4.1.2)
                 input.classList.add('is-danger');
-                
+                input.setAttribute('aria-invalid', 'true');
+
                 // Retirer la classe quand l'utilisateur corrige le champ
                 input.addEventListener('input', function() {
                     if (input.checkValidity()) {
                         input.classList.remove('is-danger');
+                        input.removeAttribute('aria-invalid');
                     }
                 }, { once: true });
             } else {
                 input.classList.remove('is-danger');
+                input.removeAttribute('aria-invalid');
             }
         });
     }
@@ -219,8 +242,8 @@
                     return;
                 }
                 
-                // Formulaire valide : ouvrir la modale
-                openModal(modal);
+                // Formulaire valide : ouvrir la modale (le focus part dans la modale)
+                openModal(modal, formSubmitBtn);
                 
                 // Générer et injecter la synthèse des champs
                 var contentTarget = document.getElementById('form-confirm-content-' + formId);
@@ -293,10 +316,25 @@
     document.addEventListener('DOMContentLoaded', function() {
         initFormConfirmSubmitModals();
 
-        // Fermer avec la touche Escape (un seul écouteur global)
+        // Un seul écouteur global : Escape ferme, Tab est piégé dans la modale active (2.4.3)
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeAllModals();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            var active = document.querySelector('.modal.is-active');
+            if (!active) return;
+            var items = focusables(active);
+            if (!items.length) return;
+            var first = items[0];
+            var last = items[items.length - 1];
+            if (event.shiftKey && (document.activeElement === first || !active.contains(document.activeElement))) {
+                last.focus();
+                event.preventDefault();
+            } else if (!event.shiftKey && (document.activeElement === last || !active.contains(document.activeElement))) {
+                first.focus();
+                event.preventDefault();
             }
         });
     });

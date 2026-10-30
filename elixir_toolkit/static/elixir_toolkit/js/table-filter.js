@@ -160,27 +160,28 @@
     function setupTableFilter($container, $filterInput, columnsAttr) {
         var columns = parseColumns(columnsAttr);
         var $table = $container.find('table');
-        
+        var liveEl = createLiveRegion($container);
+
         // Gestion de l'événement input (pour la saisie en temps réel)
         $filterInput.on('input', function() {
-            filterTable($table, $(this).val(), columns);
+            filterTable($table, $(this).val(), columns, liveEl);
         });
 
         // Gestion de l'événement change (pour les selects, etc.)
         $filterInput.on('change', function() {
-            filterTable($table, $(this).val(), columns);
+            filterTable($table, $(this).val(), columns, liveEl);
         });
 
         // Gestion de l'événement keyup (pour la touche Escape, etc.)
         $filterInput.on('keyup', function(e) {
             if (e.key === 'Escape') {
                 $(this).val('');
-                filterTable($table, '', columns);
+                filterTable($table, '', columns, liveEl);
             }
         });
-        
+
         // Appliquer le filtre initial avec la valeur déjà présente dans le champ
-        filterTable($table, $filterInput.val(), columns);
+        filterTable($table, $filterInput.val(), columns, liveEl);
     }
 
     /**
@@ -190,6 +191,7 @@
     function setupMultiTableFilter($container, $filterInputs, columnsAttr) {
         var columns = parseColumns(columnsAttr);
         var $table = $container.find('table');
+        var liveEl = createLiveRegion($container);
         
         // Stocker les valeurs des filtres avec leur colonne associée
         var filterConfig = {};
@@ -305,21 +307,21 @@
                         checkboxGroupValues[name].checkedValues = checkedValues;
                     }
                     
-                    filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
+                    filterTableMulti($table, filterConfig, columns, checkboxGroupValues, liveEl);
                 });
             } else {
                 // Gestion de l'événement input
                 $input.on('input', function() {
                     var name = $(this).data('filter-name');
                     filterConfig[name].value = $(this).val();
-                    filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
+                    filterTableMulti($table, filterConfig, columns, checkboxGroupValues, liveEl);
                 });
 
                 // Gestion de l'événement change
                 $input.on('change', function() {
                     var name = $(this).data('filter-name');
                     filterConfig[name].value = $(this).val();
-                    filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
+                    filterTableMulti($table, filterConfig, columns, checkboxGroupValues, liveEl);
                 });
 
                 // Gestion de l'événement keyup (pour Escape)
@@ -328,14 +330,14 @@
                         var name = $(this).data('filter-name');
                         $(this).val('');
                         filterConfig[name].value = '';
-                        filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
+                        filterTableMulti($table, filterConfig, columns, checkboxGroupValues, liveEl);
                     }
                 });
             }
         });
         
         // Appliquer le filtre initial avec les valeurs déjà présentes dans les champs
-        filterTableMulti($table, filterConfig, columns, checkboxGroupValues);
+        filterTableMulti($table, filterConfig, columns, checkboxGroupValues, liveEl);
     }
 
     /**
@@ -409,6 +411,29 @@
             }
         }
         return false;
+    }
+
+    /**
+     * 4.1.3 : annonce le nombre de lignes affichées après filtrage (aria-live polite)
+     */
+    var liveCounter = 0;
+
+    function createLiveRegion($container) {
+        var live = document.createElement('p');
+        live.className = 'is-sr-only';
+        live.setAttribute('aria-live', 'polite');
+        live.id = 'table-filter-live-' + (++liveCounter);
+        $container.append(live);
+        return live;
+    }
+
+    function announceResults(rows, liveEl) {
+        if (!liveEl) return;
+        var visible = 0;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].style.display !== 'none') visible++;
+        }
+        liveEl.textContent = visible + ' ligne' + (visible > 1 ? 's' : '') + ' affichée' + (visible > 1 ? 's' : '') + ' sur ' + rows.length;
     }
 
     /**
@@ -574,12 +599,13 @@
     /**
      * Filtre les lignes du tableau (version simple avec un seul filtre)
      */
-    function filterTable($table, filterValue, columns) {
+    function filterTable($table, filterValue, columns, liveEl) {
         var rows = getFilterableRows($table);
         var searchTerm = normalizeString(filterValue);
 
         if (searchTerm === '') {
             showAllRows(rows);
+            announceResults(rows, liveEl);
             return;
         }
 
@@ -587,6 +613,7 @@
             setRowVisible(rows[i], rowMatches(rows[i], searchTerm, null, columns));
         }
         syncDetailsRows($table, rows);
+        announceResults(rows, liveEl);
     }
 
     /**
@@ -595,7 +622,7 @@
      * - Logique OU entre les checkboxes du même groupe (au moins une case cochée doit matcher)
      * - Si toutes les cases d'un groupe sont cochées, le filtre pour ce groupe est désactivé
      */
-    function filterTableMulti($table, filterConfig, columns, checkboxGroupValues) {
+    function filterTableMulti($table, filterConfig, columns, checkboxGroupValues, liveEl) {
         var rows = getFilterableRows($table);
 
         // Filtres actifs hors groupes de checkboxes (textes, selects, checkboxes uniques),
@@ -624,6 +651,7 @@
 
         if (!activeFilters.length && !activeGroups.length) {
             showAllRows(rows);
+            announceResults(rows, liveEl);
             return;
         }
 
@@ -649,6 +677,7 @@
             setRowVisible(row, isVisible);
         }
         syncDetailsRows($table, rows);
+        announceResults(rows, liveEl);
     }
 
     /**

@@ -57,3 +57,33 @@
 .checkbox:has(> .help){display:grid;grid-template-columns:auto 1fr;align-items:start}
 .checkbox:has(> .help) input[type=checkbox]:not(:has(+.check)){margin-top:.125em}
 .checkbox:has(> .help) .help{grid-column:2;margin-top:.1em;margin-bottom:.5rem}
+
+/* --- Accessibilite WCAG 2.1 AA --- */
+/* 1.4.11 : l'etat coche/indetermine doit contraster >= 3:1 avec la coche (blanche).
+   Le primary Bulma par defaut (#00d1b2) n'atteint que 1.95:1 : on fonce le fond
+   des variantes claires (defaut/primary/success) a 60% + noir (>= 5:1 avec du blanc). */
+.checkbox input[type=checkbox]:checked+.check,
+.checkbox input[type=checkbox]:checked+.check.is-primary,
+.checkbox input[type=checkbox]:indeterminate+.check,
+.checkbox input[type=checkbox]:indeterminate+.check.is-primary,
+.checkbox input[type=checkbox]:checked:not(:has(+.check)),
+.checkbox input[type=checkbox]:indeterminate:not(:has(+.check)),
+.checkbox.is-primary input[type=checkbox]:checked:not(:has(+.check)),
+.checkbox.is-primary input[type=checkbox]:indeterminate:not(:has(+.check)){
+  background-color:color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000);
+  border-color:color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000);
+}
+.checkbox input[type=checkbox]:checked+.check.is-success,
+.checkbox input[type=checkbox]:indeterminate+.check.is-success,
+.checkbox.is-success input[type=checkbox]:checked:not(:has(+.check)),
+.checkbox.is-success input[type=checkbox]:indeterminate:not(:has(+.check)){
+  background-color:color-mix(in srgb, var(--bulma-success, #48c78e) 60%, #000);
+  border-color:color-mix(in srgb, var(--bulma-success, #48c78e) 60%, #000);
+}
+/* 2.4.7 : indicateur de focus clavier bien visible sur la case stylisee (.check)
+   et sur l'input natif stylise (variante sans span.check). */
+.checkbox input[type=checkbox]:focus-visible+.check,
+.checkbox input[type=checkbox]:focus-visible:not(:has(+.check)){
+  outline:2px solid var(--bulma-primary, #00d1b2);
+  outline-offset:2px;
+}

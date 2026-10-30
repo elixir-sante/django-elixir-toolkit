@@ -12,19 +12,21 @@
 <div class="control {% if icon %}has-icons-left{% endif %}">
     <div class="{% if not multiple %}select{% endif %} {{ css_classes }} {% if field.errors %}is-danger{% endif %}" style="width:100%">
         {% if icon %}
-        <span class="icon is-small is-left">
+        <span class="icon is-small is-left" aria-hidden="true">
             <i class="fas {{ icon }}"></i>
         </span>
         {% endif %}
 
-        <select 
-            name="{{ name }}" 
-            id="{{ element_id }}" 
-            aria-label="{{ name }}" 
+        {# Le libellé visible (label for=element_id) donne le nom accessible : pas d'aria-label ici. #}
+        <select
+            name="{{ name }}"
+            id="{{ element_id }}"
             placeholder="{{ placeholder }}"
-            class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}" 
-            {% if disabled %}disabled{% endif %} 
-            {% if required %}required=""{% endif %} 
+            class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}"
+            {% if field.errors %}aria-invalid="true"{% endif %}
+            {% if field.help_text or field.errors %}aria-describedby="{% if field.help_text %}{{ element_id }}-help{% endif %}{% if field.errors %}{% if field.help_text %} {% endif %}{{ element_id }}-errors{% endif %}"{% endif %}
+            {% if disabled %}disabled{% endif %}
+            {% if required %}required=""{% endif %}
             {% if multiple %}multiple{% endif %}
         >
             {% if placeholder and not multiple %}
@@ -32,7 +34,7 @@
             {% endif %}
 
             {% for value, label in options %}
-                <option class="is-size-6" value="{{ value }}" 
+                <option class="is-size-6" value="{{ value }}"
                     {% if multiple %}
                         {% if value|stringformat:"s" in selected_list or value in selected_list %}selected{% endif %}
                     {% else %}
@@ -44,12 +46,12 @@
             {% endfor %}
         </select>
     </div>
-    
+
     {% if field.errors %}
-        {% for error in field.errors %}<p class="help is-danger">{{ error }}</p>{% endfor %}
+        {% for error in field.errors %}<p class="help is-danger"{% if forloop.first %} id="{{ element_id }}-errors"{% endif %}>{{ error }}</p>{% endfor %}
     {% endif %}
     {% if field.help_text %}
-        <p class="help">{{ field.help_text|safe }}</p>
+        <p class="help" id="{{ element_id }}-help">{{ field.help_text|safe }}</p>
     {% endif %}
 </div>
 
@@ -85,6 +87,17 @@
                 if ($el.is(':disabled')) {
                     this.disable();
                 }
+                // 4.1.2 : nom accessible explicite sur les boutons « retirer » (plugin remove_button)
+                var labelRemove = function() {
+                    instance.$control.find('.item .remove').each(function() {
+                        if (!this.hasAttribute('aria-label')) {
+                            this.setAttribute('aria-label', 'Retirer cette option');
+                        }
+                    });
+                };
+                labelRemove();
+                this.on('item_add', labelRemove);
+                this.on('item_remove', function() { setTimeout(labelRemove, 0); });
             },
             onDropdownOpen: function() {
                 closeOthers(this);

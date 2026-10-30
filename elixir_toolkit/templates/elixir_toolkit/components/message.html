@@ -1,6 +1,7 @@
 {% load elixir_toolkit_tags %}
 
-<article class="message {{ color_class }} {{ css_classes }}" {{ attrs }}>
+{# role="status" par défaut, "alert" pour les messages danger (4.1.3) ; surchargeable via role=... #}
+<article class="message {{ color_class }} {{ css_classes }}" role="{{ role|default:'status' }}" {{ attrs }}>
   {% if title %}
   <div class="message-header">
     {{ title }}

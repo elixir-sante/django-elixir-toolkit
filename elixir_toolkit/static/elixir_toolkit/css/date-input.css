@@ -44,9 +44,10 @@
     opacity: 1;
 }
 
-/* « jj/mm/aaaa » affiché comme un placeholder tant que le champ est vide */
+/* « jj/mm/aaaa » affiché comme un placeholder tant que le champ est vide.
+   1.4.3 : le placeholder est du texte, >= 4.5:1 (0.3 = ~1.6:1, insuffisant). */
 .toolkit-date-input.is-empty > input[type="date"] {
-    color: var(--bulma-input-placeholder-color, rgba(54, 54, 54, 0.3));
+    color: var(--bulma-input-placeholder-color, rgba(54, 54, 54, 0.7));
 }
 
 /* Croix à gauche du calendrier : son apparition ne décale pas le calendrier.

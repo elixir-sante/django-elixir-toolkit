@@ -31,6 +31,8 @@ def ui_message_base(
     """
     color_class = f"is-{color}" if color else "is-primary"
     html_attrs = {k.replace("_", "-"): v for k, v in kwargs.items()}
+    # 4.1.3 : annonce du message aux lecteurs d'écran (alert pour les erreurs, status sinon)
+    role = html_attrs.pop("role", "alert" if color == "danger" else "status")
 
     # Django marque les littéraux passés aux tags de template comme "safe"
     # (mark_safe dans django.template.base.Variable) : un simple
@@ -48,6 +50,7 @@ def ui_message_base(
         "color_class": color_class,
         "title": title,
         "css_classes": css_classes,
+        "role": role,
         "attrs": flatatt(html_attrs),
     }
 
@@ -137,6 +140,8 @@ class MessageBlockNode(Node):
         title = self.title.resolve(context) if self.title else None
         resolved_classes = self.css_classes.resolve(context) if self.css_classes else ""
         html_attrs = {k: v.resolve(context) for k, v in self.kwargs.items()}
+        # 4.1.3 : annonce du message (alert pour danger, status sinon), surchargeable via role=
+        role = html_attrs.pop("role", "alert" if (color or self.default_color) == "danger" else "status")
 
         t = template.loader.get_template("elixir_toolkit/components/message.html")
         ctx = context.flatten()
@@ -146,6 +151,7 @@ class MessageBlockNode(Node):
                 "color_class": f"is-{color}" if color else "is-primary",
                 "title": escape(title) if title is not None else None,
                 "css_classes": resolved_classes,
+                "role": role,
                 "attrs": flatatt(html_attrs),
             }
         )
