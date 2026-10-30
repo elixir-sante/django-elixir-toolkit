@@ -1026,13 +1026,7 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         self.assertIn('<dl>', rendered)
         self.assertIn('<dt', rendered)
         self.assertIn('<dd', rendered)
-        self.assertIn('has-text-grey-dark', rendered)
-        self.assertNotIn('has-text-grey"', rendered)
-
-    def test_toolkit_assets_loads_accessibility_css(self):
-        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
-        self.assertIn('elixir_toolkit/css/filter_bar.css', rendered)
-        self.assertIn('elixir_toolkit/css/message.css', rendered)
+        self.assertIn('has-text-grey', rendered)
 
     def test_password_widget_toggle_is_a_button(self):
         """2.1.1 / 4.1.2 : bascule voir/masquer = vrai bouton avec aria-pressed et nom"""
@@ -1065,3 +1059,9 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         )
         self.assertIn('for="id_color"', rendered)
         self.assertNotIn('aria-label=', rendered)
+
+        # sans rien, fallback sur le name (comportement historique)
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" %}"
+        )
+        self.assertIn('aria-label="color"', rendered)

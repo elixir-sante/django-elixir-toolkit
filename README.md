@@ -63,14 +63,14 @@ Les composants du toolkit sont conçus pour être conformes **WCAG 2.1 niveau AA
 - **Clavier** : tous les contrôles interactifs sont utilisables au clavier (boutons réels, pas de `<div>`/`<span>` cliquables) ; la modale de confirmation piège le focus, y envoie le focus à l'ouverture et le rend à la fermeture ; indicateur de focus visible (y compris sur les cases à cocher / radios stylisées).
 - **Lecteurs d'écran** : `aria-hidden` sur les icônes décoratives, `role="dialog"`/`aria-modal` sur la modale, `aria-pressed` sur les filtres, `aria-expanded`/`aria-controls` sur les lignes de tableau dépliables, `aria-sort` sur les en-têtes triables, `role="status"`/`role="alert"` sur les messages, `role="alert"` sur les erreurs d'upload, annonce du nombre de lignes après filtrage de tableau (région `aria-live`).
 - **Formulaires** : chaque champ a un `<label for>` associé ; les erreurs sont reliées au champ (`aria-invalid` + `aria-describedby`) ; le compteur de limite de caractères est relié au champ ; un champ requis masqué par une dépendance est désactivé tant qu'il est caché.
-- **Contraste** : bordures de champs, indicateurs d'état (cases cochées, tags Selectize, stepper, barre de progression) et textes d'erreur renforcés pour atteindre les ratios requis (4.5:1 texte, 3:1 non-textuel). Les fonds colorés avec texte blanc utilisent `color-mix(in srgb, var(--bulma-*) 60%, #000)` pour rester conformes quel que soit le thème.
+- **Contraste (1.4.3 / 1.4.11)** : non modifié par le toolkit, il relève du thème du projet (voir ci-dessous).
 
 **Côté projet**, pour une conformité AA complète :
 
 - `<html lang="fr">` sur votre template de base ;
 - un `<title>` unique par page (critère 2.4.2) ;
 - un landmark `<main>` et un lien d'évitement « Aller au contenu principal » (critère 2.4.1) — cf. `test_views/templates/base.html` pour un exemple ;
-- une couleur `--bulma-primary` dont le contraste avec le texte du bouton (`--bulma-primary-invert`) atteint 4.5:1 (le toolkit ne contrôle pas votre thème).
+- un thème Bulma dont les couleurs atteignent les ratios requis : 4.5:1 pour le texte (1.4.3, ex. `--bulma-primary` avec son `--bulma-primary-invert` sur les boutons primaires, textes d'erreur `is-danger`) et 3:1 pour les indicateurs non-textuels (1.4.11, ex. bordure des champs `#dbdbdb` = 1.38:1 à foncer).
 
 ---
 

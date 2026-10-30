@@ -57,7 +57,7 @@ body {
 }
 
 .control .select .selectize-control .selectize-input input::placeholder {
-    color: #6b6b6b !important;
+    color: #7a7a7a !important;
     font-style: italic;
 }
 
@@ -76,7 +76,7 @@ body {
     font-size: 16px !important;
     z-index: 1000 !important;
     background-color: #fff !important;
-    border: 1px solid #8a8a8a !important;
+    border: 1px solid #dbdbdb !important;
     box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1) !important;
 }
 
@@ -118,7 +118,7 @@ body {
 .selectize-control.plugin-clear_button .clear {
     right: 10px !important;
     font-size: 18px !important;
-    color: #4a4a4a !important;
+    color: #b5b5b5 !important;
 }
 
 /* Erreur de validation */

@@ -1,6 +1,6 @@
 <div class="column is-6 ui-field {{ css_classes }}">
     <dl>
-        <dt class="ui-field-label has-text-weight-normal is-size-7 has-text-grey-dark">{{ label }}</dt>
+        <dt class="ui-field-label has-text-weight-normal is-size-7 has-text-grey">{{ label }}</dt>
         <dd class="ui-field-value has-text-weight-normal">
             {% if not value %}{{ empty }}{% elif href %}<a href="{{ href }}">{{ value }}</a>{% else %}{{ value }}{% endif %}
         </dd>

@@ -1,10 +1,7 @@
 .ui-stepper {
     --ui-stepper-size: 40px;
-    /* 1.4.11 : bordure du marqueur >= 3:1 (#d0d0d0 = 1.54:1) */
-    --ui-stepper-line-color: #8a8a8a;
-    /* 1.4.3 : fond de l'etape active fonce pour un texte blanc >= 4.5:1
-       (primary par defaut = 1.95:1 avec du blanc) */
-    --ui-stepper-active-color: color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000);
+    --ui-stepper-line-color: #d0d0d0;
+    --ui-stepper-active-color: var(--bulma-primary);
     --ui-stepper-text-color: #333;
 
     display: flex;
@@ -74,6 +71,5 @@
     margin-top: 0.15rem;
     font-size: 0.65rem;
     line-height: 1.2;
-    /* 1.4.3 : #7a7a7a = 4.29:1 < 4.5:1 */
-    color: #595959;
+    color: var(--bulma-grey, #7a7a7a);
 }

@@ -16,7 +16,7 @@
             {% for sub_filters in filters %}
                 {% for val, label in sub_filters %}
                     <button
-                        class="button is-rounded is-primary-light filter-btn"
+                        class="button is-rounded is-primary-light has-text-primary filter-btn"
                         data-filter="{{ val }}"
                         data-group="{{ forloop.parentloop.counter0 }}"
                         aria-pressed="false">
@@ -27,7 +27,7 @@
         {% else %}
             {% for val, label in filters %}
                 <button
-                    class="button is-rounded is-primary-light filter-btn"
+                    class="button is-rounded is-primary-light has-text-primary filter-btn"
                     data-filter="{{ val }}"
                     data-group="0"
                     aria-pressed="false">
@@ -49,6 +49,7 @@
         btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
         btn.classList.toggle('is-primary', pressed);
         btn.classList.toggle('is-primary-light', !pressed);
+        btn.classList.toggle('has-text-primary', !pressed);
     }
 
     mainContainer.querySelectorAll('.filter-btn').forEach(btn => {

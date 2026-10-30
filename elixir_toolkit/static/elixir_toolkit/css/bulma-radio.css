@@ -46,32 +46,6 @@
 .radio:has(> .help) .help{grid-column:2;margin-top:.1em;margin-bottom:.5rem}
 
 /* --- Accessibilite WCAG 2.1 AA --- */
-/* 1.4.11 : le point/rond coche doit contraster >= 3:1 avec le fond blanc de la case.
-   Le primary Bulma par defaut (#00d1b2) n'atteint que 1.95:1 : on fonce les variantes
-   claires (defaut/primary/success) a 60% + noir. */
-.radio input[type=radio]:checked+.check:before,
-.radio input[type=radio]:checked+.check.is-primary:before{
-  background-color:color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000);
-}
-.radio input[type=radio]:checked+.check.is-success:before{
-  background-color:color-mix(in srgb, var(--bulma-success, #48c78e) 60%, #000);
-}
-.radio input[type=radio]:checked+.check,
-.radio input[type=radio]:checked+.check.is-primary{
-  border-color:color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000);
-}
-.radio input[type=radio]:checked+.check.is-success{
-  border-color:color-mix(in srgb, var(--bulma-success, #48c78e) 60%, #000);
-}
-.radio input[type=radio]:checked:not(:has(+.check)),
-.radio.is-primary input[type=radio]:checked:not(:has(+.check)){
-  border-color:color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000);
-  background-image:radial-gradient(circle, color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000) 45%, transparent 50%);
-}
-.radio.is-success input[type=radio]:checked:not(:has(+.check)){
-  border-color:color-mix(in srgb, var(--bulma-success, #48c78e) 60%, #000);
-  background-image:radial-gradient(circle, color-mix(in srgb, var(--bulma-success, #48c78e) 60%, #000) 45%, transparent 50%);
-}
 /* 2.4.7 : indicateur de focus clavier bien visible. */
 .radio input[type=radio]:focus-visible+.check,
 .radio input[type=radio]:focus-visible:not(:has(+.check)){

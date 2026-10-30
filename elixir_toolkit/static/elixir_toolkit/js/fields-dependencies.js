@@ -23,23 +23,11 @@ function initFieldDependencies() {
         map[controllerId].forEach((fieldId) => {
             // 1. On génère l'ID Crispy : "div_" + "id_mon_champ" = "div_id_mon_champ"
             // 2. On génère l'ID classique : "field_" + "id_mon_champ" = "field_id_mon_champ"
-            const fieldWrapper = document.getElementById("div_" + fieldId) ||
+            const fieldWrapper = document.getElementById("div_" + fieldId) || 
                                  document.getElementById("field_" + fieldId);
 
             if (fieldWrapper) {
                 fieldWrapper.style.display = isChecked ? "block" : "none";
-
-                // 3.3.1 : un champ requis masqué ne doit pas bloquer la validation
-                // sur un champ invisible → on le désactive tant qu'il est caché
-                fieldWrapper.querySelectorAll("input, select, textarea").forEach((el) => {
-                    if (!isChecked && el.required && !el.disabled && !el.dataset.dependencyDisabled) {
-                        el.dataset.dependencyDisabled = "1";
-                        el.disabled = true;
-                    } else if (isChecked && el.dataset.dependencyDisabled) {
-                        el.disabled = false;
-                        delete el.dataset.dependencyDisabled;
-                    }
-                });
             }
         });
     }

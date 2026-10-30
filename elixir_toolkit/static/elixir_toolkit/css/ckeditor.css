@@ -9,9 +9,7 @@
 #uploadProgressBar {
   width: 0%;
   height: 6px;
-  /* 1.4.11 : la barre doit contraster >= 3:1 avec le fond #eee
-     (primary par defaut = ~1.9:1) */
-  background: color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000);
+  background: var(--bulma-primary);
   border-radius: 4px;
   transition: width 0.3s ease;
 }

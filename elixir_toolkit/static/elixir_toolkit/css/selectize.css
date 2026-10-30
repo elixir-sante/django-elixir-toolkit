@@ -120,8 +120,7 @@
     font-size: 16px !important;
     z-index: 1000 !important;
     background-color: #fff !important;
-    /* 1.4.11 : bordure du menu >= 3:1 (#dbdbdb = 1.38:1) */
-    border: 1px solid #8a8a8a !important;
+    border: 1px solid #dbdbdb !important;
     box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1) !important;
 }
 
@@ -156,14 +155,11 @@
     row-gap: 0.25rem; /* Espace uniquement entre les lignes de tags, aucun effet à une seule ligne */
 }
 
-/* Multi-select (Tags).
-   1.4.3 : le fond primary par defaut (#00d1b2) avec texte blanc = 1.95:1 :
-   on fonce le fond a 60% + noir (>= 5:1 avec du blanc, quel que soit le theme). */
+/* Multi-select (Tags) */
 .selectize-control.multi .selectize-input > div.item {
     /* padding: 2px 8px !important; */
     margin: 0 0.25rem 0 0 !important;
-    background-color: color-mix(in srgb, var(--bulma-primary, #00d1b2) 60%, #000) !important;
-    color: #ffffff !important;
+    background-color: var(--bulma-primary) !important;
     background-image: none !important;
     box-shadow: none !important;
     border: none !important;
@@ -258,7 +254,5 @@
 }
 
 .selectize-control.plugin-remove_button .item .remove {
-    /* 1.4.11 : separateur du bouton « retirer » >= 3:1 sur le fond du tag */
-    border-left: 1px solid rgba(255, 255, 255, 0.6) !important;
-    color: #ffffff !important;
+    border-left: 1px solid #aaa !important;
 }
