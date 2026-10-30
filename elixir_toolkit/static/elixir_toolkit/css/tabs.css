@@ -21,9 +21,9 @@
   cursor: pointer;
 }
 
-/* 2.4.7 : focus clavier visible (le bouton n'a pas de bordure) */
+/* 2.4.7 : focus clavier visible (le bouton n'a pas de bordure), basé sur primary */
 .tabs-scroll-hint:focus-visible {
-  outline: 2px solid var(--bulma-primary, #485fc7);
+  outline: 2px solid var(--bulma-primary, #00d1b2);
   outline-offset: -2px;
 }
 

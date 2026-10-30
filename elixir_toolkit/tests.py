@@ -1065,3 +1065,14 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
             "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" %}"
         )
         self.assertIn('aria-label="color"', rendered)
+
+    def test_focus_css_based_on_primary(self):
+        """2.4.7 : le focus est branché sur la couleur primary du thème"""
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+        self.assertIn('elixir_toolkit/css/focus.css', rendered)
+
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/focus.css').read_text()
+        self.assertIn('--bulma-focus-h: var(--bulma-primary-h)', css)
+        self.assertIn('--bulma-input-focus-h: var(--bulma-primary-h)', css)
+        self.assertIn('outline: 2px solid var(--bulma-primary)', css)
