@@ -1099,3 +1099,11 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
             rendered = self.render_template(t, ctx)
             self.assertNotIn('{#', rendered, msg=t)
             self.assertNotIn('#}', rendered, msg=t)
+
+    def test_selectize_dropdown_hover_uses_primary(self):
+        """Le survol du menu déroulant Selectize est basé sur var(--bulma-primary),
+        pas sur le bleu link/secondary par défaut."""
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/selectize.css').read_text()
+        self.assertIn('var(--toolkit-select-active-bg, var(--bulma-primary))', css)
+        self.assertNotIn('var(--secondary-color, #485fc7)', css)
