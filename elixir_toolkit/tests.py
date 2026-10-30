@@ -1051,3 +1051,17 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         self.assertIn('for="id_password"', rendered)
         # l'icône de cadenas est décorative
         self.assertIn('aria-hidden="true"', rendered)
+
+    def test_ui_select_aria_label_fallback_without_label(self):
+        """4.1.2 : sans label visible, un aria-label explicite est requis"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" aria_label='Couleur' %}"
+        )
+        self.assertIn('aria-label="Couleur"', rendered)
+
+        # avec un label visible, pas d'aria-label en double
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" label='Couleur' %}"
+        )
+        self.assertIn('for="id_color"', rendered)
+        self.assertNotIn('aria-label=', rendered)

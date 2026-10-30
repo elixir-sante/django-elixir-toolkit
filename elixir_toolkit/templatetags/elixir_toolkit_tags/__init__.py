@@ -279,6 +279,8 @@ def ui_select(
     placeholder="Choisissez...",
     icon=None,
     css_classes="",
+    label=None,
+    aria_label=None,
 ):
     if isinstance(options, str):
         try:
@@ -299,6 +301,9 @@ def ui_select(
         "icon": icon,
         "css_classes": css_classes,
         "multiple": multiple,
+        # 4.1.2 : un label visible, ou à défaut un aria-label explicite
+        "label": label,
+        "aria_label": aria_label or label,
     }
 
 

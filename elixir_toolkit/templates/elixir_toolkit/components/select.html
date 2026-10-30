@@ -17,10 +17,12 @@
         </span>
         {% endif %}
 
-        {# Le libellé visible (label for=element_id) donne le nom accessible : pas d'aria-label ici. #}
+        {# Le libellé visible (label for=element_id) donne le nom accessible ;
+           aria-label uniquement en secours quand aucun label n'est rendu. #}
         <select
             name="{{ name }}"
             id="{{ element_id }}"
+            {% if not label and aria_label %}aria-label="{{ aria_label }}"{% endif %}
             placeholder="{{ placeholder }}"
             class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}"
             {% if field.errors %}aria-invalid="true"{% endif %}

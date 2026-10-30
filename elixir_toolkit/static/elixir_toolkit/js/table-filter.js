@@ -419,11 +419,16 @@
     var liveCounter = 0;
 
     function createLiveRegion($container) {
-        var live = document.createElement('p');
-        live.className = 'is-sr-only';
-        live.setAttribute('aria-live', 'polite');
-        live.id = 'table-filter-live-' + (++liveCounter);
-        $container.append(live);
+        // Idempotent : on réutilise la région existante (les ré-init HTMX
+        // appellent setupMultiTableFilter plusieurs fois sur le même container)
+        var live = $container.children('p.table-filter-live').get(0);
+        if (!live) {
+            live = document.createElement('p');
+            live.className = 'is-sr-only table-filter-live';
+            live.setAttribute('aria-live', 'polite');
+            live.id = 'table-filter-live-' + (++liveCounter);
+            $container.append(live);
+        }
         return live;
     }
 
