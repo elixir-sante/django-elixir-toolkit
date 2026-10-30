@@ -2,6 +2,8 @@
 {% load elixir_toolkit_tags %}
 {% load crispy_forms_tags %}
 
+{% block title %}Démo Django Elixir Toolkit{% endblock %}
+
 {% block body %}
 <div class="container">
     <h1 class="title is-1">Django Elixir toolkit</h1>
@@ -63,8 +65,8 @@
 <div class="box">
     <h2 id="boutons" class="title is-3">Boutons</h2>
     
-    <a href="#" class="button is-primary">Bouton primary</a>
-    <a href="#" class="button">Bouton</a>
+    <a href="#boutons" class="button is-primary">Bouton primary</a>
+    <a href="#boutons" class="button">Bouton</a>
     {% ui_button icon="fas fa-trash has-text-danger" %}
     {% ui_button text="Supprimer" icon="fas fa-trash has-text-danger" %}
     {% ui_button text="Voir la doc" href="https://bulma.io" target="_blank" icon="fas fa-book" %}
@@ -97,14 +99,14 @@
     <h3 class="title is-4">Selectize simple</h3>
     
     <h3 class="title is-4">Avec option déjà sélectionnée</h3>
-    {% ui_select  name="filtre_status"  options=mes_options_paiement selected="SCHE" icon="fa-filter" placeholder="Filtrer par statut..." %}
+    {% ui_select name="filtre_status" options=mes_options_paiement selected="SCHE" icon="fa-filter" placeholder="Filtrer par statut..." label="Statut" %}
     
     <h3 class="title is-4">Sans présélection</h3>
-    {% ui_select name="payment_mode" options=mes_options_paiement icon="fa-credit-card" placeholder="Choisir le mode..." %}
+    {% ui_select name="payment_mode" options=mes_options_paiement icon="fa-credit-card" placeholder="Choisir le mode..." label="Mode de paiement" %}
     
     <h3 class="title is-4">Selectize multiple</h3>
     <p>25 choix disponibles pour tester le passage en multiligne du champ quand il se remplit.</p>
-    {% ui_select name="payment_mode_multiple" multiple=True options=mes_options_multiples selected="CB" icon="fa-credit-card"  placeholder="Choisir le mode..." %}
+    {% ui_select name="payment_mode_multiple" multiple=True options=mes_options_multiples selected="CB" icon="fa-credit-card" placeholder="Choisir le mode..." label="Modes de paiement" %}
 </div>
 
 
@@ -335,7 +337,7 @@
 <!-- Champ de recherche pour le filtrage -->
 <div class="field has-addons mb-4">
     <div class="control is-expanded">
-        <input type="text" id="table-filter-input" class="input" placeholder="Rechercher dans le tableau...">
+        <input type="text" id="table-filter-input" class="input" placeholder="Rechercher dans le tableau..." aria-label="Rechercher dans le tableau">
     </div>
     <div class="control">
         <button class="button is-info" onclick="document.getElementById('table-filter-input').value = ''; $('#table-filter-input').trigger('input');">
@@ -417,7 +419,7 @@
 <!-- Champ de recherche pour le filtrage sur colonne spécifique -->
 <div class="field has-addons mb-4">
     <div class="control is-expanded">
-        <input type="text" id="category-filter-input" class="input" placeholder="Rechercher par catégorie...">
+        <input type="text" id="category-filter-input" class="input" placeholder="Rechercher par catégorie..." aria-label="Rechercher par catégorie">
     </div>
 </div>
 
@@ -662,7 +664,7 @@
         <div class="field">
             <label class="label" for="date-html-readonly">Lecture seule</label>
             <div class="control">
-                <input type="date" id="date-html-readonly" name="date_html_readonly" value="2024-02-01" readonly>
+                <input type="date" id="date-html-readonly" name="date_html_readonly" value="2024-02-01" readonly disabled>
             </div>
         </div>
     </div>

@@ -54,6 +54,12 @@ th.sort-desc .sort-icon::after {
     display: inline;
 }
 
+/* 2.4.7 : focus clavier visible sur les en-tetes triables */
+th:focus-visible {
+    outline: 2px solid var(--bulma-primary, #00d1b2);
+    outline-offset: -2px;
+}
+
 /* Ensure table headers are clickable */
 th {
     cursor: pointer;

@@ -6,9 +6,9 @@
 <button type="{{ type|default:'button' }}" class="button {{ css_classes }}" {{ attrs|safe }}>
 {% endif %}
 
-    {# Case cochée : Icône à gauche #}
+    {# Case cochée : Icône à gauche (décorative, masquée aux lecteurs d'écran) #}
     {% if icon and not icon_right %}
-    <span class="icon">
+    <span class="icon" aria-hidden="true">
         <i class="{{ icon }}"></i>
     </span>
     {% endif %}
@@ -19,7 +19,7 @@
 
     {# Case cochée : Icône à droite #}
     {% if icon and icon_right %}
-    <span class="icon">
+    <span class="icon" aria-hidden="true">
         <i class="{{ icon }}"></i>
     </span>
     {% endif %}

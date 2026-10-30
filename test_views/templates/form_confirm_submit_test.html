@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load elixir_toolkit_tags %}
 
+{% block title %}Test confirmation de soumission - Démo Elixir Toolkit{% endblock %}
+
 {% block body %}
 <div class="container">
     <h1 class="title is-1">Test du composant Form Confirm Submit</h1>
@@ -32,39 +34,39 @@
         <form id="test-form-1" method="post" action="#" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="field">
-                <label class="label">Nom <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_nom">Nom <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <input class="input" type="text" name="nom" placeholder="Votre nom" required>
+                    <input class="input" type="text" name="nom" id="id_nom" placeholder="Votre nom" required>
                 </div>
             </div>
             <div class="field">
-                <label class="label">Email <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_email">Email <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <input class="input" type="email" name="email" placeholder="Votre email" required>
+                    <input class="input" type="email" name="email" id="id_email" placeholder="Votre email" required>
                 </div>
             </div>
             <div class="field">
-                <label class="label">Message <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_message">Message <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <textarea class="textarea" name="message" placeholder="Votre message" required></textarea>
+                    <textarea class="textarea" name="message" id="id_message" placeholder="Votre message" required></textarea>
                 </div>
             </div>
             <div class="field">
-                <label class="label">Fichier</label>
+                <label class="label" for="id_fichier">Fichier</label>
                 <div class="control">
-                    <input class="input" type="file" name="fichier">
+                    <input class="input" type="file" name="fichier" id="id_fichier">
                 </div>
             </div>
             <div class="field">
-                <label class="label">Fichiers multiples</label>
+                <label class="label" for="id_fichiers">Fichiers multiples</label>
                 <div class="control">
-                    <input class="input" type="file" name="fichiers" multiple>
+                    <input class="input" type="file" name="fichiers" id="id_fichiers" multiple>
                 </div>
             </div>
             <div class="field">
-                <label class="label">Date</label>
+                <label class="label" for="id_date">Date</label>
                 <div class="control">
-                    <input class="input" type="date" name="date">
+                    <input class="input" type="date" name="date" id="id_date">
                 </div>
             </div>
             <div class="field">
@@ -90,15 +92,15 @@
         <form id="test-form-2" method="post" action="#">
             {% csrf_token %}
             <div class="field">
-                <label class="label">Titre <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_titre">Titre <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <input class="input" type="text" name="titre" placeholder="Titre" required minlength="3">
+                    <input class="input" type="text" name="titre" id="id_titre" placeholder="Titre" required minlength="3">
                 </div>
             </div>
             <div class="field">
-                <label class="label">Message <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_message2">Message <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <textarea class="textarea" name="message" placeholder="Votre message" required minlength="10"></textarea>
+                    <textarea class="textarea" name="message" id="id_message2" placeholder="Votre message" required minlength="10"></textarea>
                 </div>
             </div>
             <div class="field">
@@ -119,9 +121,9 @@
         <form id="test-form-3" method="post" action="#">
             {% csrf_token %}
             <div class="field">
-                <label class="label">Titre <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_titre3">Titre <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <input class="input" type="text" name="titre" placeholder="Titre" required>
+                    <input class="input" type="text" name="titre" id="id_titre3" placeholder="Titre" required>
                 </div>
             </div>
             <div class="field">
@@ -152,22 +154,22 @@
         <form id="test-form-4" method="post" action="#">
             {% csrf_token %}
             <div class="field">
-                <label class="label">Description <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_description">Description <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <textarea class="textarea" name="description" placeholder="Description détaillée (minimum 50 caractères)" required minlength="50"></textarea>
+                    <textarea class="textarea" name="description" id="id_description" placeholder="Description détaillée (minimum 50 caractères)" required minlength="50"></textarea>
                 </div>
                 <p class="help is-danger">Minimum 50 caractères</p>
             </div>
             <div class="field">
-                <label class="label">Email <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_email4">Email <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <input class="input" type="email" name="email" placeholder="Votre email" required>
+                    <input class="input" type="email" name="email" id="id_email4" placeholder="Votre email" required>
                 </div>
             </div>
             <div class="field">
-                <label class="label">Âge <span class="has-text-danger">*</span></label>
+                <label class="label" for="id_age">Âge <span class="has-text-danger" aria-hidden="true">*</span></label>
                 <div class="control">
-                    <input class="input" type="number" name="age" placeholder="Votre âge" required min="18" max="120">
+                    <input class="input" type="number" name="age" id="id_age" placeholder="Votre âge" required min="18" max="120">
                 </div>
                 <p class="help">Doit être compris entre 18 et 120 ans</p>
             </div>

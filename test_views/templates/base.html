@@ -6,12 +6,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Ma page de test</title>
+    <title>{% block title %}Ma page de test{% endblock %}</title>
 
-    {% toolkit_assets %}  
+    {% toolkit_assets %}
+    <style>
+      /* 2.4.1 : lien d'évitement visible au focus clavier */
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        z-index: 2000;
+        background: #363636;
+        color: #fff;
+        padding: 0.75rem 1rem;
+      }
+      .skip-link:focus-visible {
+        left: 0;
+        color: #fff;
+      }
+    </style>
 
   </head>
   <body>
-    {% block body %}{% endblock %}
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+    <main id="main-content">
+      {% block body %}{% endblock %}
+    </main>
   </body>
 </html>

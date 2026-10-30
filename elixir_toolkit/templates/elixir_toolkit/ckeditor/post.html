@@ -2,8 +2,6 @@
 <link rel="stylesheet" href="{% static 'css/toolkit/ckeditor.css' %}">
 <script src="{% static 'js/toolkit/ckeditor-load-external-plugins.js' %}"></script>
 
-<!-- Barre de progression upload visible à l'utilisateur -->
-<div id="uploadProgressContainer">
-    <div id="uploadProgressBar"></div>
-</div>
-<div id="uploadProgressText"></div>
+<!-- Barre de progression upload visible à l'utilisateur (élément natif <progress> : rôle et valeurs implicites) -->
+<progress id="uploadProgressContainer" aria-label="Envoi du fichier en cours" max="100" value="0"></progress>
+<div id="uploadProgressText" aria-live="polite"></div>

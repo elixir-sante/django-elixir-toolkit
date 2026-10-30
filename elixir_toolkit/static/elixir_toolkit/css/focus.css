@@ -1,0 +1,19 @@
+/* Focus clavier basé sur la couleur primary du thème (WCAG 2.4.7).
+   Par défaut, Bulma branche le focus des champs et boutons sur `link` (bleu)
+   via --bulma-focus-* / --bulma-input-focus-* : on les rebranche sur primary.
+   Chargé après le CSS Bulma (cf. toolkit_assets), ce :root gagne. */
+:root {
+    --bulma-focus-h: var(--bulma-primary-h);
+    --bulma-focus-s: var(--bulma-primary-s);
+    --bulma-focus-l: var(--bulma-primary-l);
+    --bulma-input-focus-h: var(--bulma-primary-h);
+    --bulma-input-focus-s: var(--bulma-primary-s);
+    --bulma-input-focus-l: var(--bulma-primary-l);
+}
+
+/* Liens et éléments focusables sans style de focus Bulma : outline primary */
+a:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--bulma-primary);
+    outline-offset: 2px;
+}

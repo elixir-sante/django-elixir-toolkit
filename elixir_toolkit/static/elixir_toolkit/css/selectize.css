@@ -130,9 +130,11 @@
 }
 
 
+/* Survol d'une option : basé sur la couleur primary du thème projet
+   (surchargeable via --toolkit-select-active-bg) */
 .selectize-dropdown .option.active,
 .selectize-dropdown .selectize-dropdown-content .active {
-    background-color: var(--toolkit-select-active-bg, var(--secondary-color, #485fc7)) !important;
+    background-color: var(--toolkit-select-active-bg, var(--bulma-primary)) !important;
     color: var(--toolkit-select-active-color, #ffffff) !important;
 }
 

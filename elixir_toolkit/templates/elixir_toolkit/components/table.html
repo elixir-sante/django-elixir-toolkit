@@ -6,12 +6,22 @@
 
 {% if expandable %}
 <script>
+    // 4.1.2 : état du bouton d'expansion exposé (aria-expanded / aria-controls)
+    function initToggleRowBtns() {
+        document.querySelectorAll('.toggle-row-btn[data-target]').forEach(function(btn) {
+            btn.setAttribute('aria-controls', btn.dataset.target);
+            if (!btn.hasAttribute('aria-expanded')) {
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
     document.addEventListener('click', function(event) {
         var btn = event.target.closest('.toggle-row-btn');
         if (!btn) return;
 
         // On récupère l'ID cible stocké dans data-target (ex: "details-row-6")
-        var targetId = btn.getAttribute('data-target');
+        var targetId = btn.dataset.target;
         if (!targetId) return;
 
         var targetRow = document.getElementById(targetId);
@@ -20,12 +30,17 @@
         if (targetRow) {
             var isHidden = targetRow.style.display === 'none';
             targetRow.style.display = isHidden ? '' : 'none';
-            
+            btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+
             if (icon) {
+                icon.setAttribute('aria-hidden', 'true');
                 icon.classList.toggle('fa-chevron-down', isHidden);
                 icon.classList.toggle('fa-chevron-right', !isHidden);
             }
         }
     });
+
+    document.addEventListener('DOMContentLoaded', initToggleRowBtns);
+    document.addEventListener('htmx:afterSettle', initToggleRowBtns);
 </script>
 {% endif %}
