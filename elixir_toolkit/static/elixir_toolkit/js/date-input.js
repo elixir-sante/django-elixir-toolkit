@@ -4,6 +4,7 @@
  * - bascule la classe `is-empty` du wrapper (placeholder grisé, croix masquée)
  * - la croix vide le champ et déclenche `input` / `change` (filtres HTMX, validations...)
  * - suit les affectations JS (`input.value = ''`) et le contenu injecté dynamiquement
+ * - au reset du formulaire, déclenche `input` / `change` sur les champs date modifiés
  *
  * Le libellé de la croix est surchargeable par champ via `data-clear-label`.
  */
@@ -104,10 +105,30 @@
         input.focus();
     });
 
+    function dateInputsOf(form) {
+        // form.elements couvre aussi les champs rattachés via l'attribut `form="…"`
+        return Array.prototype.filter.call(form.elements || [], function (el) {
+            return el.matches && el.matches(INPUT);
+        });
+    }
+
+    // Le reset natif d'un formulaire restaure les valeurs sans déclencher `input`
+    // ni `change` : les scripts qui écoutent les champs date (filtres de tableau,
+    // champs HTMX, validations...) ne voient pas le changement. On émet donc ces
+    // événements sur chaque champ date dont la valeur a effectivement changé.
     document.addEventListener('reset', function (e) {
         var form = e.target;
-        // Les valeurs sont restaurées après l'événement reset
-        setTimeout(function () { init(form); }, 0);
+        var inputs = dateInputsOf(form);
+        // L'événement reset est émis AVANT la restauration des valeurs
+        var before = inputs.map(function (input) { return input.value; });
+        setTimeout(function () {
+            init(form);
+            inputs.forEach(function (input, i) {
+                if (input.value === before[i]) return;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        }, 0);
     });
 
     function start() {

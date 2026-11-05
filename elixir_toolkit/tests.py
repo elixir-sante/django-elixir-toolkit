@@ -600,6 +600,19 @@ class ToolkitDateInputTest(ToolkitBaseTest):
         self.assertIn('elixir_toolkit/css/date-input.css', rendered)
         self.assertIn('elixir_toolkit/js/date-input.js', rendered)
 
+    def test_date_input_js_dispatches_events_on_form_reset(self):
+        """Le reset natif ne déclenche ni `input` ni `change` : date-input.js doit
+        les émettre sur les champs date restaurés pour que les écouteurs
+        (filtres de tableau, HTMX...) se réappliquent."""
+        import pathlib
+        js = pathlib.Path('elixir_toolkit/static/elixir_toolkit/js/date-input.js').read_text(encoding='utf-8')
+        reset_handler = js[js.index("addEventListener('reset'"):js.index('function start()')]
+
+        self.assertIn("new Event('input', { bubbles: true })", reset_handler)
+        self.assertIn("new Event('change', { bubbles: true })", reset_handler)
+        # uniquement si la valeur a changé (pas de requête HTMX inutile)
+        self.assertIn('input.value === before[i]', reset_handler)
+
     def test_toolkit_assets_loads_bulma_checkbox_css(self):
         rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
 
