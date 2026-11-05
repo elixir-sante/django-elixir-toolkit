@@ -89,6 +89,18 @@ class ToolkitValidationTest(ToolkitBaseTest):
         self.assertIn('selected', rendered)
         self.assertIn('Alpha', rendered)
 
+    def test_ui_select_on_initialize_does_not_use_instance_before_assignment(self):
+        """onInitialize s'exécute pendant `$el.selectize(config)`, avant l'affectation
+        de `var instance` : y lire `instance.$control` lève une TypeError qui interrompt
+        l'init (handler de reset non branché, classe `input` absente)."""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_select name='test' options=\"[('A', 'Alpha')]\" %}"
+        )
+        on_initialize = rendered[rendered.index('onInitialize:'):rendered.index('onDropdownOpen:')]
+
+        self.assertNotIn('instance.', on_initialize)
+        self.assertIn('self.$control', on_initialize)
+
 
 class ToolkitSelectizeTest(ToolkitBaseTest):
     def test_ui_select_tag_parsing(self):
