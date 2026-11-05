@@ -89,11 +89,16 @@
                     this.disable();
                 }
                 // 4.1.2 : Selectize masque le <select> (display:none) et le remplace par un
-                // <input> généré : on lui transmet le nom accessible du champ (label visible
-                // via aria-labelledby, sinon aria-label explicite, sinon name).
+                // <input> généré : on lui transmet le nom accessible du champ. aria-labelledby
+                // vers le label visible + aria-label explicite (texte du label sans l'astérisque),
+                // car tous les outils d'audit ne suivent pas aria-labelledby.
                 var labelId = elementId + '-label';
-                if (document.getElementById(labelId)) {
+                var labelEl = document.getElementById(labelId);
+                if (labelEl) {
                     this.$control_input.attr('aria-labelledby', labelId);
+                    var labelClone = labelEl.cloneNode(true);
+                    labelClone.querySelectorAll('.asterisk').forEach(function (a) { a.remove(); });
+                    this.$control_input.attr('aria-label', labelClone.textContent.replace(/\s+/g, ' ').trim());
                 } else {
                     this.$control_input.attr('aria-label', "{{ aria_label|default:name|escapejs }}");
                 }
