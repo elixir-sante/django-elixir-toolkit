@@ -1,7 +1,7 @@
 {% load elixir_toolkit_tags %}
 
 {% if label %}
-    <label class="label" for="{{ element_id }}">
+    <label class="label" for="{{ element_id }}" id="{{ element_id }}-label">
         {{ label }}
         {% if field.field.required %}
             <span class="asterisk" aria-hidden="true">*</span>
@@ -87,6 +87,15 @@
                 window.selectizeInstances.push(this);
                 if ($el.is(':disabled')) {
                     this.disable();
+                }
+                // 4.1.2 : Selectize masque le <select> (display:none) et le remplace par un
+                // <input> généré : on lui transmet le nom accessible du champ (label visible
+                // via aria-labelledby, sinon aria-label explicite, sinon name).
+                var labelId = elementId + '-label';
+                if (document.getElementById(labelId)) {
+                    this.$control_input.attr('aria-labelledby', labelId);
+                } else {
+                    this.$control_input.attr('aria-label', "{{ aria_label|default:name|escapejs }}");
                 }
                 // 4.1.2 : nom accessible explicite sur les boutons « retirer » (plugin remove_button)
                 // `this` et non `instance` : onInitialize s'exécute pendant $el.selectize(),

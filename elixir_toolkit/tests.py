@@ -1259,6 +1259,21 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         self.assertIn('elixir_toolkit/js/accessibility.js', rendered)
         self.assertIn('elixir_toolkit/css/message.css', rendered)
 
+    def test_ui_select_label_has_id_for_selectize_input(self):
+        """4.1.2 : le label du select porte un id ({id}-label), repris en aria-labelledby
+        sur l'<input> généré par Selectize — le <select> original étant masqué (display:none),
+        sans cela le contrôle visible n'a pas de nom accessible (« missing form label »)"""
+        class F(forms.Form):
+            color = forms.ChoiceField(label="Couleur", choices=[('red', 'Rouge')], required=False)
+
+        field = F()['color']
+        rendered = self.render_template(
+            '{% include "elixir_toolkit/components/select.html" with field=field label=field.label name="color" element_id="id_color" %}',
+            {'field': field},
+        )
+        self.assertIn('<label class="label" for="id_color" id="id_color-label">', rendered)
+        self.assertIn("this.$control_input.attr('aria-labelledby', labelId)", rendered)
+
     def test_asterisk_uses_accessible_red(self):
         """1.4.3 : l'astérisque des champs obligatoires est en #B60000 (contraste ~7:1 sur
         fond clair), pas le rouge Bulma is-danger (#f14668, ~3.3:1, insuffisant)"""
