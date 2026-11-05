@@ -1258,3 +1258,11 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
         self.assertIn('elixir_toolkit/js/accessibility.js', rendered)
         self.assertIn('elixir_toolkit/css/message.css', rendered)
+
+    def test_asterisk_uses_accessible_red(self):
+        """1.4.3 : l'astérisque des champs obligatoires est en #B60000 (contraste ~7:1 sur
+        fond clair), pas le rouge Bulma is-danger (#f14668, ~3.3:1, insuffisant)"""
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/input.css').read_text()
+        self.assertIn('.asterisk', css)
+        self.assertIn('#b60000', css)

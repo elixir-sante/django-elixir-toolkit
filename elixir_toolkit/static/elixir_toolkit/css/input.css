@@ -5,3 +5,9 @@ input[type="password"]::-ms-clear {
     width: 0;
     height: 0;
 }
+
+/* 1.4.3 : astérisque des champs obligatoires — rouge #B60000 (contraste 7:1 sur fond
+   clair), le rouge Bulma is-danger (#f14668, ~3.3:1) est insuffisant pour du texte */
+.asterisk {
+    color: #b60000;
+}
