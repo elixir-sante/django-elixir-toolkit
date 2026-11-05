@@ -10,8 +10,7 @@
     </label>
     <div class="control">
         <div class="file has-name is-fullwidth {% if field.errors %}is-danger{% else %}is-primary{% endif %}">
-            {# 1.3.1 / 3.3.2 : un seul élément label associé à l'input (celui du champ ci-dessus) —
-               le conteneur visuel est un span, sinon l'input en aurait deux #}
+            {# 1.3.1 / 3.3.2 : un seul élément label associé à l'input (celui du champ ci-dessus), le conteneur visuel est un span #}
             {% crispy_field field 'class' 'file-input' %}
             <span class="file-label">
                 <span class="file-cta">

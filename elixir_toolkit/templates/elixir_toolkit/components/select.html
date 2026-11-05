@@ -17,11 +17,11 @@
         </span>
         {% endif %}
 
-        {# Le libellé visible (label for=element_id) donne le nom accessible ; sans label, aria-label en secours (aria_label explicite, sinon name). #}
+        {# 4.1.2 : aria-label systématique sur le select (label, sinon aria_label, sinon name) — Selectize masque ensuite le select et certains outils signalent « select missing label » #}
         <select
             name="{{ name }}"
             id="{{ element_id }}"
-            {% if not label %}aria-label="{{ aria_label|default:name }}"{% endif %}
+            aria-label="{{ aria_label|default:label|default:name }}"
             placeholder="{{ placeholder }}"
             class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}"
             {% if field.errors %}aria-invalid="true"{% endif %}

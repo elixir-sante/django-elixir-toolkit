@@ -1169,12 +1169,13 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         )
         self.assertIn('aria-label="Couleur"', rendered)
 
-        # avec un label visible, pas d'aria-label en double
+        # avec un label visible, aria-label reprend le texte du label (le <select> est
+        # ensuite masqué par Selectize : aria-label garantit le nom accessible partout)
         rendered = self.render_template(
             "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" label='Couleur' %}"
         )
         self.assertIn('for="id_color"', rendered)
-        self.assertNotIn('aria-label=', rendered)
+        self.assertIn('aria-label="Couleur"', rendered)
 
         # sans rien, fallback sur le name (comportement historique)
         rendered = self.render_template(
