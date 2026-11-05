@@ -67,7 +67,8 @@
     
     <a href="#boutons" class="button is-primary">Bouton primary</a>
     <a href="#boutons" class="button">Bouton</a>
-    {% ui_button icon="fas fa-trash has-text-danger" %}
+    {# 4.1.2 : bouton icône seule = nom accessible obligatoire via aria-label #}
+    {% ui_button icon="fas fa-trash has-text-danger" aria_label="Supprimer" %}
     {% ui_button text="Supprimer" icon="fas fa-trash has-text-danger" %}
     {% ui_button text="Voir la doc" href="https://bulma.io" target="_blank" icon="fas fa-book" %}
     {% ui_button_primary text="bouton primary" css_classes="is-large is-loading is-rounded" id="submit-btn" %}

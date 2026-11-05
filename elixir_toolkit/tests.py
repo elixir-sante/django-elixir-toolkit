@@ -1223,3 +1223,38 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/selectize.css').read_text()
         self.assertIn('var(--toolkit-select-active-bg, var(--bulma-primary))', css)
         self.assertNotIn('var(--secondary-color, #485fc7)', css)
+
+    def test_message_is_a_div_not_an_article(self):
+        """4.1.2 : les rôles status/alert ne sont pas autorisés sur l'élément <article>"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_message content='Info' %}"
+        )
+        self.assertIn('<div class="message is-primary " role="status"', rendered)
+        self.assertNotIn('<article', rendered)
+
+    def test_button_icon_only_has_aria_label(self):
+        """4.1.2 : un bouton réduit à une icône doit avoir un nom accessible"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_button icon='fas fa-trash' aria_label='Supprimer' %}"
+        )
+        self.assertIn('aria-label="Supprimer"', rendered)
+
+    def test_file_input_has_a_single_label(self):
+        """1.3.1 / 3.3.2 : un seul label associé à l'input file (le libellé du champ)"""
+        class F(forms.Form):
+            fichier = forms.FileField(label="Pièce jointe", required=True)
+
+        field = F()['fichier']
+        rendered = self.render_template(
+            '{% include "elixir_toolkit/components/fields/file_input.html" with field=field %}',
+            {'field': field},
+        )
+        self.assertEqual(rendered.count('<label'), 1)
+        self.assertIn('for="id_fichier"', rendered)
+        self.assertNotIn('<label class="file-label">', rendered)
+
+    def test_toolkit_assets_loads_accessibility_assets(self):
+        """Les correctifs d'accessibilité génériques sont chargés par {% toolkit_assets %}"""
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+        self.assertIn('elixir_toolkit/js/accessibility.js', rendered)
+        self.assertIn('elixir_toolkit/css/message.css', rendered)

@@ -1,0 +1,4 @@
+/* 1.4.1 : les liens dans un bloc de texte doivent rester distinguables sans la couleur */
+.message .message-body a {
+    text-decoration: underline;
+}

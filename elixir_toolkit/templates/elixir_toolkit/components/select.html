@@ -94,8 +94,11 @@
                 var self = this;
                 var labelRemove = function() {
                     self.$control.find('.item .remove').each(function() {
-                        if (!this.hasAttribute('aria-label')) {
-                            this.setAttribute('aria-label', 'Retirer cette option');
+                        // 2.5.3 : le « × » visible est décoratif, hors du nom accessible
+                        this.setAttribute('aria-label', 'Retirer cette option');
+                        this.setAttribute('title', 'Retirer cette option');
+                        if (!this.querySelector('span[aria-hidden="true"]')) {
+                            this.innerHTML = '<span aria-hidden="true">' + this.innerHTML + '</span>';
                         }
                     });
                 };
