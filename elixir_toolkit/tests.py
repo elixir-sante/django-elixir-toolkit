@@ -943,6 +943,96 @@ class ToolkitLayoutColumnsTest(TestCase):
         self.assertIn(COLUMN_FULL_CLASS, html)
 
 
+class ToolkitFormHelperTest(TestCase):
+    """`SuperFormHelper` / `CustomFormHelper` : scripts de validation et de loading."""
+
+    def make_form_class(self):
+        from crispy_forms.layout import Layout
+        from elixir_toolkit.forms import CustomFormHelper
+
+        class FakeForm(CustomFormHelper, forms.Form):
+            name = forms.CharField(label="Nom")
+            layout = Layout("name")  # layout de classe, partagé par toutes les instances
+
+        return FakeForm
+
+    def render(self, form):
+        from crispy_forms.utils import render_crispy_form
+        return render_crispy_form(form)
+
+    def test_custom_form_helper_defaults(self):
+        from elixir_toolkit.forms import SuperFormHelper
+
+        helper = self.make_form_class()().helper
+
+        self.assertIsInstance(helper, SuperFormHelper)
+        self.assertFalse(helper.form_tag)
+        self.assertTrue(helper.enable_form_validator)
+        self.assertTrue(helper.enable_submit_button_loading)
+
+    def test_scripts_work_for_htmx_loaded_forms(self):
+        """Formulaire injecté par HTMX : DOMContentLoaded est passé, les scripts s'exécutent tout de suite."""
+        html = self.render(self.make_form_class()())
+
+        self.assertIn('id="id_name"', html)
+        self.assertEqual(html.count("document.currentScript"), 2)
+        self.assertIn("document.readyState === 'loading'", html)
+        self.assertIn("is-loading", html)
+        self.assertIn("input-error", html)
+        # Loading retiré si la requête HTMX échoue ou ne redirige pas.
+        self.assertIn("htmx:afterRequest", html)
+
+    def test_layout_not_mutated_by_rendering(self):
+        """Rendus successifs : les scripts ne s'accumulent pas dans le layout partagé."""
+        form_class = self.make_form_class()
+        fields_before = len(form_class.layout.fields)
+
+        self.render(form_class())
+        html = self.render(form_class())
+
+        self.assertEqual(len(form_class.layout.fields), fields_before)
+        self.assertEqual(html.count("<script>"), 2)
+
+    def test_super_form_helper_without_options_adds_no_script(self):
+        from crispy_forms.layout import Layout
+        from elixir_toolkit.forms import SuperFormHelper
+
+        class FakeForm(forms.Form):
+            name = forms.CharField(label="Nom")
+
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.helper = SuperFormHelper()
+                self.helper.form_tag = False
+                self.helper.layout = Layout("name")
+
+        self.assertNotIn("<script>", self.render(FakeForm()))
+
+    def test_custom_form_helper_setter_overrides_helper(self):
+        form = self.make_form_class()()
+        custom = FormHelper()
+
+        form.helper = custom
+
+        self.assertIs(form.helper, custom)
+
+    def test_custom_form_helper_property_override(self):
+        """Personnalisation par surcharge de la propriété `helper` (`super().helper`)."""
+        form_class = self.make_form_class()
+
+        class OverriddenForm(form_class):
+            @property
+            def helper(self):
+                helper = super().helper
+                helper.enable_submit_button_loading = False
+                return helper
+
+        html = self.render(OverriddenForm())
+
+        self.assertIn("input-error", html)
+        self.assertNotIn("is-loading", html)
+
+
 class ToolkitAccessibilityTest(ToolkitBaseTest):
     """Conformité WCAG 2.1 AA des composants rendus (revue accessibilité)."""
 

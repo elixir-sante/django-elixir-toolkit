@@ -1,10 +1,10 @@
 import json
 
 from crispy_forms.layout import Field as CrispyField
-from crispy_forms.layout import HTML
 from crispy_forms.helper import FormHelper
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils.safestring import mark_safe
 
 from elixir_toolkit.validators import (
     MaxFileSizeValidator,
@@ -61,68 +61,146 @@ def limit_length(field, max_length):
     field.widget.attrs.update(field.widget_attrs(field.widget))
 
 
+# Les scripts des helpers s'exécutent au rendu du formulaire, qu'il soit dans
+# la page initiale ou injecté par HTMX (balises <script> exécutées au swap) :
+# `DOMContentLoaded` seul ne suffit pas, il est déjà passé pour un formulaire
+# chargé par HTMX. Ils ne visent que le <form> qui les contient
+# (`document.currentScript`), et chaque élément n'est branché qu'une fois.
+FORM_VALIDATOR_SCRIPT = """
+<script>
+(function (script) {
+    function init() {
+        var form = script && script.closest('form');
+        var root = form || document;
+        root.querySelectorAll('input, textarea, select').forEach(function (input) {
+            if (input.dataset.toolkitValidator) { return; }
+            input.dataset.toolkitValidator = 'true';
+            var validate = function () {
+                input.classList.toggle('input-error', !input.checkValidity());
+            };
+            input.addEventListener('input', validate);
+            input.addEventListener('blur', validate);
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})(document.currentScript);
+</script>
+"""
+
+SUBMIT_BUTTON_LOADING_SCRIPT = """
+<script>
+(function (script) {
+    var SUBMIT_SELECTOR = 'button[type="submit"], input[type="submit"]';
+
+    function stopLoading(root) {
+        root.querySelectorAll(SUBMIT_SELECTOR).forEach(function (button) {
+            button.classList.remove('is-loading');
+        });
+    }
+
+    function bind(form) {
+        if (form.dataset.toolkitSubmitLoading) { return; }
+        form.dataset.toolkitSubmitLoading = 'true';
+        form.addEventListener('submit', function (e) {
+            var submitButton = e.submitter || form.querySelector(SUBMIT_SELECTOR);
+            if (submitButton) {
+                // Bulma `is-loading` : spinner + clics bloqués, pas de double envoi.
+                submitButton.classList.add('is-loading');
+            }
+        });
+        // Formulaire HTMX : réponse sans redirection (erreur, formulaire non
+        // remplacé…) → bouton réactivé. Avec redirection, il reste en loading.
+        form.addEventListener('htmx:afterRequest', function (e) {
+            if (e.detail.elt !== form) { return; }
+            var xhr = e.detail.xhr;
+            var redirects = xhr && (xhr.getResponseHeader('HX-Redirect') || xhr.getResponseHeader('HX-Location') || xhr.getResponseHeader('HX-Refresh'));
+            if (!e.detail.successful || !redirects) {
+                stopLoading(form);
+            }
+        });
+    }
+
+    function init() {
+        var form = script && script.closest('form');
+        (form ? [form] : document.querySelectorAll('form')).forEach(bind);
+    }
+
+    // Retour arrière (bfcache) : la page revient telle quelle, bouton compris.
+    if (!window.toolkitSubmitLoadingPageshow) {
+        window.toolkitSubmitLoadingPageshow = true;
+        window.addEventListener('pageshow', function (e) {
+            if (e.persisted) { stopLoading(document); }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})(document.currentScript);
+</script>
+"""
+
+
 class SuperFormHelper(FormHelper):
-    
+    """`FormHelper` crispy avec deux comportements optionnels :
+
+    - `enable_form_validator` : classe `input-error` sur un champ invalide (saisie / sortie) ;
+    - `enable_submit_button_loading` : `is-loading` sur le bouton au submit (anti double envoi).
+
+    Fonctionne pour un formulaire de la page comme pour un formulaire chargé par HTMX.
+    Le layout n'est pas modifié : les scripts sont ajoutés au rendu.
+    """
+
     enable_form_validator = False
     enable_submit_button_loading = False
-    
+
     def render_layout(self, form, context, template_pack=None):
-
-        # Ajout du script de validation au formulaire
-        if self.layout and self.enable_form_validator:
-            self.layout.append(HTML("""
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('input, textarea, select').forEach(function (input) {
-                        var validate = function () {
-                            input.classList.toggle('input-error', !input.checkValidity())
-                        }
-                        input.addEventListener('input', validate)
-                        input.addEventListener('blur', validate)
-                    })
-                })
-            </script>
-            """))
-
-        # Ajout de la propriété is-loading au bouton submit
-        if self.layout and self.enable_submit_button_loading:
-            self.layout.append(HTML("""
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('form').forEach(function (form) {
-                        form.addEventListener('submit', function (e) {
-                            var submitButton = e.submitter || form.querySelector('button[type="submit"]')
-                            if (submitButton) {
-                                submitButton.classList.add('is-loading')
-                            }
-                        })
-                    })
-                })
-            </script>
-            """))
-
-        return super().render_layout(form, context, template_pack)
+        html = super().render_layout(form, context, template_pack)
+        if not self.layout:
+            return html
+        if self.enable_form_validator:
+            html += mark_safe(FORM_VALIDATOR_SCRIPT)
+        if self.enable_submit_button_loading:
+            html += mark_safe(SUBMIT_BUTTON_LOADING_SCRIPT)
+        return html
 
 
 class CustomFormHelper:
-    """CustomFormHelper :
-     - ajoute automatiquement le JS de validation au formulaire
-     - permet la personnalisation du helper via la surcharge de helper
+    """Mixin de formulaire : fournit un `helper` prêt à l'emploi.
+
+    À hériter avec `forms.Form` (ce n'est pas un `FormHelper`) :
+
+        class MyForm(CustomFormHelper, forms.Form):
+            layout = Layout(...)   # attribut ou propriété, optionnel
+
+    Le helper est un `SuperFormHelper` avec `form_tag = False` (balise <form> à
+    écrire dans le template), validation visuelle et loading du bouton activés,
+    et le `layout` du formulaire s'il en définit un. Pour le personnaliser,
+    affecter un autre helper (`self.helper = ...`) : il est alors utilisé tel quel.
     """
-    
+
     @property
     def helper(self):
-        self._helper = SuperFormHelper()
-        self._helper.form_tag = False
-        self._helper.enable_form_validator = True
-        self._helper.enable_submit_button_loading = True
-        if hasattr(self, 'layout'):
-            self._helper.layout = self.layout
-        return self._helper
+        custom_helper = getattr(self, "_custom_helper", None)
+        if custom_helper is not None:
+            return custom_helper
+        helper = SuperFormHelper()
+        helper.form_tag = False
+        helper.enable_form_validator = True
+        helper.enable_submit_button_loading = True
+        if hasattr(self, "layout"):
+            helper.layout = self.layout
+        return helper
 
     @helper.setter
     def helper(self, value):
-        self._helper = value
+        self._custom_helper = value
 
 
 class MultipleFileUploadInput(forms.FileInput):

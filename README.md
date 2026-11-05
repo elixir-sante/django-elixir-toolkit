@@ -865,14 +865,37 @@ class MyForm(forms.Form):
 
 #### CustomFormHelper
 
-Helper prêt à l'emploi avec les fonctionnalités activées :
+`CustomFormHelper` est un **mixin de formulaire** (pas un `FormHelper`) : il fournit
+une propriété `helper` prête à l'emploi (`SuperFormHelper`, validation + loading activés,
+`form_tag = False` → balise `<form>` à écrire dans le template).
 
 ```python
+from crispy_forms.layout import Layout
 from elixir_toolkit.forms import CustomFormHelper
 
-class MyForm(forms.Form):
-    helper = CustomFormHelper()
+class MyForm(CustomFormHelper, forms.Form):
+    name = forms.CharField(label="Nom")
+
+    layout = Layout("name")   # attribut ou propriété : repris par le helper
 ```
+
+Pour personnaliser le helper, surcharger la propriété :
+
+```python
+class MyForm(CustomFormHelper, forms.Form):
+    @property
+    def helper(self):
+        helper = super().helper
+        helper.layout = Layout("name")
+        return helper
+```
+
+Ne pas écrire `helper = CustomFormHelper()` ni `self.helper = CustomFormHelper()` : ce n'est
+pas un `FormHelper`, crispy ne sait pas le rendre.
+
+Les scripts (validation, loading) marchent aussi pour un formulaire chargé par HTMX et ne
+visent que le `<form>` qui les contient. Sur un formulaire HTMX, le bouton sort du loading si
+la requête échoue ou ne redirige pas (`HX-Redirect`, `HX-Location`, `HX-Refresh`).
 
 ---
 
@@ -943,22 +966,25 @@ class MyForm(forms.Form):
 ### Formulaire
 ```python
 from django import forms
-from elixir_toolkit.forms import CustomFormHelper, ToolkitFileField
-from crispy_forms.layout import Layout, Submit
+from elixir_toolkit.forms import CustomFormHelper, FileUpload, ToolkitFileField
+from crispy_forms.layout import Layout
 
-class MyForm(forms.Form):
+class MyForm(CustomFormHelper, forms.Form):
     name = forms.CharField(label="Nom")
     document = ToolkitFileField(label="Document")
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = CustomFormHelper()
-        self.helper.form_method = 'post'
-        self.helper.layout = Layout(
-            'name',
-            FileUpload('document'),
-            Submit('submit', 'Enregistrer', css_class='button is-primary')
-        )
+    layout = Layout(
+        'name',
+        FileUpload('document'),
+    )
+```
+
+```html
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% crispy form %}
+    {% ui_button_primary text="Enregistrer" type="submit" %}
+</form>
 ```
 
 ---

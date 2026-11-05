@@ -84,15 +84,37 @@ class MyForm(forms.Form):
         self.helper.enable_submit_button_loading = True  # is-loading sur le bouton au submit
 ```
 
-`CustomFormHelper` est un helper prêt à l'emploi (validation + loading activés,
-`form_tag = False`) :
+`CustomFormHelper` est un **mixin de formulaire** (pas un `FormHelper`) : il fournit
+une propriété `helper` prête à l'emploi (`SuperFormHelper`, validation + loading activés,
+`form_tag = False` → balise `<form>` à écrire dans le template).
 
 ```python
-class MyForm(forms.Form):
-    helper = CustomFormHelper()   # attention : form_tag=False → <form> à écrire dans le template
+from crispy_forms.layout import Layout
+from elixir_toolkit.forms import CustomFormHelper
+
+class MyForm(CustomFormHelper, forms.Form):
+    name = forms.CharField(label="Nom")
+
+    layout = Layout("name")   # attribut ou propriété : repris par le helper
 ```
 
-Il réutilise `self.layout` si le formulaire définit un attribut `layout`.
+Pour personnaliser le helper, surcharger la propriété :
+
+```python
+class MyForm(CustomFormHelper, forms.Form):
+    @property
+    def helper(self):
+        helper = super().helper
+        helper.layout = Layout("name")
+        return helper
+```
+
+Ne pas écrire `helper = CustomFormHelper()` ni `self.helper = CustomFormHelper()` : ce n'est
+pas un `FormHelper`, crispy ne sait pas le rendre.
+
+Les scripts (validation, loading) marchent aussi pour un formulaire chargé par HTMX et ne
+visent que le `<form>` qui les contient. Sur un formulaire HTMX, le bouton sort du loading si
+la requête échoue ou ne redirige pas (`HX-Redirect`, `HX-Location`, `HX-Refresh`).
 
 ---
 
@@ -136,9 +158,9 @@ self.helper.layout = Layout(
 
 ```python
 from crispy_forms.layout import Layout
-from elixir_toolkit.forms import FileUpload, ToolkitFileField, MultipleFileField
+from elixir_toolkit.forms import CustomFormHelper, FileUpload, ToolkitFileField, MultipleFileField
 
-class MyForm(forms.Form):
+class MyForm(CustomFormHelper, forms.Form):
     document = ToolkitFileField(
         max_size=10 * 1024 * 1024,          # défaut : 5 Mo
         allowed_extensions=["pdf", "png"],  # défaut : ['pdf', 'png', 'jpg', 'jpeg']
@@ -150,13 +172,10 @@ class MyForm(forms.Form):
         max_files=5,                        # défaut : 5
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = CustomFormHelper()
-        self.helper.layout = Layout(
-            FileUpload("document"),
-            FileUpload("pieces"),
-        )
+    layout = Layout(
+        FileUpload("document"),
+        FileUpload("pieces"),
+    )
 ```
 
 Points importants :
