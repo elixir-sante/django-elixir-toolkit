@@ -1169,13 +1169,14 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         )
         self.assertIn('aria-label="Couleur"', rendered)
 
-        # avec un label visible, l'aria-label reprend exactement son texte (2.5.3 « label
-        # in name ») : le <select> masqué par Selectize garde ainsi un nom accessible
+        # avec un label visible, pas d'aria-label sur le <select> : le nom accessible
+        # vient du <label for> (2.5.3 « label in name ») ; l'input généré par Selectize
+        # reçoit le nom via aria-labelledby/aria-label posés par le JS du template
         rendered = self.render_template(
             "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" label='Couleur' %}"
         )
         self.assertIn('for="id_color"', rendered)
-        self.assertIn('aria-label="Couleur"', rendered)
+        self.assertNotIn('aria-label="Couleur"', rendered)
 
         # sans rien, fallback sur le name (comportement historique)
         rendered = self.render_template(

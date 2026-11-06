@@ -17,11 +17,11 @@
         </span>
         {% endif %}
 
-        {# 4.1.2 / 2.5.3 : aria-label systématique, mais = texte du label visible quand il existe (sinon fallback aria_label / field.label / name) — Selectize masque ensuite le <select> #}
+        {# 4.1.2 / 2.5.3 : aria-label seulement sans label visible (sinon le <label for> est le nom accessible, identique au label visible — un aria-label additionnel ne passe pas l'analyse statique Sonar) — l'input généré par Selectize reçoit son nom via le JS du template #}
         <select
             name="{{ name }}"
             id="{{ element_id }}"
-            aria-label="{% firstof label aria_label field.label name %}"
+            {% if not label %}aria-label="{% firstof aria_label field.label name %}"{% endif %}
             placeholder="{{ placeholder }}"
             class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}"
             {% if field.errors %}aria-invalid="true"{% endif %}
