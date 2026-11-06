@@ -833,6 +833,14 @@ class ToolkitIBANFieldTest(ToolkitBaseTest):
         self.assertIn("input[data-max-length][data-max-length-counter]", js)
         self.assertIn("data-max-length-ignore-spaces", js)
 
+    def test_max_length_js_blocks_overflow_without_native_maxlength(self):
+        import pathlib
+        js = pathlib.Path('elixir_toolkit/static/elixir_toolkit/js/max-length.js').read_text(encoding='utf-8')
+
+        # Sans `maxlength` natif (IBANField), frappe et collage bloqués en JS
+        self.assertIn("if (!field.hasAttribute('maxlength')) blockOverflow(", js)
+        self.assertIn("addEventListener('beforeinput'", js)
+
 
 class ToolkitFileUploadHelpTextTest(ToolkitBaseTest):
     """help_text généré automatiquement à partir des propriétés du champ,

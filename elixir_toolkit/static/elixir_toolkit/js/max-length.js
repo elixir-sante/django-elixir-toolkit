@@ -3,7 +3,8 @@
  * - compteur « n / max caractères » sous les `textarea`, les éditeurs CKEditor et les `input`
  *   portant `data-max-length-counter`, en rouge à la limite
  * - `data-max-length-ignore-spaces` : espaces exclus du décompte (ex. IBAN saisi par groupes de 4)
- * - `input` / `textarea` : blocage natif via l'attribut `maxlength`
+ * - `input` / `textarea` : blocage natif via l'attribut `maxlength` ; sans `maxlength`
+ *   (cas `data-max-length-ignore-spaces`), frappe bloquée et texte collé tronqué en JS
  * - CKEditor : bloque la frappe et tronque le texte collé au-delà de la limite
  * - contenu déjà trop long (valeur en base, glisser-déposer...) : message d'erreur
  *   et boutons submit du formulaire désactivés
@@ -80,11 +81,42 @@
 
         var update = createFeedback(field, field.closest('.control') || field);
         var ignoreSpaces = field.hasAttribute('data-max-length-ignore-spaces');
+        function count(text) {
+            return (ignoreSpaces ? text.replace(SPACES, '') : text).length;
+        }
         function refresh() {
-            update((ignoreSpaces ? field.value.replace(SPACES, '') : field.value).length);
+            update(count(field.value));
         }
         field.addEventListener('input', refresh);
+        // Pas de `maxlength` natif (il compterait les espaces) : blocage équivalent en JS
+        if (!field.hasAttribute('maxlength')) blockOverflow(field, maxLengthOf(field), count);
         refresh();
+    }
+
+    // Bloque la frappe et tronque le texte collé au-delà de `max` (décompte par `count`),
+    // comme le ferait l'attribut `maxlength`. Le glisser-déposer reste signalé par l'erreur.
+    function blockOverflow(field, max, count) {
+        field.addEventListener('beforeinput', function (event) {
+            var type = event.inputType || '';
+            if (event.isComposing || type.indexOf('insert') !== 0 || type === 'insertFromDrop') return;
+            var text = event.data;
+            if (text == null && event.dataTransfer) text = event.dataTransfer.getData('text/plain');
+            var start = field.selectionStart;
+            var end = field.selectionEnd;
+            if (text == null || start === null) return;
+
+            var value = field.value;
+            var allowed = max - count(value.slice(0, start) + value.slice(end));
+            if (count(text) <= allowed) return;
+
+            event.preventDefault();
+            if (allowed <= 0) return;
+            // Garde le début du texte jusqu'à `allowed` caractères comptés
+            var cut = 0;
+            while (cut < text.length && count(text.slice(0, cut + 1)) <= allowed) cut++;
+            field.setRangeText(text.slice(0, cut), start, end, 'end');
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+        });
     }
 
     // Nombre de caractères de texte dans des ranges du modèle CKEditor
