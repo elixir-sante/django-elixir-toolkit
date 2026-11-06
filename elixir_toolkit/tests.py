@@ -1131,8 +1131,8 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
             {'field': field},
         )
         self.assertIn('aria-invalid="true"', rendered)
-        self.assertIn('aria-describedby="id_choice-errors"', rendered)
-        self.assertIn('id="id_choice-errors"', rendered)
+        self.assertIn('aria-describedby="id_choice_error"', rendered)
+        self.assertIn('id="id_choice_error"', rendered)
 
     def test_ui_field_uses_dl_semantics(self):
         """1.3.1 : couple libellé/valeur en dl/dt/dd, contraste du libellé renforcé"""

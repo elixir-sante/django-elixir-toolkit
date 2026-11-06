@@ -25,7 +25,7 @@
             placeholder="{{ placeholder }}"
             class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}"
             {% if field.errors %}aria-invalid="true"{% endif %}
-            {% if field.help_text or field.errors %}aria-describedby="{% if field.help_text %}{{ element_id }}-help{% endif %}{% if field.errors %}{% if field.help_text %} {% endif %}{{ element_id }}-errors{% endif %}"{% endif %}
+            {% if field.help_text or field.errors %}aria-describedby="{% if field.help_text %}{{ element_id }}-help{% endif %}{% if field.errors %}{% if field.help_text %} {% endif %}{{ element_id }}_error{% endif %}"{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if required %}required=""{% endif %}
             {% if multiple %}multiple{% endif %}
@@ -49,7 +49,7 @@
     </div>
 
     {% if field.errors %}
-        {% for error in field.errors %}<p class="help is-danger"{% if forloop.first %} id="{{ element_id }}-errors"{% endif %}>{{ error }}</p>{% endfor %}
+        {% for error in field.errors %}<p class="help is-danger" id="{{ element_id }}_error{% if not forloop.first %}_{{ forloop.counter }}{% endif %}">{{ error }}</p>{% endfor %}
     {% endif %}
     {% if field.help_text %}
         <p class="help" id="{{ element_id }}-help">{{ field.help_text|safe }}</p>

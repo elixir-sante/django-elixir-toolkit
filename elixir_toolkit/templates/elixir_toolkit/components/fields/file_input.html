@@ -23,8 +23,9 @@
     </div>
     {% if field.help_text %}<p class="help" id="{{ field.id_for_label }}-help">{{ field.help_text|safe }}</p>{% endif %}
 
+    {# 3.3.2 / 4.1.2 : nom accessible de la checkbox "clear" via aria-label #}
     <div style="display: none;">
-        <input type="checkbox" name="{{ field.name }}-clear" id="{{ field.id_for_label }}-clear_id">
+        <input type="checkbox" name="{{ field.name }}-clear" id="{{ field.id_for_label }}-clear_id" aria-label="{% if field.field.widget.allow_multiple_selected %}Supprimer les fichiers actuels{% else %}Supprimer le fichier actuel{% endif %}">
     </div>
 
     <div id="list-{{ field.id_for_label }}" class="mt-2 tags"></div>
@@ -35,7 +36,7 @@
 
     {% if field.errors %}
         {% for error in field.errors %}
-            <p class="help is-danger"{% if forloop.first %} id="{{ field.id_for_label }}-errors"{% endif %}><strong>{{ error }}</strong></p>
+            <p class="help is-danger" id="{{ field.id_for_label }}_error{% if not forloop.first %}_{{ forloop.counter }}{% endif %}"><strong>{{ error }}</strong></p>
         {% endfor %}
     {% endif %}
 </div>
@@ -73,10 +74,10 @@
             var describedby = [];
             if (document.getElementById(fieldId + '-help')) describedby.push(fieldId + '-help');
             describedby.push('size-' + fieldId);
-            if (document.getElementById(fieldId + '-errors')) describedby.push(fieldId + '-errors');
+            if (document.getElementById(fieldId + '_error')) describedby.push(fieldId + '_error');
             describedby.push('error-' + fieldId);
             fileInput.setAttribute('aria-describedby', describedby.join(' '));
-            if (document.getElementById(fieldId + '-errors')) fileInput.setAttribute('aria-invalid', 'true');
+            if (document.getElementById(fieldId + '_error')) fileInput.setAttribute('aria-invalid', 'true');
 
             container.dataset.initialized = "true";
             let allFiles = new DataTransfer();
