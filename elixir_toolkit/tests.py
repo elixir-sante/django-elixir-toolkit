@@ -747,6 +747,25 @@ class ToolkitMaxLengthTest(ToolkitBaseTest):
         )
 
 
+class ToolkitDigitsOnlyTest(ToolkitBaseTest):
+    """`data-digits-only` sur un champ : digits-only.js retire à la saisie tout
+    caractère autre qu'un chiffre."""
+
+    def test_toolkit_assets_loads_digits_only_js(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+
+        self.assertIn('elixir_toolkit/js/digits-only.js', rendered)
+
+    def test_digits_only_js_filters_non_digits_on_input(self):
+        import pathlib
+        js = pathlib.Path('elixir_toolkit/static/elixir_toolkit/js/digits-only.js').read_text(encoding='utf-8')
+
+        # Délégation sur document : couvre aussi le contenu chargé en HTMX
+        self.assertIn("document.addEventListener('input'", js)
+        self.assertIn("[data-digits-only]", js)
+        self.assertIn("/\\D/g", js)
+
+
 class ToolkitFileUploadHelpTextTest(ToolkitBaseTest):
     """help_text généré automatiquement à partir des propriétés du champ,
     écrasé totalement si `help_text` est transmis explicitement."""
