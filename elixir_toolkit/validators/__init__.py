@@ -17,6 +17,8 @@ from .iban import (
     is_valid_iban,
     get_iban_country,
     get_iban_check_digits,
+    normalize_iban,
+    IBAN_MAX_LENGTH,
 )
 
 # Import phone validators

@@ -90,6 +90,7 @@ par CDN (défaut : `1.0.0`).
 | Upload de fichier | `ToolkitFileField` / `MultipleFileField` + `FileUpload()` |
 | Champ date | `forms.DateField` standard (auto-patché) |
 | Limite de caractères | `max_length=` standard (auto-patché) |
+| Champ IBAN (compteur, nettoyage, validation) | `IBANField` (`elixir_toolkit.forms`) |
 | Saisie limitée aux chiffres | `attrs={"data-digits-only": True}` sur le widget (+ validateur serveur) |
 | CKEditor | `{% ckeditor_pre %}` / `{% ckeditor_post %}` (librairie `ckeditor_tags`) |
 | Captcha LiveIdentity | `{% render_captcha_script %}` (librairie `liveidentity_tags`) + `validate_liveidentity_token` |
