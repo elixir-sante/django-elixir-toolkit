@@ -1150,8 +1150,8 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
             {'field': field},
         )
         self.assertIn('aria-invalid="true"', rendered)
-        self.assertIn('aria-describedby="id_choice-errors"', rendered)
-        self.assertIn('id="id_choice-errors"', rendered)
+        self.assertIn('aria-describedby="id_choice_error"', rendered)
+        self.assertIn('id="id_choice_error"', rendered)
 
     def test_ui_field_uses_dl_semantics(self):
         """1.3.1 : couple libellé/valeur en dl/dt/dd, contraste du libellé renforcé"""
@@ -1188,12 +1188,17 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         )
         self.assertIn('aria-label="Couleur"', rendered)
 
-        # avec un label visible, pas d'aria-label en double
+        # avec un label visible, aria-labelledby pointe vers ce label : le nom accessible
+        # est par construction le texte du label visible (2.5.3 « label in name »), sans
+        # aria-label que l'analyse statique Sonar ne sait pas évaluer — et le <select>
+        # masqué par Selectize garde un nom accessible ; l'input généré reçoit aussi le
+        # nom via aria-labelledby/aria-label posés par le JS du template
         rendered = self.render_template(
             "{% load elixir_toolkit_tags %}{% ui_select name='color' options=\"[('red', 'Rouge')]\" label='Couleur' %}"
         )
         self.assertIn('for="id_color"', rendered)
-        self.assertNotIn('aria-label=', rendered)
+        self.assertIn('aria-labelledby="id_color-label"', rendered)
+        self.assertNotIn('aria-label="Couleur"', rendered)
 
         # sans rien, fallback sur le name (comportement historique)
         rendered = self.render_template(
