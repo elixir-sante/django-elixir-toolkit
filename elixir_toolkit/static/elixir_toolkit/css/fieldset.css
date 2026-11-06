@@ -1,0 +1,29 @@
+/* Groupes de champs <fieldset> générés par crispy-bulma (a11y) ────────────────
+   crispy-bulma rend les widgets groupés (radios, checkboxes) en <fieldset>, et
+   les Fieldset() du Layout crispy en produisent aussi. Neutralise le rendu natif
+   des <fieldset> — bordure, marges, padding, largeur intrinsèque — qui casse les
+   mises en page Bulma (.field, .column).
+   Le sélecteur d'élément est volontairement peu spécifique : les classes
+   utilitaires Bulma posées sur un <fieldset> (ex. .column : 0.75rem de padding)
+   restent prioritaires et continuent de s'appliquer. */
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-inline-size: 0;
+}
+
+/* Un <legend> natif se rend hors du flux, dans la bande de bordure du
+   <fieldset> : il ignore le padding de la boîte et déborde au-dessus.
+   Un float pleine largeur le fait réentrer dans le flux, sous le padding.
+   Les légendes des groupes crispy-bulma portent déjà .label ; celles posées via
+   Fieldset() n'ont aucune classe : on reprend l'équivalent du style .label. */
+legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
