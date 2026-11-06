@@ -120,8 +120,7 @@ body {
 .selectize-control.plugin-clear_button .clear {
     right: 10px !important;
     font-size: 18px !important;
-    color: #4a4a4a !important;
-    opacity: 1 !important;
+    color: #b5b5b5 !important;
 }
 
 /* Erreur de validation */
