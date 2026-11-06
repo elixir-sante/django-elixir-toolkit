@@ -189,7 +189,7 @@
 
     font-size: 18px !important;
     color: #4a4a4a !important;
-    opacity: 1 !important;
+    opacity: 0.8 !important;
 }
 
 .selectize-control.plugin-clear_button .selectize-input.has-items + .clear:hover {
