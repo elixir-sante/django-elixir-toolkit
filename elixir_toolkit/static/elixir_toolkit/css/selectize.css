@@ -179,7 +179,9 @@
     display: none !important;
 }
 
-/* Afficher la croix uniquement si un élément est sélectionné (has-items) */
+/* Afficher la croix uniquement si un élément est sélectionné (has-items)
+   1.4.3 : opacity:.4 par défaut dans selectize.default.css donne un contraste de 2:1 ;
+   on le neutralise et #4a4a4a sur blanc donne 8.8:1 */
 .selectize-control.plugin-clear_button .selectize-input.has-items + .clear {
     display: inline-block !important;
     right: 0.11rem !important;
@@ -187,6 +189,12 @@
 
     font-size: 18px !important;
     color: #4a4a4a !important;
+    opacity: 0.8 !important;
+}
+
+.selectize-control.plugin-clear_button .selectize-input.has-items + .clear:hover {
+    color: var(--bulma-text, #363636) !important;
+    text-decoration: none !important;
 }
 
 /* Alignement et centrage de la flèche Selectize native (Affichée SEULEMENT si aucun item n'est sélectionné) */
