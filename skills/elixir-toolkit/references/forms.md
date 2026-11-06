@@ -315,3 +315,20 @@ telephone = forms.CharField(
 
 La validation front est un confort UX uniquement : elle est contournable
 (JS désactivé, requête forgée). Garder le validator Django en parallèle.
+
+## Saisie numérique uniquement
+
+`data-digits-only` sur le widget : la frappe, le collage et le glisser-déposer
+ne conservent que les chiffres (`digits-only.js`, chargé par `{% toolkit_assets %}`,
+fonctionne aussi sur le contenu HTMX). Ne pas écrire de `oninput` ni de JS équivalent.
+
+```python
+numero = forms.CharField(
+    max_length=10,
+    validators=[RegexValidator(r"^\d{10}$")],  # sécurité côté serveur, toujours
+    widget=forms.TextInput(attrs={"data-digits-only": True, "inputmode": "numeric"}),
+)
+```
+
+Réservé aux champs composés **uniquement** de chiffres. Pour un téléphone acceptant
+`+33`, espaces ou tirets, utiliser `FRENCH_PHONE_INPUT_PATTERN` (ci-dessus).

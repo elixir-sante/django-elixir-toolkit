@@ -65,7 +65,8 @@ par CDN (défaut : `1.0.0`).
    La forme block (`ui_message_block`...) rend le contenu via le moteur de template :
    les variables y sont auto-échappées, sans `is_safe`.
 6. **Ne pas réimplémenter le JS du toolkit.** Les comportements s'activent par attributs
-   `data-*` (`data-max-size`, `data-depends-on`, `data-form-confirm`, `data-search`, ...) ou par
+   `data-*` (`data-max-size`, `data-depends-on`, `data-form-confirm`, `data-search`,
+   `data-digits-only`, ...) ou par
    classes CSS (`js-form-confirm`, `toggle-row-btn`, `table-filter`). Lire
    `references/templatetags.md` avant d'écrire du JS lié à un composant.
 
@@ -89,6 +90,7 @@ par CDN (défaut : `1.0.0`).
 | Upload de fichier | `ToolkitFileField` / `MultipleFileField` + `FileUpload()` |
 | Champ date | `forms.DateField` standard (auto-patché) |
 | Limite de caractères | `max_length=` standard (auto-patché) |
+| Saisie limitée aux chiffres | `attrs={"data-digits-only": True}` sur le widget (+ validateur serveur) |
 | CKEditor | `{% ckeditor_pre %}` / `{% ckeditor_post %}` (librairie `ckeditor_tags`) |
 | Captcha LiveIdentity | `{% render_captcha_script %}` (librairie `liveidentity_tags`) + `validate_liveidentity_token` |
 
