@@ -9,6 +9,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 
 from crispy_forms.helper import FormHelper
 from elixir_toolkit.forms import (
+    IBANField,
     limit_length,
     MultipleFileField,
     ToolkitFileField,
@@ -18,6 +19,7 @@ from elixir_toolkit.forms import (
     COLUMN_THIRD_CLASS,
 )
 from elixir_toolkit.validators import (
+    FrenchIBANValidator,
     FrenchPhoneNumberValidator,
     normalize_french_phone_number,
     FRENCH_PHONE_INPUT_PATTERN,
@@ -769,6 +771,67 @@ class ToolkitDigitsOnlyTest(ToolkitBaseTest):
         self.assertIn("document.addEventListener('input'", js)
         self.assertIn("[data-digits-only]", js)
         self.assertIn("/\\D/g", js)
+
+
+class ToolkitIBANFieldTest(ToolkitBaseTest):
+    """`IBANField` : valeur normalisée, `IBANValidator` et compteur de saisie
+    (max-length.js) compté hors espaces de présentation."""
+
+    def _form(self, data=None, **kwargs):
+        class PaymentForm(forms.Form):
+            iban = IBANField(required=False, **kwargs)
+
+        return PaymentForm(data=data)
+
+    def test_renders_counter_without_native_maxlength(self):
+        rendered = str(self._form()["iban"])
+
+        self.assertIn('data-max-length="34"', rendered)
+        self.assertIn("data-max-length-counter", rendered)
+        self.assertIn("data-max-length-ignore-spaces", rendered)
+        # Les espaces de présentation ne doivent pas buter sur un maxlength natif
+        self.assertNotIn("maxlength=", rendered)
+
+    def test_cleans_presentation_spaces_and_case(self):
+        form = self._form(data={"iban": "fr14 2004 1010 0505 0001 3m02 606"})
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["iban"], "FR1420041010050500013M02606")
+
+    def test_rejects_invalid_iban(self):
+        form = self._form(data={"iban": "FR14 2004 1010 0505 0001 3M02 607"})
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("iban", form.errors)
+
+    def test_spaces_do_not_count_in_max_length(self):
+        # 27 caractères utiles + 6 espaces : sous la limite de 34 une fois normalisé
+        form = self._form(data={"iban": "  FR14 2004 1010 0505 0001 3M02 606  "})
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_rejects_value_over_34_chars(self):
+        form = self._form(data={"iban": "FR" + "1" * 33})
+
+        self.assertFalse(form.is_valid())
+
+    def test_empty_value_not_validated(self):
+        form = self._form(data={"iban": ""})
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["iban"], "")
+
+    def test_validators_overridable(self):
+        form = self._form(data={"iban": "BE68 5390 0754 7034"}, validators=[FrenchIBANValidator()])
+
+        self.assertFalse(form.is_valid())
+
+    def test_max_length_js_counts_inputs_opt_in_and_ignores_spaces(self):
+        import pathlib
+        js = pathlib.Path('elixir_toolkit/static/elixir_toolkit/js/max-length.js').read_text(encoding='utf-8')
+
+        self.assertIn("input[data-max-length][data-max-length-counter]", js)
+        self.assertIn("data-max-length-ignore-spaces", js)
 
 
 class ToolkitFileUploadHelpTextTest(ToolkitBaseTest):

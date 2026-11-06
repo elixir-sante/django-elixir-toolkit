@@ -11,6 +11,9 @@ from elixir_toolkit.validators import (
     MaxTotalSizeValidator,
     AllowedExtensionsValidator,
     MaxFilesValidator,
+    IBANValidator,
+    IBAN_MAX_LENGTH,
+    normalize_iban,
 )
 
 def is_rich_text_widget(widget):
@@ -398,6 +401,34 @@ COLUMN_HALF_CLASS = "column is-12-mobile is-6-tablet"
 COLUMN_QUARTER_CLASS = "column is-12-mobile is-3-tablet"
 
 COLUMN_FULL_CLASS = "column"
+
+
+class IBANField(forms.CharField):
+    """Champ IBAN : espaces de présentation acceptés, compteur de saisie.
+
+    - valeur normalisée (espaces et tirets retirés, majuscules) avant validation ;
+    - `IBANValidator` par défaut (remplaçable via `validators=`, ex. `FrenchIBANValidator`) ;
+    - limite de 34 caractères (maximum de la norme) comptée hors espaces : compteur
+      « n / 34 caractères » sous le champ (`max-length.js`), sans `maxlength` natif
+      qui compterait les espaces.
+    """
+
+    default_validators = [IBANValidator()]
+
+    def __init__(self, *, max_length=IBAN_MAX_LENGTH, **kwargs):
+        super().__init__(max_length=max_length, **kwargs)
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        return normalize_iban(value) if value else value
+
+    def widget_attrs(self, widget):
+        attrs = super().widget_attrs(widget)
+        if self.max_length is not None and not widget.is_hidden:
+            attrs.pop("maxlength", None)
+            attrs["data-max-length-counter"] = True
+            attrs["data-max-length-ignore-spaces"] = True
+        return attrs
 
 
 class PasswordWithIconField(CrispyField):

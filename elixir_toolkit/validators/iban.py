@@ -131,7 +131,7 @@ IBAN_COUNTRY_SPEC = {
 }
 
 
-def _normalize_iban(iban):
+def normalize_iban(iban):
     """
     Normalise une chaîne IBAN : majuscules, suppression des espaces
     (y compris insécables) et des tirets. Les autres caractères sont
@@ -149,7 +149,7 @@ def validate_iban_structure(iban):
     - longueur entre 15 et 34 caractères
     - 2 lettres (code pays) puis 2 chiffres de contrôle compris entre 02 et 98
     """
-    iban = _normalize_iban(iban)
+    iban = normalize_iban(iban)
 
     if not iban:
         raise ValidationError("L'IBAN ne peut pas être vide.", code='iban_empty')
@@ -298,7 +298,7 @@ class IBANValidator:
         self.allow_unknown_countries = allow_unknown_countries
 
     def __call__(self, value):
-        iban = _normalize_iban(value)
+        iban = normalize_iban(value)
 
         if not iban:
             raise ValidationError(self.message, code=self.code)
@@ -389,7 +389,7 @@ def is_valid_iban(iban, allowed_countries=None):
 
 def get_iban_country(iban):
     """Retourne le code pays à 2 lettres d'un IBAN, ou None si invalide."""
-    iban = _normalize_iban(iban)
+    iban = normalize_iban(iban)
     if len(iban) >= 2 and re.fullmatch(r'[A-Z]{2}', iban[:2]):
         return iban[:2]
     return None
@@ -397,7 +397,7 @@ def get_iban_country(iban):
 
 def get_iban_check_digits(iban):
     """Retourne les 2 chiffres de contrôle d'un IBAN, ou None si invalide."""
-    iban = _normalize_iban(iban)
+    iban = normalize_iban(iban)
     if len(iban) >= 4 and re.fullmatch(r'[A-Z]{2}[0-9]{2}', iban[:4]):
         return iban[2:4]
     return None

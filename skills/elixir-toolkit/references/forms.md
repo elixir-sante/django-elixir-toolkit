@@ -68,6 +68,21 @@ class MyForm(forms.Form):
   });
   ```
   Ne pas utiliser `ckeditorRegisterCallback` de django_ckeditor_5 : déjà réservé par le toolkit.
+- compteur sur un `input` (absent par défaut) : `data-max-length-counter` sur le widget ;
+  `data-max-length-ignore-spaces` exclut les espaces du décompte.
+
+### Champ IBAN
+
+`IBANField` (`elixir_toolkit.forms`) : espaces de présentation acceptés, valeur nettoyée
+(espaces/tirets retirés, majuscules), `IBANValidator` par défaut (surchargeable via
+`validators=[FrenchIBANValidator()]`), compteur « n / 34 caractères » hors espaces.
+Ne pas réécrire de compteur JS ni de `help_text` « 0/34 caractères ».
+
+```python
+from elixir_toolkit.forms import IBANField
+
+iban = IBANField(label="IBAN", required=False)
+```
 
 ---
 

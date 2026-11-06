@@ -1,6 +1,8 @@
 /**
  * Limite de caractères des champs `[data-max-length]` (posé sur tout `forms.CharField` avec `max_length`, cf. `elixir_toolkit/apps.py`)
- * - compteur « n / max caractères » sous les `textarea` et les éditeurs CKEditor, en rouge à la limite
+ * - compteur « n / max caractères » sous les `textarea`, les éditeurs CKEditor et les `input`
+ *   portant `data-max-length-counter`, en rouge à la limite
+ * - `data-max-length-ignore-spaces` : espaces exclus du décompte (ex. IBAN saisi par groupes de 4)
  * - `input` / `textarea` : blocage natif via l'attribut `maxlength`
  * - CKEditor : bloque la frappe et tronque le texte collé au-delà de la limite
  * - contenu déjà trop long (valeur en base, glisser-déposer...) : message d'erreur
@@ -12,7 +14,8 @@
     if (window.ElixirMaxLengthLoaded) return;
     window.ElixirMaxLengthLoaded = true;
 
-    var TEXTAREA = 'textarea[data-max-length]:not(.django_ckeditor_5)';
+    var FIELDS = 'textarea[data-max-length]:not(.django_ckeditor_5), input[data-max-length][data-max-length-counter]';
+    var SPACES = /\s/g;
     var OVER = 'data-max-length-over';
     var DISABLED = 'data-max-length-disabled';
     var SUBMIT = 'button:not([type]), button[type="submit"], input[type="submit"]';
@@ -71,15 +74,16 @@
         };
     }
 
-    function initTextarea(textarea) {
-        if (initialized.has(textarea)) return;
-        initialized.add(textarea);
+    function initField(field) {
+        if (initialized.has(field)) return;
+        initialized.add(field);
 
-        var update = createFeedback(textarea, textarea.closest('.control') || textarea);
+        var update = createFeedback(field, field.closest('.control') || field);
+        var ignoreSpaces = field.hasAttribute('data-max-length-ignore-spaces');
         function refresh() {
-            update(textarea.value.length);
+            update((ignoreSpaces ? field.value.replace(SPACES, '') : field.value).length);
         }
-        textarea.addEventListener('input', refresh);
+        field.addEventListener('input', refresh);
         refresh();
     }
 
@@ -168,7 +172,7 @@
     }
 
     function init() {
-        document.querySelectorAll(TEXTAREA).forEach(initTextarea);
+        document.querySelectorAll(FIELDS).forEach(initField);
     }
 
     // Fourni par ckeditor-load-external-plugins.js

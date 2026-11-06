@@ -590,6 +590,27 @@ window.elixirOnCkeditorReady(function (editor) {
 });
 ```
 
+**Compteur sur un `input`** : par défaut le compteur n'apparaît que sous les `textarea` et CKEditor. Pour un `input`, ajouter `data-max-length-counter` sur le widget ; `data-max-length-ignore-spaces` exclut les espaces du décompte (sans `maxlength` natif, qui les compterait).
+
+---
+
+### Champ IBAN
+
+```python
+from elixir_toolkit.forms import IBANField
+from elixir_toolkit.validators import FrenchIBANValidator
+
+class PaymentForm(forms.Form):
+    iban = IBANField(label="IBAN", required=False)
+    # IBAN français uniquement :
+    # iban = IBANField(validators=[FrenchIBANValidator()])
+```
+
+- espaces de présentation acceptés à la saisie (« FR76 3000 6000 ... ») ;
+- valeur nettoyée : espaces et tirets retirés, majuscules (`cleaned_data["iban"] == "FR7630006000..."`) ;
+- validé par `IBANValidator` (structure, longueur du pays, MOD-97) ;
+- compteur « n / 34 caractères » sous le champ, espaces non comptés. Ne pas écrire de JS de compteur ni de `help_text` « 0/34 ».
+
 ---
 
 ### Champ de Fichier avec Upload
