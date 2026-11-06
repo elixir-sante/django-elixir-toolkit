@@ -63,7 +63,8 @@
         return function update(length) {
             var over = length > max;
             counter.textContent = length + ' / ' + max + ' caractères';
-            counter.classList.toggle('has-text-danger', length >= max);
+            // is-danger (comme le message d'erreur) et pas has-text-danger : contraste 1.4.3
+            counter.classList.toggle('is-danger', length >= max);
             error.classList.toggle('is-hidden', !over);
             element.toggleAttribute(OVER, over);
             refreshSubmit(element.closest('form'));
