@@ -21,7 +21,7 @@
         <select
             name="{{ name }}"
             id="{{ element_id }}"
-            aria-label="{{ aria_label|default:label|default:name }}"
+            aria-label="{% firstof aria_label label field.label name %}"
             placeholder="{{ placeholder }}"
             class="selectize-control selectize-font-size-16 {% if field.errors %}input-error{% endif %}"
             {% if field.errors %}aria-invalid="true"{% endif %}
