@@ -635,6 +635,11 @@ class ToolkitDateInputTest(ToolkitBaseTest):
 
         self.assertIn("elixir_toolkit/css/bulma-radio.css", rendered)
 
+    def test_toolkit_assets_loads_fieldset_css(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+
+        self.assertIn("elixir_toolkit/css/fieldset.css", rendered)
+
 
 class ToolkitMaxLengthTest(ToolkitBaseTest):
     """`max_length` d'un `forms.CharField` (patché dans `apps.py`) : blocage
