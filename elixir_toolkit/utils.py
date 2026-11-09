@@ -18,6 +18,7 @@ __all__ = [
     "session_pop",
     "session_apop",
     "parse_date",
+    "as_dict_list",
 ]
 
 
@@ -61,6 +62,21 @@ def parse_date(date_str, force_date=False) -> datetime | date | None:
     if force_date:
         return ret.date()
     return ret
+
+
+def as_dict_list(value) -> list:
+    """
+    Normalise une balise XML répétable parsée en dict : un élément arrive en
+    dict, plusieurs en liste, aucun en `None` (ou valeur vide).
+
+    Retourne toujours une liste des éléments de type dict, filtrant les
+    entrées d'un autre type.
+    """
+    if isinstance(value, dict):
+        return [value]
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, dict)]
+    return []
 
 
 @sync_to_async
