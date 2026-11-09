@@ -24,6 +24,7 @@ from elixir_toolkit.validators import (
     normalize_french_phone_number,
     FRENCH_PHONE_INPUT_PATTERN,
 )
+from elixir_toolkit.utils import as_dict_list
 
 class ToolkitBaseTest(TestCase):
     """Classe de base pour partager la logique de rendu des templates."""
@@ -911,6 +912,25 @@ class ToolkitFileUploadWidgetAttrsTest(ToolkitBaseTest):
 
         self.assertEqual(attrs["data-max-total-size"], 10 * 1024 * 1024)
         self.assertEqual(attrs["accept"], ".pdf")
+
+
+class AsDictListTest(TestCase):
+    """Normalisation des balises XML répétables (voir `as_dict_list`)."""
+
+    def test_dict_unique_devient_liste(self):
+        self.assertEqual(as_dict_list({"id": "1"}), [{"id": "1"}])
+
+    def test_liste_conserve_les_dicts(self):
+        items = [{"id": "1"}, {"id": "2"}]
+        self.assertEqual(as_dict_list(items), items)
+
+    def test_liste_filtre_les_non_dicts(self):
+        self.assertEqual(as_dict_list([{"id": "1"}, "bruit", 42]), [{"id": "1"}])
+
+    def test_none_ou_vide_renvoie_liste_vide(self):
+        self.assertEqual(as_dict_list(None), [])
+        self.assertEqual(as_dict_list(""), [])
+        self.assertEqual(as_dict_list("texte"), [])
 
 
 class FrenchPhoneNumberValidatorTest(TestCase):
