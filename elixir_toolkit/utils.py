@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
 import base64
+import re
 import logging
 from datetime import datetime, date
 from dateutil import parser, tz
@@ -19,6 +20,8 @@ __all__ = [
     "session_apop",
     "parse_date",
     "as_dict_list",
+    "make_links_relative",
+    "replace_link_prefix",
 ]
 
 
@@ -77,6 +80,42 @@ def as_dict_list(value) -> list:
     if isinstance(value, list):
         return [item for item in value if isinstance(item, dict)]
     return []
+
+
+def make_links_relative(content: str, domain: str) -> str:
+    """
+    Rend relatifs les liens HTML (`href`/`src`) qui pointent vers `domain`.
+
+    Le schéma et le port sont ignorés : `domain` peut contenir un port
+    (`exemple.fr:8000`), les liens vers `http(s)://exemple.fr[:port]/chemin`
+    deviennent `/chemin`. Les liens vers un autre domaine sont conservés.
+    """
+    host = re.escape(domain.split(":")[0])
+    pattern = re.compile(
+        r'(<[^>]+?(?:href|src)=[\'"])(?:https?://)?' + host + r'(?::\d+)?(/[^\'"]*)[\'"]',
+        re.IGNORECASE,
+    )
+    return pattern.sub(lambda match: match.group(1) + match.group(2) + match.group(1)[-1], content)
+
+
+def replace_link_prefix(content: str, old_prefix: str, new_prefix: str) -> str:
+    """
+    Remplace le premier segment `old_prefix` des liens HTML relatifs (`href`/`src`) par `new_prefix`.
+
+    `/old/page/` devient `/new/page/` (idem sans `/` initial, ou suivi de `?`/`#`).
+    Un segment qui ne fait que commencer par `old_prefix` (`/older/`) et les liens
+    absolus (`https://…`, `//…`) sont conservés.
+    """
+    pattern = re.compile(r'(?P<attr>(?:href|src)=)(?P<quote>[\'"])(?P<url>/?(?!/)[^\'"]*)(?P=quote)', re.IGNORECASE)
+    prefix = re.compile(rf"^(?P<slash>/?){re.escape(old_prefix)}(?=[/?#]|$)")
+
+    def replace(match):
+        url = match.group("url")
+        if "://" not in url:
+            url = prefix.sub(lambda m: m.group("slash") + new_prefix, url)
+        return f"{match.group('attr')}{match.group('quote')}{url}{match.group('quote')}"
+
+    return pattern.sub(replace, content)
 
 
 @sync_to_async

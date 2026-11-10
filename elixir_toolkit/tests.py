@@ -24,7 +24,7 @@ from elixir_toolkit.validators import (
     normalize_french_phone_number,
     FRENCH_PHONE_INPUT_PATTERN,
 )
-from elixir_toolkit.utils import as_dict_list
+from elixir_toolkit.utils import as_dict_list, make_links_relative, replace_link_prefix
 
 class ToolkitBaseTest(TestCase):
     """Classe de base pour partager la logique de rendu des templates."""
@@ -1343,3 +1343,34 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/selectize.css').read_text()
         self.assertIn('var(--toolkit-select-active-bg, var(--bulma-primary))', css)
         self.assertNotIn('var(--secondary-color, #485fc7)', css)
+
+
+class LinkRewritingTest(TestCase):
+    """Réécriture des liens HTML (voir `make_links_relative` et `replace_link_prefix`)."""
+
+    def test_make_links_relative(self):
+        cases = [
+            ('<a href="http://exemple.fr/oc/page/">x</a>', '<a href="/oc/page/">x</a>'),
+            ('<a href="https://exemple.fr:8000/oc/?a=1#b">x</a>', '<a href="/oc/?a=1#b">x</a>'),
+            ('<img src="https://exemple.fr/media/logo.png">', '<img src="/media/logo.png">'),
+            ('<a href="https://autre.fr/oc/">x</a>', '<a href="https://autre.fr/oc/">x</a>'),
+            ('<a href="/oc/page/">x</a>', '<a href="/oc/page/">x</a>'),
+            ("<a href='https://exemple.fr/oc/'>x</a>", "<a href='/oc/'>x</a>"),
+        ]
+        for content, expected in cases:
+            with self.subTest(content=content):
+                self.assertEqual(make_links_relative(content, "exemple.fr:8000"), expected)
+
+    def test_replace_link_prefix(self):
+        cases = [
+            ('<a href="/oc/page/">x</a>', '<a href="/cible/page/">x</a>'),
+            ('<a href="oc/page/">x</a>', '<a href="cible/page/">x</a>'),
+            ('<a href="/oc?x=1">x</a>', '<a href="/cible?x=1">x</a>'),
+            ('<a href="/oc">x</a>', '<a href="/cible">x</a>'),
+            ('<a href="/ocean/">x</a>', '<a href="/ocean/">x</a>'),
+            ('<a href="https://site.fr/oc/">x</a>', '<a href="https://site.fr/oc/">x</a>'),
+            ('<a href="//cdn.fr/oc/">x</a>', '<a href="//cdn.fr/oc/">x</a>'),
+        ]
+        for content, expected in cases:
+            with self.subTest(content=content):
+                self.assertEqual(replace_link_prefix(content, "oc", "cible"), expected)
