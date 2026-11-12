@@ -163,7 +163,9 @@ Au chargement de l'app, les settings absents sont injectés :
   - `extends` : mise en forme complète, tableaux, couleurs, liens internes
     (`linkPickerUrl: /ckeditor/internal-links/`)
   - `custom_page` : + upload d'images/fichiers (plugins externes du toolkit),
-    htmlEmbed, MediaEmbed
+    htmlEmbed, MediaEmbed (vidéo affichée grâce à `ckeditor.css`, chargé par
+    `toolkit_assets`, qui neutralise le flex du composant Bulma `.media` sur
+    `<figure class="media">`)
   - `light` : liste à puces uniquement
   - `description_only` : lecture seule
   - `lightandlink` : puces + liens

@@ -27,3 +27,9 @@
   font-size: 0.9em;
   color: #666;
 }
+
+/* Vidéo MediaEmbed (<figure class="media">) : la classe entre en conflit avec le
+   composant Bulma `.media` (display: flex), qui réduit la vidéo à une largeur nulle */
+figure.media {
+  display: block;
+}

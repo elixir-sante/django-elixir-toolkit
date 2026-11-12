@@ -1336,6 +1336,16 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
             self.assertNotIn('{#', rendered, msg=t)
             self.assertNotIn('#}', rendered, msg=t)
 
+    def test_ckeditor_media_embed_not_bulma_media_object(self):
+        """La vidéo MediaEmbed (<figure class="media">) échappe au flex du composant
+        Bulma `.media`, qui la réduit à une largeur nulle."""
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+        self.assertIn('elixir_toolkit/css/ckeditor.css', rendered)
+
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/ckeditor.css').read_text(encoding='utf-8')
+        self.assertRegex(css, r'figure\.media \{\s*display: block;\s*\}')
+
     def test_selectize_dropdown_hover_uses_primary(self):
         """Le survol du menu déroulant Selectize est basé sur var(--bulma-primary),
         pas sur le bleu link/secondary par défaut."""
