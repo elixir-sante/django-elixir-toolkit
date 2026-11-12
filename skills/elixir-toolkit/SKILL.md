@@ -86,6 +86,7 @@ par CDN (défaut : `1.0.0`).
 | Message / alerte | `{% ui_message %}` (+ variantes `_info`, `_success`, `_warning`, `_danger`) ; forme block `{% ui_message_block %}...{% end_ui_message_block %}` (+ variantes `_info_block`, etc.) pour du contenu riche |
 | Parcours en étapes | `{% ui_stepper %}` |
 | Indicateurs de défilement d'onglets | `{% ui_tabs_scroll_hints %}` |
+| Bloc long replié (« Afficher la suite ») | `{% ui_collapsible %}...{% end_ui_collapsible %}` |
 | Modale de confirmation de soumission | `{% ui_form_confirm_submit %}` |
 | Upload de fichier | `ToolkitFileField` / `MultipleFileField` + `FileUpload()` |
 | Champ date | `forms.DateField` standard (auto-patché) |

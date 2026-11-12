@@ -257,6 +257,21 @@ Après un swap HTMX, rappeler `loadTabsScrollHints()` côté JS.
 
 ---
 
+## Bloc repliable (afficher la suite)
+
+```html
+{% ui_collapsible css_classes="box content" max_height="10rem" %}
+    {{ contenu_long|safe }}
+{% end_ui_collapsible %}
+```
+
+Le bloc est replié à `max_height` (défaut `10rem`) avec un fondu, et un bouton « Afficher la suite / Réduire »
+(`aria-expanded`, `aria-controls`) n'apparaît que si le contenu dépasse. Sans JS, le contenu reste entièrement visible ;
+un lien caché qui reçoit le focus clavier déplie le bloc.
+Options : `css_classes`, `max_height`, `label_more`, `label_less`. Après un swap HTMX, rappeler `loadCollapsibles()` côté JS.
+
+---
+
 ## Modale de confirmation de soumission
 
 ```html

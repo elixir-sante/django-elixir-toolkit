@@ -1,0 +1,19 @@
+/* Blocs repliables ({% ui_collapsible %}) : classe is-collapsed posée par collapsible.js */
+.collapsible.is-collapsed .collapsible-content {
+    max-height: var(--collapsible-max-height, 10rem);
+    overflow: hidden;
+    /* Fondu en bas pour signaler la suite, indépendant de la couleur de fond */
+    mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+
+.collapsible .collapsible-toggle {
+    margin-top: 0.5rem;
+}
+
+.collapsible .collapsible-toggle .icon {
+    transition: transform 0.2s;
+}
+
+.collapsible .collapsible-toggle[aria-expanded="true"] .icon {
+    transform: rotate(180deg);
+}

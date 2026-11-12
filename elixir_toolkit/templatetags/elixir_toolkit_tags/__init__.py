@@ -4,6 +4,7 @@ from django.forms.utils import flatatt
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 import ast
+import uuid
 from django.template.base import Node
 
 register = template.Library()
@@ -267,6 +268,33 @@ def ui_tabs_scroll_hints():
     Après un swap HTMX, rappeler loadTabsScrollHints() côté JS.
     """
     return {}
+
+
+@register.simple_block_tag(end_name="end_ui_collapsible")
+def ui_collapsible(content, css_classes="", max_height="10rem", label_more="Afficher la suite", label_less="Réduire"):
+    """Bloc replié à une hauteur maximale, avec un bouton pour le déplier s'il déborde.
+
+    Usage :
+        {% ui_collapsible css_classes="box content" max_height="12rem" %}
+            {{ contenu_long|safe }}
+        {% end_ui_collapsible %}
+
+    Le contenu est le bloc entre les tags (rendu par le moteur : variables auto-échappées).
+    Sans JavaScript, le bloc reste entièrement affiché. Le bouton n'apparaît que si le
+    contenu dépasse max_height. Après un swap HTMX, rappeler loadCollapsibles() côté JS.
+    """
+    return template.loader.render_to_string(
+        "elixir_toolkit/components/collapsible.html",
+        {
+            # Déjà rendu par le moteur de template (variables échappées) : ne pas ré-échapper
+            "content": mark_safe(content),
+            "css_classes": css_classes,
+            "max_height": max_height,
+            "label_more": label_more,
+            "label_less": label_less,
+            "id": f"collapsible-{uuid.uuid4().hex[:8]}",
+        },
+    )
 
 
 @register.inclusion_tag("elixir_toolkit/components/select.html")

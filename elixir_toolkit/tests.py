@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from django.test import TestCase
@@ -501,6 +502,53 @@ class ToolkitMessageBlockTest(ToolkitBaseTest):
 
         self.assertIn('class="message is-primary "', rendered)
         self.assertIn("Mon message", rendered)
+
+
+class ToolkitCollapsibleTest(ToolkitBaseTest):
+    def test_collapsible_basic_render(self):
+        """Contenu HTML préservé, bouton relié au contenu, caché tant que le JS n'a pas mesuré le débordement"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_collapsible css_classes='box content' %}Du <strong>HTML</strong>{% end_ui_collapsible %}"
+        )
+        self.assertIn('class="collapsible box content" data-collapsible', rendered)
+        self.assertIn("--collapsible-max-height: 10rem", rendered)
+        self.assertIn("Du <strong>HTML</strong>", rendered)
+        content_id = re.search(r'class="collapsible-content" id="([^"]+)"', rendered).group(1)
+        self.assertIn(f'aria-controls="{content_id}"', rendered)
+        self.assertIn('aria-expanded="false"', rendered)
+        self.assertIn("collapsible-toggle is-hidden", rendered)
+        self.assertIn("Afficher la suite", rendered)
+
+    def test_collapsible_options(self):
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_collapsible max_height='5rem' label_more='Lire plus' label_less='Lire moins' %}"
+            "Texte{% end_ui_collapsible %}"
+        )
+        self.assertIn("--collapsible-max-height: 5rem", rendered)
+        self.assertIn('data-label-more="Lire plus" data-label-less="Lire moins"', rendered)
+
+    def test_collapsible_variables_escaped(self):
+        """Les variables du bloc restent auto-échappées, le HTML du bloc n'est pas ré-échappé"""
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}{% ui_collapsible %}<p>{{ value }}</p>{% end_ui_collapsible %}",
+            {"value": "<script>"},
+        )
+        self.assertIn("<p>&lt;script&gt;</p>", rendered)
+
+    def test_collapsible_unique_ids(self):
+        rendered = self.render_template(
+            "{% load elixir_toolkit_tags %}"
+            "{% ui_collapsible %}A{% end_ui_collapsible %}{% ui_collapsible %}B{% end_ui_collapsible %}"
+        )
+        ids = re.findall(r'class="collapsible-content" id="([^"]+)"', rendered)
+        self.assertEqual(len(set(ids)), 2)
+
+    def test_collapsible_assets_loaded(self):
+        rendered = self.render_template("{% load elixir_toolkit_tags %}{% toolkit_assets %}")
+        self.assertIn("elixir_toolkit/js/collapsible.js", rendered)
+        self.assertIn("elixir_toolkit/css/collapsible.css", rendered)
 
 
 class ToolkitStepperTest(ToolkitBaseTest):

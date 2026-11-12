@@ -1,0 +1,10 @@
+{# Repli activé par collapsible.js (classe is-collapsed) : sans JS, le contenu reste entièrement visible #}
+<div class="collapsible {{ css_classes }}" data-collapsible style="--collapsible-max-height: {{ max_height }}">
+  <div class="collapsible-content" id="{{ id }}">{{ content }}</div>
+  <button type="button" class="button is-text collapsible-toggle is-hidden"
+          aria-expanded="false" aria-controls="{{ id }}"
+          data-label-more="{{ label_more }}" data-label-less="{{ label_less }}">
+    <span class="collapsible-toggle-label">{{ label_more }}</span>
+    <span class="icon" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+  </button>
+</div>
