@@ -79,8 +79,28 @@ class ToolkitValidationTest(ToolkitBaseTest):
 
         self.assertIn('is-danger', rendered)
         self.assertIn('class="help is-danger"', rendered)
-        self.assertIn(field.errors[0], rendered) 
+        self.assertIn(field.errors[0], rendered)
         self.assertIn('PDF uniquement', rendered)
+
+    def test_file_input_shows_initial_file(self):
+        """Le fichier déjà enregistré (data-initial-name / data-initial-url) est affiché,
+        ouvrable, et le retirer coche la case `<champ>-clear`."""
+        class MockForm(forms.Form):
+            file_field = forms.FileField(
+                required=False,
+                widget=forms.FileInput(attrs={"data-initial-name": "mandat.pdf", "data-initial-url": "/docs/1/"}),
+            )
+
+        field = MockForm()['file_field']
+        template = '{% include "elixir_toolkit/components/fields/file_input.html" with field=field %}'
+        rendered = self.render_template(template, {'field': field})
+
+        self.assertIn('data-initial-name="mandat.pdf"', rendered)
+        self.assertIn('data-initial-url="/docs/1/"', rendered)
+        self.assertIn('id="id_file_field-clear_id"', rendered)
+        self.assertIn("fileInput.dataset.initialName", rendered)
+        self.assertIn("fileInput.dataset.initialUrl", rendered)
+        self.assertIn("clearCheckbox.checked = true", rendered)
 
     def test_ui_select_manual_options(self):
         template = """

@@ -95,9 +95,55 @@
                 ALLOWED_EXTENSIONS = ['pdf', 'png', 'jpg', 'jpeg'];
             }
 
+            // Fichier déjà enregistré (data-initial-name, et data-initial-url pour l'ouvrir) :
+            // affiché tant qu'aucun nouveau fichier n'est choisi ; le retirer coche `<champ>-clear`
+            let initialFileName = fileInput.dataset.initialName || '';
+            const initialFileUrl = fileInput.dataset.initialUrl || '';
+
+            function showInitialFile() {
+                const fileControl = document.createElement('div');
+                fileControl.className = 'control';
+
+                const tags = document.createElement('div');
+                tags.className = 'tags has-addons';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'tag is-delete is-medium';
+                removeBtn.setAttribute('aria-label', 'Retirer le fichier ' + initialFileName);
+                removeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    initialFileName = '';
+                    if (clearCheckbox) clearCheckbox.checked = true;
+                    updateFileList();
+                });
+
+                const nameTag = document.createElement(initialFileUrl ? 'a' : 'span');
+                nameTag.className = 'tag is-link is-medium';
+                nameTag.textContent = initialFileName.substring(0, 25);
+                if (initialFileUrl) {
+                    nameTag.href = initialFileUrl;
+                    nameTag.target = '_blank';
+                    nameTag.rel = 'noopener';
+                    nameTag.setAttribute('aria-label', 'Ouvrir le fichier ' + initialFileName + ' (nouvel onglet)');
+                }
+
+                tags.appendChild(removeBtn);
+                tags.appendChild(nameTag);
+                fileControl.appendChild(tags);
+                fileListDisplay.appendChild(fileControl);
+                if (fileNameLabel) fileNameLabel.textContent = '1 fichier(s)';
+                if (fileSizeContainer) fileSizeContainer.textContent = '';
+            }
+
             function updateFileList() {
                 fileListDisplay.innerHTML = '';
                 let totalSize = 0;
+
+                if (!allFiles.files.length && initialFileName) {
+                    showInitialFile();
+                    return;
+                }
 
                 if (!allFiles.files.length) {
                     if (fileNameLabel) fileNameLabel.textContent = 'Aucun fichier';
