@@ -205,6 +205,10 @@ Points importants :
 - `MultipleFileField` ajoute en plus `MaxTotalSizeValidator` et `MaxFilesValidator`.
 - Les attributs `data-max-size`, `data-allowed-extensions`, `data-max-files` posés sur le
   widget alimentent la validation côté navigateur.
+- **Fichier déjà enregistré** (champ unique) : poser `data-initial-name` (nom affiché) et
+  `data-initial-url` (lien pour l'ouvrir, optionnel) sur le widget. Le fichier est affiché
+  tant qu'aucun nouveau n'est choisi ; le retirer coche la case `<champ>-clear` envoyée au
+  formulaire, à traiter côté vue/formulaire.
 - **`help_text` généré automatiquement** à partir des paramètres d'appel du champ
   (`max_size`, `allowed_extensions`, et pour `MultipleFileField` `max_files` /
   `max_total_size`) :
