@@ -1,3 +1,13 @@
+/* --- En-tête des tableaux : fond gris clair, texte gris foncé, titres en majuscules --- */
+.table {
+    --bulma-table-head-background-color: #f2f2f2;
+    --bulma-table-head-cell-color: #4d505c;
+}
+
+.table thead th {
+    text-transform: uppercase;
+}
+
 /* --- Tableaux expandables --- */
 
 /* Boutons d'expansion : pas de soulignement sur le texte */
