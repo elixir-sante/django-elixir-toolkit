@@ -1394,6 +1394,12 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/ckeditor.css').read_text(encoding='utf-8')
         self.assertRegex(css, r'figure\.media \{\s*display: block;\s*\}')
 
+    def test_message_links_underlined_except_buttons(self):
+        """1.4.1 : les liens d'un message sont soulignés, pas les boutons ni les tags."""
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/message.css').read_text(encoding='utf-8')
+        self.assertRegex(css, r'\.message \.message-body a:not\(\.button\):not\(\.tag\) \{\s*text-decoration: underline;')
+
     def test_selectize_dropdown_hover_uses_primary(self):
         """Le survol du menu déroulant Selectize est basé sur var(--bulma-primary),
         pas sur le bleu link/secondary par défaut."""

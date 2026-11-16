@@ -1,4 +1,5 @@
-/* 1.4.1 : les liens dans un bloc de texte doivent rester distinguables sans la couleur */
-.message .message-body a {
+/* 1.4.1 : les liens dans un bloc de texte doivent rester distinguables sans la couleur ;
+   les boutons et tags, déjà distingués par leur forme, ne sont pas soulignés */
+.message .message-body a:not(.button):not(.tag) {
     text-decoration: underline;
 }
