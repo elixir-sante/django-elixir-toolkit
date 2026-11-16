@@ -100,6 +100,13 @@
             let initialFileName = fileInput.dataset.initialName || '';
             const initialFileUrl = fileInput.dataset.initialUrl || '';
 
+            function clearInitialFile(e) {
+                e.preventDefault();
+                initialFileName = '';
+                if (clearCheckbox) clearCheckbox.checked = true;
+                updateFileList();
+            }
+
             function showInitialFile() {
                 const fileControl = document.createElement('div');
                 fileControl.className = 'control';
@@ -111,12 +118,7 @@
                 removeBtn.type = 'button';
                 removeBtn.className = 'tag is-delete is-medium';
                 removeBtn.setAttribute('aria-label', 'Retirer le fichier ' + initialFileName);
-                removeBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    initialFileName = '';
-                    if (clearCheckbox) clearCheckbox.checked = true;
-                    updateFileList();
-                });
+                removeBtn.addEventListener('click', clearInitialFile);
 
                 const nameTag = document.createElement(initialFileUrl ? 'a' : 'span');
                 nameTag.className = 'tag is-link is-medium';
