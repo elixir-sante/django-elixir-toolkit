@@ -1,3 +1,10 @@
 .button.is-primary:not(.is-outlined) {
     background-color: var(--bulma-primary) !important; 
 }
+
+/* Bouton texte (Bulma souligne .button.is-text par défaut) : un bouton n'est pas un lien, pas de soulignement,
+   y compris dans un contenu riche (.content). Ex. bouton « Afficher la suite » de ui_collapsible. */
+.button.is-text,
+.content .button.is-text {
+    text-decoration: none;
+}
