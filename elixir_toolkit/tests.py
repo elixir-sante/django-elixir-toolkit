@@ -1420,6 +1420,12 @@ class ToolkitAccessibilityTest(ToolkitBaseTest):
         css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/message.css').read_text(encoding='utf-8')
         self.assertRegex(css, r'\.message \.message-body a:not\(\.button\):not\(\.tag\) \{\s*text-decoration: underline;')
 
+    def test_text_button_not_underlined(self):
+        """Les boutons texte (.button.is-text) ne sont pas soulignés, contrairement au défaut Bulma."""
+        import pathlib
+        css = pathlib.Path('elixir_toolkit/static/elixir_toolkit/css/button.css').read_text(encoding='utf-8')
+        self.assertRegex(css, r'\.button\.is-text,\s*\.content \.button\.is-text \{\s*text-decoration: none;')
+
     def test_selectize_dropdown_hover_uses_primary(self):
         """Le survol du menu déroulant Selectize est basé sur var(--bulma-primary),
         pas sur le bleu link/secondary par défaut."""
